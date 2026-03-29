@@ -1,0 +1,11 @@
+^\.Rproj.user$
+^\.Rhistory$
+^\.RData$
+^\.DS_Store$
+^README\.Rmd$
+^README\.md$
+^inst/doc$
+\.Rcheck$
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.github$
