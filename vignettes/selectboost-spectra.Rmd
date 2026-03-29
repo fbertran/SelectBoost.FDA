@@ -1,0 +1,84 @@
+---
+title: "SelectBoost for Dense Spectra"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{SelectBoost for Dense Spectra}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+has_glmnet <- requireNamespace("glmnet", quietly = TRUE)
+```
+
+For dense spectra or finely sampled signals, `SelectBoost` is often most useful
+when grouping is constrained by functional structure instead of using a purely
+global correlation graph.
+
+## Construct a spectral design object
+
+```{r}
+library(SelectBoost.FDA)
+
+set.seed(321)
+n <- 70
+wavelength <- seq(1100, 2500, length.out = 40)
+
+latent <- rnorm(n)
+spectra_values <- outer(latent, exp(-((wavelength - 1700) / 180)^2)) +
+  outer(rnorm(n), exp(-((wavelength - 2200) / 120)^2)) +
+  matrix(rnorm(n * length(wavelength), sd = 0.15), nrow = n)
+
+spectra <- fda_grid(
+  spectra_values,
+  argvals = wavelength,
+  name = "spectra",
+  unit = "nm"
+)
+y <- 2 * spectra_values[, 16] - 1.5 * spectra_values[, 30] + rnorm(n, sd = 0.4)
+
+design <- fda_design(
+  response = y,
+  predictors = list(spectra = spectra),
+  family = "gaussian"
+)
+
+head(selection_map(design))
+```
+
+## Fit FDA-aware SelectBoost
+
+The fitting chunk below is evaluated only when `glmnet` is installed.
+
+```{r, eval = has_glmnet}
+sb_fit <- fit_selectboost(
+  design,
+  selector = "glmnet",
+  selector_args = list(lambda_rule = "lambda.min"),
+  mode = "fast",
+  group_method = "threshold",
+  bandwidth = 3,
+  steps.seq = c(0.6, 0.2),
+  B = 10,
+  seed = 1
+)
+
+sb_fit
+summary(sb_fit)
+head(selection_map(sb_fit, c0 = colnames(sb_fit$feature_selection)[1]))
+plot(
+  sb_fit,
+  type = "group",
+  value = "mean",
+  legend_title = "Mean selection",
+  palette = grDevices::terrain.colors(24)
+)
+```
+
+The `selection_map()` method keeps the wavelength information attached to each
+coefficient, which is the main advantage of moving from raw matrices to
+FDA-native design objects.

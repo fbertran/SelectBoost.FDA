@@ -6,16 +6,27 @@ Authors@R: c(
 	email = "frederic.bertrand@lecnam.net", comment = c(ORCID = "0000-0002-0837-8281")))
 Author: Frederic Bertrand [cre, aut] (<https://orcid.org/0000-0002-0837-8281>)
 Maintainer: Frederic Bertrand <frederic.bertrand@lecnam.net>
-Description: Sketches a SelectBoost-inspired workflow for FDA.
+Description: Implements SelectBoost-style variable selection workflows for
+    functional data analysis. The package provides helper utilities to
+    flatten functional predictors represented on grids or in basis form,
+    grouped stability-selection routines based on repeated subject-level
+    subsampling, FDA-aware grouping functions for SelectBoost, and an
+    optional adapter to the native stability-selection interface from the
+    'FDboost' package.
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Imports:
-    graphics,
-    movMF,
-    stats,
-    utils
+    SelectBoost,
+    stats
 Suggests:
+    FDboost,
+    glmnet,
+    grpreg,
+    knitr,
+    rmarkdown,
+    stabs,
     testthat (>= 3.0.0)
+VignetteBuilder: knitr
 Config/testthat/edition: 3

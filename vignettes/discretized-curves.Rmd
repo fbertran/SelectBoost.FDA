@@ -1,0 +1,98 @@
+---
+title: "Discretized Curves and Grouped Stability Selection"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Discretized Curves and Grouped Stability Selection}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+has_grpreg <- requireNamespace("grpreg", quietly = TRUE)
+```
+
+`SelectBoost.FDA` can work directly with discretized functional predictors by
+building an `fda_design` object and then fitting grouped stability selection on
+top of it.
+
+## Build a functional design
+
+```{r}
+library(SelectBoost.FDA)
+
+set.seed(123)
+n <- 80
+grid <- seq(0, 1, length.out = 25)
+
+signal_values <- outer(rnorm(n), sin(2 * pi * grid)) +
+  matrix(rnorm(n * length(grid), sd = 0.2), nrow = n)
+noise_values <- matrix(rnorm(n * length(grid)), nrow = n)
+
+signal <- fda_grid(signal_values, argvals = grid, name = "signal", unit = "time")
+noise <- fda_grid(noise_values, argvals = grid, name = "noise", unit = "time")
+y <- 1.5 * signal_values[, 8] - signal_values[, 18] + rnorm(n, sd = 0.5)
+
+design <- fda_design(
+  response = y,
+  predictors = list(signal = signal, noise = noise),
+  family = "gaussian"
+)
+
+design
+summary(design)
+head(selection_map(design))
+```
+
+The design stores both the matrix passed to the fitting engine and the feature
+map needed to come back to predictor names and domain locations later.
+
+## Fit grouped stability selection
+
+The following chunk is evaluated only when `grpreg` is installed.
+
+```{r, eval = has_grpreg}
+fit <- fit_stability(
+  design,
+  selector = "grpreg",
+  B = 30,
+  sample_fraction = 0.5,
+  cutoff = 0.7,
+  seed = 1
+)
+
+fit
+summary(fit)
+head(selection_map(fit))
+plot(fit, type = "group")
+fit$selected_groups
+```
+
+## Interval-level summaries
+
+You can also move from predictor-level groups to non-overlapping intervals.
+
+```{r, eval = has_grpreg}
+interval_fit <- interval_stability_selection(
+  design,
+  width = 5,
+  selector = "grpreg",
+  B = 20,
+  cutoff = 0.6,
+  seed = 2
+)
+
+head(interval_fit$interval_table)
+plot(
+  interval_fit,
+  type = "interval",
+  value = "mean",
+  facet = "predictor",
+  legend_title = "Mean frequency",
+  palette = grDevices::heat.colors(24)
+)
+interval_fit$selected_groups
+```

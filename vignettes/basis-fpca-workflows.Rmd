@@ -1,0 +1,98 @@
+---
+title: "Basis and FPCA Workflows"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Basis and FPCA Workflows}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+has_glmnet <- requireNamespace("glmnet", quietly = TRUE)
+```
+
+When functional predictors are already represented by spline coefficients or
+FPCA scores, `SelectBoost.FDA` can still use the same design object and summary
+machinery. The main difference is interpretive: scores/components are often the
+units of interest rather than grid intervals.
+
+## Build a design from FPCA scores
+
+```{r}
+library(SelectBoost.FDA)
+
+set.seed(2026)
+n <- 90
+
+signal_scores <- cbind(
+  rnorm(n),
+  rnorm(n),
+  rnorm(n)
+)
+noise_scores <- cbind(
+  rnorm(n),
+  rnorm(n)
+)
+
+y <- 2 * signal_scores[, 1] - 1.2 * signal_scores[, 2] + rnorm(n, sd = 0.35)
+
+design <- fda_design(
+  response = y,
+  predictors = list(
+    signal_fpca = fda_basis(
+      signal_scores,
+      basis_type = "fpca",
+      component_names = paste0("PC", 1:3),
+      name = "signal_fpca"
+    ),
+    noise_fpca = fda_basis(
+      noise_scores,
+      basis_type = "fpca",
+      component_names = paste0("PC", 1:2),
+      name = "noise_fpca"
+    )
+  ),
+  family = "gaussian"
+)
+
+design
+selection_map(design)
+selection_map(design, level = "basis")
+```
+
+## Fit grouped stability selection
+
+```{r, eval = has_glmnet}
+fit <- fit_stability(
+  design,
+  selector = "glmnet",
+  B = 30,
+  sample_fraction = 0.5,
+  cutoff = 0.6,
+  seed = 7
+)
+
+fit
+summary(fit)
+selection_map(fit)
+selection_map(fit, level = "basis")
+plot(fit, type = "basis", value = "mean")
+```
+
+The basis-level summary is often the most convenient table for reporting:
+
+- `n_components` counts the basis coefficients or FPCA scores in each predictor.
+- `selected_components` reports how many exceed the stability threshold.
+- `mean_feature_frequency` and `max_feature_frequency` summarize component-wise
+  stability within each basis-expanded predictor.
+
+## Interpretation note
+
+For FPCA in particular, scores are often much less correlated than dense raw
+grid points. In that setting, grouped stability selection is usually the more
+natural default, while `SelectBoost` is often most useful for dense
+discretizations or strongly correlated basis systems.
