@@ -17,33 +17,33 @@ has_glmnet <- requireNamespace("glmnet", quietly = TRUE)
 
 For dense spectra or finely sampled signals, `SelectBoost` is often most useful
 when grouping is constrained by functional structure instead of using a purely
-global correlation graph.
+global correlation graph. The end-to-end workflow still starts from raw curves
+and optional scalar covariates.
 
 ## Construct a spectral design object
 
 ```{r}
 library(SelectBoost.FDA)
-
-set.seed(321)
-n <- 70
-wavelength <- seq(1100, 2500, length.out = 40)
-
-latent <- rnorm(n)
-spectra_values <- outer(latent, exp(-((wavelength - 1700) / 180)^2)) +
-  outer(rnorm(n), exp(-((wavelength - 2200) / 120)^2)) +
-  matrix(rnorm(n * length(wavelength), sd = 0.15), nrow = n)
+data("spectra_example", package = "SelectBoost.FDA")
 
 spectra <- fda_grid(
-  spectra_values,
-  argvals = wavelength,
-  name = "spectra",
+  spectra_example$predictors$signal,
+  argvals = spectra_example$grid,
+  name = "signal",
   unit = "nm"
 )
-y <- 2 * spectra_values[, 16] - 1.5 * spectra_values[, 30] + rnorm(n, sd = 0.4)
+nuisance <- fda_grid(
+  spectra_example$predictors$nuisance,
+  argvals = spectra_example$grid,
+  name = "nuisance",
+  unit = "nm"
+)
 
 design <- fda_design(
-  response = y,
-  predictors = list(spectra = spectra),
+  response = spectra_example$response,
+  predictors = list(signal = spectra, nuisance = nuisance),
+  scalar_covariates = spectra_example$scalar_covariates,
+  scalar_transform = fda_standardize(),
   family = "gaussian"
 )
 
@@ -70,6 +70,7 @@ sb_fit <- fit_selectboost(
 sb_fit
 summary(sb_fit)
 head(selection_map(sb_fit, c0 = colnames(sb_fit$feature_selection)[1]))
+selected(sb_fit, level = "group", c0 = colnames(sb_fit$feature_selection)[1])
 plot(
   sb_fit,
   type = "group",

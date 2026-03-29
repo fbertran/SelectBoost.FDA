@@ -4,15 +4,37 @@ feature_map_from_block <- function(feature_names,
                                    position,
                                    argval = position,
                                    unit = NA_character_,
-                                   basis_type = NA_character_) {
+                                   basis_type = NA_character_,
+                                   block = predictor,
+                                   transform = "identity",
+                                   source_predictor = predictor,
+                                   source_representation = representation,
+                                   source_position_start = position,
+                                   source_position_end = position,
+                                   source_argval_start = argval,
+                                   source_argval_end = argval,
+                                   domain_start = source_argval_start,
+                                   domain_end = source_argval_end,
+                                   component = if (identical(representation, "basis")) argval else NA_character_) {
+  n_features <- length(feature_names)
   data.frame(
     feature = feature_names,
     predictor = predictor,
-    block = predictor,
+    block = block,
     position = as.integer(position),
     argval = as.character(argval),
     representation = representation,
     basis_type = basis_type,
+    transform = rep(transform, n_features),
+    source_predictor = rep(source_predictor, n_features),
+    source_representation = rep(source_representation, n_features),
+    source_position_start = as.integer(source_position_start),
+    source_position_end = as.integer(source_position_end),
+    source_argval_start = as.character(source_argval_start),
+    source_argval_end = as.character(source_argval_end),
+    domain_start = as.character(domain_start),
+    domain_end = as.character(domain_end),
+    component = as.character(component),
     unit = rep(unit %||% NA_character_, length(feature_names)),
     stringsAsFactors = FALSE
   )
@@ -41,7 +63,9 @@ coerce_predictor_block <- function(x, predictor_name = NULL) {
         representation = "grid",
         position = seq_len(ncol(mat)),
         argval = x$argvals,
-        unit = x$unit
+        unit = x$unit,
+        transform = "identity",
+        source_representation = "grid"
       )
     ))
   }
@@ -60,7 +84,30 @@ coerce_predictor_block <- function(x, predictor_name = NULL) {
         position = seq_len(ncol(mat)),
         argval = x$argvals %||% seq_len(ncol(mat)),
         unit = x$unit,
-        basis_type = x$basis_type
+        basis_type = x$basis_type,
+        transform = "identity",
+        source_representation = "basis",
+        component = x$component_names %||% x$argvals %||% seq_len(ncol(mat))
+      )
+    ))
+  }
+
+  if (inherits(x, "fda_scalar")) {
+    predictor_name <- predictor_name %||% x$name %||% "scalar"
+    mat <- as.matrix(x$values)
+    feature_names <- colnames(mat) %||% paste0(predictor_name, "_", seq_len(ncol(mat)))
+    colnames(mat) <- feature_names
+    return(list(
+      matrix = mat,
+      feature_map = feature_map_from_block(
+        feature_names = feature_names,
+        predictor = predictor_name,
+        representation = "scalar",
+        position = seq_len(ncol(mat)),
+        argval = feature_names,
+        unit = x$unit,
+        transform = "identity",
+        source_representation = "scalar"
       )
     ))
   }
@@ -83,7 +130,9 @@ coerce_predictor_block <- function(x, predictor_name = NULL) {
       predictor = predictor_name,
       representation = "matrix",
       position = seq_len(ncol(x)),
-      argval = seq_len(ncol(x))
+      argval = seq_len(ncol(x)),
+      transform = "identity",
+      source_representation = "matrix"
     )
   )
 }
@@ -139,6 +188,9 @@ resolve_fit_input <- function(x, y = NULL, family = NULL) {
     }
     if (!is.null(family) && !identical(family, x$family)) {
       stop("`family` must match the family stored in `x`.", call. = FALSE)
+    }
+    if (is.null(x$response)) {
+      stop("`x` does not contain a response. Build the design with `response = ...` before fitting.", call. = FALSE)
     }
 
     y <- validate_xy(x$matrix, x$response, family = x$family)
@@ -278,28 +330,69 @@ print.fda_basis <- function(x, ...) {
 #'
 #' @param response Response vector.
 #' @param predictors A single predictor or a named list of predictors. Elements
-#'   can be `fda_grid`, `fda_basis`, matrices, data frames, or numeric vectors.
+#'   can be `fda_grid`, `fda_basis`, `fda_scalar`, matrices, data frames, or
+#'   numeric vectors.
+#' @param scalar_covariates Optional scalar covariates supplied separately from
+#'   the functional predictors.
 #' @param family Model family.
 #' @param id Optional observation identifiers.
-#' @param center,scale Passed to `as_functional_matrix()`.
+#' @param center,scale Backward-compatible shortcuts for applying an identity
+#'   transform with centering and scaling to the functional predictors.
+#' @param transforms Optional preprocessing specs for the functional predictors.
+#' @param scalar_transform Optional preprocessing specs for scalar covariates.
+#' @param preprocessor Optional fitted `fda_preprocessor`. When supplied, it is
+#'   reused instead of fitting preprocessing from the current data.
 #'
 #' @returns An object of class `fda_design`.
 #' @export
-fda_design <- function(response,
+fda_design <- function(response = NULL,
                        predictors,
+                       scalar_covariates = NULL,
                        family = c("gaussian", "binomial"),
                        id = NULL,
                        center = FALSE,
-                       scale = FALSE) {
+                       scale = FALSE,
+                       transforms = NULL,
+                       scalar_transform = NULL,
+                       preprocessor = NULL) {
   family <- match.arg(family)
+  predictors <- normalize_predictor_collection(predictors)
+  scalar_covariates <- normalize_scalar_collection(scalar_covariates)
 
-  if (!is.list(predictors) ||
-      inherits(predictors, c("fda_grid", "fda_basis", "matrix", "data.frame", "fda_matrix"))) {
-    predictors <- list(predictor1 = predictors)
+  if (!is.null(preprocessor)) {
+    if (!inherits(preprocessor, "fda_preprocessor")) {
+      stop("`preprocessor` must inherit from class `fda_preprocessor`.", call. = FALSE)
+    }
+    if (!is.null(transforms) || !is.null(scalar_transform) || isTRUE(center) || isTRUE(scale)) {
+      stop("When `preprocessor` is supplied, do not also pass `transforms`, `scalar_transform`, `center`, or `scale`.", call. = FALSE)
+    }
+  } else {
+    transform_specs <- normalize_spec_map(
+      specs = transforms,
+      expected_names = names(predictors),
+      default_spec = fda_identity(center = center, scale = scale)
+    )
+    scalar_specs <- normalize_spec_map(
+      specs = scalar_transform,
+      expected_names = names(scalar_covariates),
+      default_spec = fda_identity()
+    )
+    preprocessor <- fit_fda_preprocessor(
+      predictors = predictors,
+      scalar_covariates = scalar_covariates,
+      transforms = transform_specs,
+      scalar_transform = scalar_specs
+    )
   }
 
-  fda_x <- as_functional_matrix(predictors, center = center, scale = scale)
-  response <- validate_xy(fda_x, response, family = family)
+  fda_x <- apply_fda_preprocessor(
+    object = preprocessor,
+    predictors = predictors,
+    scalar_covariates = scalar_covariates
+  )
+  if (!is.null(response)) {
+    response <- validate_xy(fda_x, response, family = family)
+  }
 
   if (is.null(id)) {
     id <- seq_len(nrow(fda_x$x))
@@ -311,10 +404,12 @@ fda_design <- function(response,
   result <- list(
     response = response,
     predictors = predictors,
+    scalar_covariates = scalar_covariates,
     family = family,
     id = id,
     matrix = fda_x,
-    feature_map = fda_x$feature_map
+    feature_map = fda_x$feature_map,
+    preprocessor = preprocessor
   )
   class(result) <- "fda_design"
   result
@@ -325,8 +420,10 @@ print.fda_design <- function(x, ...) {
   cat("FDA design\n")
   cat("  observations:", nrow(x$matrix$x), "\n")
   cat("  features:", ncol(x$matrix$x), "\n")
-  cat("  predictors:", length(unique(x$feature_map$predictor)), "\n")
+  cat("  functional predictors:", length(x$predictors), "\n")
+  cat("  scalar covariates:", length(x$scalar_covariates %||% list()), "\n")
   cat("  family:", x$family, "\n")
+  cat("  response available:", !is.null(x$response), "\n")
   invisible(x)
 }
 
@@ -343,6 +440,9 @@ summary.fda_design <- function(object, ...) {
     n_observations = nrow(object$matrix$x),
     n_features = ncol(object$matrix$x),
     family = object$family,
+    has_response = !is.null(object$response),
+    n_functional_predictors = length(object$predictors),
+    n_scalar_covariates = length(object$scalar_covariates %||% list()),
     predictors = predictor_counts
   )
   class(result) <- "summary.fda_design"
@@ -355,6 +455,9 @@ print.summary.fda_design <- function(x, ...) {
   cat("  observations:", x$n_observations, "\n")
   cat("  features:", x$n_features, "\n")
   cat("  family:", x$family, "\n")
+  cat("  response available:", x$has_response, "\n")
+  cat("  functional predictors:", x$n_functional_predictors, "\n")
+  cat("  scalar covariates:", x$n_scalar_covariates, "\n")
   print(x$predictors, row.names = FALSE)
   invisible(x)
 }
@@ -398,13 +501,19 @@ fit_selectboost <- function(design, ...) {
 decorate_selection_feature_map <- function(map) {
   map$basis_component <- ifelse(
     map$representation == "basis",
-    ifelse(is.na(map$argval) | !nzchar(map$argval), map$feature, map$argval),
+    ifelse(
+      is.na(map$component) | !nzchar(map$component),
+      ifelse(is.na(map$argval) | !nzchar(map$argval), map$feature, map$argval),
+      map$component
+    ),
     NA_character_
   )
+  same_domain <- is.na(map$domain_start) | is.na(map$domain_end) | map$domain_start == map$domain_end
+  raw_label <- ifelse(same_domain, map$argval, paste0(map$domain_start, " - ", map$domain_end))
   map$domain_label <- ifelse(
     is.na(map$unit) | !nzchar(map$unit),
-    map$argval,
-    paste0(map$argval, " ", map$unit)
+    raw_label,
+    paste0(raw_label, " ", map$unit)
   )
   map
 }
@@ -471,11 +580,14 @@ summarise_selection_map <- function(map, level = c("feature", "group", "basis"))
         group = rows$group[1],
         representation = paste(unique(rows$representation), collapse = ", "),
         basis_type = paste(unique(stats::na.omit(rows$basis_type)), collapse = ", "),
+        source_representation = paste(unique(rows$source_representation), collapse = ", "),
         n_features = nrow(rows),
         start_position = min(rows$position),
         end_position = max(rows$position),
         start_argval = rows$argval[1],
         end_argval = rows$argval[nrow(rows)],
+        domain_start = rows$domain_start[1],
+        domain_end = rows$domain_end[nrow(rows)],
         stringsAsFactors = FALSE
       )
 
@@ -531,10 +643,13 @@ summarise_selection_map <- function(map, level = c("feature", "group", "basis"))
       predictor = part$predictor[1],
       representation = "basis",
       basis_type = part$basis_type[1],
+      source_representation = paste(unique(part$source_representation), collapse = ", "),
       n_components = nrow(part),
       first_component = part$basis_component[1],
       last_component = part$basis_component[nrow(part)],
       components = paste(part$basis_component, collapse = ", "),
+      domain_start = part$domain_start[1],
+      domain_end = part$domain_end[nrow(part)],
       stringsAsFactors = FALSE
     )
 
@@ -625,9 +740,77 @@ selection_map.selectboost_fda_result <- function(x,
   summarise_selection_map(output, level = match.arg(level))
 }
 
+selection_fit_metadata <- function(object) {
+  list(
+    family = object$family,
+    n_features = ncol(object$x$x),
+    n_groups = length(unique(object$groups)),
+    n_predictors = length(unique(object$x$feature_map$predictor))
+  )
+}
+
+#' Extract Selected Features or Groups
+#'
+#' Returns the selected rows from [selection_map()] for stability-selection or
+#' SelectBoost fits.
+#'
+#' @param x A fitted selection object.
+#' @param ... Additional arguments passed to the relevant method.
+#'
+#' @returns A data frame.
+#' @export
+selected <- function(x, ...) {
+  UseMethod("selected")
+}
+
+#' @export
+selected.fda_stability_selection <- function(x,
+                                             level = c("feature", "group", "basis"),
+                                             cutoff = x$cutoff,
+                                             ...) {
+  level <- match.arg(level)
+  map <- selection_map(x, level = level, cutoff = cutoff, ...)
+  keep <- if (identical(level, "feature")) {
+    map$selected
+  } else if (identical(level, "group")) {
+    map$group_selected
+  } else {
+    map$selected_components > 0
+  }
+  map[keep %in% TRUE, , drop = FALSE]
+}
+
+#' @export
+selected.selectboost_fda_result <- function(x,
+                                            level = c("feature", "group", "basis"),
+                                            c0 = NULL,
+                                            threshold = 0,
+                                            value = c("max", "mean"),
+                                            ...) {
+  level <- match.arg(level)
+  value <- match.arg(value)
+  map <- selection_map(x, level = level, c0 = c0, ...)
+  keep <- if (identical(level, "feature")) {
+    map$selection > threshold
+  } else if (identical(level, "group")) {
+    metric <- if (identical(value, "mean")) map$mean_selection else map$max_selection
+    metric > threshold
+  } else {
+    metric <- if (identical(value, "mean")) map$mean_selection else map$max_selection
+    metric > threshold
+  }
+  map[keep %in% TRUE, , drop = FALSE]
+}
+
 #' @export
 summary.fda_stability_selection <- function(object, ...) {
+  meta <- selection_fit_metadata(object)
   result <- list(
+    method = "stability_selection",
+    family = meta$family,
+    n_features = meta$n_features,
+    n_groups = meta$n_groups,
+    n_predictors = meta$n_predictors,
     B = object$B,
     sample_fraction = object$sample_fraction,
     cutoff = object$cutoff,
@@ -643,6 +826,10 @@ summary.fda_stability_selection <- function(object, ...) {
 #' @export
 print.summary.fda_stability_selection <- function(x, ...) {
   cat("FDA stability selection summary\n")
+  cat("  family:", x$family, "\n")
+  cat("  predictors:", x$n_predictors, "\n")
+  cat("  features:", x$n_features, "\n")
+  cat("  groups:", x$n_groups, "\n")
   cat("  replicates:", x$B, "\n")
   cat("  sample fraction:", x$sample_fraction, "\n")
   cat("  cutoff:", x$cutoff, "\n")
@@ -654,9 +841,14 @@ print.summary.fda_stability_selection <- function(x, ...) {
 #' @export
 summary.selectboost_fda_result <- function(object, ...) {
   counts <- colSums(object$feature_selection > 0)
+  meta <- selection_fit_metadata(object)
   result <- list(
+    method = "selectboost",
+    family = meta$family,
+    n_features = meta$n_features,
+    n_groups = meta$n_groups,
+    n_predictors = meta$n_predictors,
     mode = object$mode,
-    n_features = nrow(object$feature_selection),
     n_c0 = ncol(object$feature_selection),
     selected_by_c0 = counts
   )
@@ -667,8 +859,11 @@ summary.selectboost_fda_result <- function(object, ...) {
 #' @export
 print.summary.selectboost_fda_result <- function(x, ...) {
   cat("FDA SelectBoost summary\n")
+  cat("  family:", x$family, "\n")
+  cat("  predictors:", x$n_predictors, "\n")
   cat("  mode:", x$mode, "\n")
   cat("  features:", x$n_features, "\n")
+  cat("  groups:", x$n_groups, "\n")
   cat("  c0 values:", x$n_c0, "\n")
   invisible(x)
 }

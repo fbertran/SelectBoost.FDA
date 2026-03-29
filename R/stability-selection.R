@@ -246,7 +246,7 @@ stability_selection_fda <- function(x,
     selected_groups = names(group_frequency)[group_frequency >= cutoff],
     sampled_indices = sampled_indices
   )
-  class(result) <- "fda_stability_selection"
+  class(result) <- c("fda_stability_selection", "fda_selection_fit")
   result
 }
 
@@ -295,10 +295,11 @@ fdboost_stability_selection <- function(model, ...) {
 
 #' @export
 print.fda_stability_selection <- function(x, ...) {
-  cat("Functional stability selection\n")
+  cat("FDA stability selection\n")
+  cat("  family:", x$family, "\n")
+  cat("  features:", ncol(x$x$x), "\n")
+  cat("  groups:", length(unique(x$groups)), "\n")
   cat("  replicates:", x$B, "\n")
-  cat("  sample fraction:", x$sample_fraction, "\n")
-  cat("  features above cutoff:", length(x$selected_features), "\n")
-  cat("  groups above cutoff:", length(x$selected_groups), "\n")
+  cat("  cutoff:", x$cutoff, "\n")
   invisible(x)
 }

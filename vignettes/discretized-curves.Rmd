@@ -15,30 +15,35 @@ knitr::opts_chunk$set(
 has_grpreg <- requireNamespace("grpreg", quietly = TRUE)
 ```
 
-`SelectBoost.FDA` can work directly with discretized functional predictors by
-building an `fda_design` object and then fitting grouped stability selection on
-top of it.
+`SelectBoost.FDA` can now go from raw discretized curves to stability summaries
+without any manual matrix construction. The design object stores the fitted
+preprocessing, the flattened matrix used by the selector, and the reversible
+map back to the original curve domain.
 
 ## Build a functional design
 
 ```{r}
 library(SelectBoost.FDA)
+data("spectra_example", package = "SelectBoost.FDA")
 
-set.seed(123)
-n <- 80
-grid <- seq(0, 1, length.out = 25)
-
-signal_values <- outer(rnorm(n), sin(2 * pi * grid)) +
-  matrix(rnorm(n * length(grid), sd = 0.2), nrow = n)
-noise_values <- matrix(rnorm(n * length(grid)), nrow = n)
-
-signal <- fda_grid(signal_values, argvals = grid, name = "signal", unit = "time")
-noise <- fda_grid(noise_values, argvals = grid, name = "noise", unit = "time")
-y <- 1.5 * signal_values[, 8] - signal_values[, 18] + rnorm(n, sd = 0.5)
+signal <- fda_grid(
+  spectra_example$predictors$signal,
+  argvals = spectra_example$grid,
+  name = "signal",
+  unit = "nm"
+)
+nuisance <- fda_grid(
+  spectra_example$predictors$nuisance,
+  argvals = spectra_example$grid,
+  name = "nuisance",
+  unit = "nm"
+)
 
 design <- fda_design(
-  response = y,
-  predictors = list(signal = signal, noise = noise),
+  response = spectra_example$response,
+  predictors = list(signal = signal, nuisance = nuisance),
+  scalar_covariates = spectra_example$scalar_covariates,
+  scalar_transform = fda_standardize(),
   family = "gaussian"
 )
 
@@ -47,8 +52,14 @@ summary(design)
 head(selection_map(design))
 ```
 
-The design stores both the matrix passed to the fitting engine and the feature
-map needed to come back to predictor names and domain locations later.
+The design stores the fitted preprocessing object as well. In this first
+workflow the functional predictors stay on their original grid, while the
+scalar covariates are standardized.
+
+```{r}
+design$preprocessor
+summary(design$preprocessor)
+```
 
 ## Fit grouped stability selection
 
@@ -68,7 +79,7 @@ fit
 summary(fit)
 head(selection_map(fit))
 plot(fit, type = "group")
-fit$selected_groups
+selected(fit, level = "group")
 ```
 
 ## Interval-level summaries
@@ -94,5 +105,5 @@ plot(
   legend_title = "Mean frequency",
   palette = grDevices::heat.colors(24)
 )
-interval_fit$selected_groups
+selected(interval_fit, level = "group")
 ```

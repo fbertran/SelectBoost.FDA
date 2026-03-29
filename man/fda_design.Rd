@@ -5,25 +5,41 @@
 \title{Functional Design Object}
 \usage{
 fda_design(
-  response,
+  response = NULL,
   predictors,
+  scalar_covariates = NULL,
   family = c("gaussian", "binomial"),
   id = NULL,
   center = FALSE,
-  scale = FALSE
+  scale = FALSE,
+  transforms = NULL,
+  scalar_transform = NULL,
+  preprocessor = NULL
 )
 }
 \arguments{
 \item{response}{Response vector.}
 
 \item{predictors}{A single predictor or a named list of predictors. Elements
-can be \code{fda_grid}, \code{fda_basis}, matrices, data frames, or numeric vectors.}
+can be \code{fda_grid}, \code{fda_basis}, \code{fda_scalar}, matrices, data frames, or
+numeric vectors.}
+
+\item{scalar_covariates}{Optional scalar covariates supplied separately from
+the functional predictors.}
 
 \item{family}{Model family.}
 
 \item{id}{Optional observation identifiers.}
 
-\item{center, scale}{Passed to \code{as_functional_matrix()}.}
+\item{center, scale}{Backward-compatible shortcuts for applying an identity
+transform with centering and scaling to the functional predictors.}
+
+\item{transforms}{Optional preprocessing specs for the functional predictors.}
+
+\item{scalar_transform}{Optional preprocessing specs for scalar covariates.}
+
+\item{preprocessor}{Optional fitted \code{fda_preprocessor}. When supplied, it is
+reused instead of fitting preprocessing from the current data.}
 }
 \value{
 An object of class \code{fda_design}.

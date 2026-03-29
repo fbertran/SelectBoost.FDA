@@ -150,7 +150,7 @@ as_functional_matrix <- function(x, center = FALSE, scale = FALSE) {
     return(x$matrix)
   }
 
-  if (inherits(x, c("fda_grid", "fda_basis")) ||
+  if (inherits(x, c("fda_grid", "fda_basis", "fda_scalar")) ||
       is.matrix(x) ||
       is.data.frame(x) ||
       (is.vector(x) && !is.list(x))) {

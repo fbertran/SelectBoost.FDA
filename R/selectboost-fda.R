@@ -148,15 +148,17 @@ selectboost_fda <- function(x,
     bandwidth = bandwidth,
     feature_selection = feature_selection
   )
-  class(output) <- "selectboost_fda_result"
+  class(output) <- c("selectboost_fda_result", "fda_selection_fit")
   output
 }
 
 #' @export
 print.selectboost_fda_result <- function(x, ...) {
   cat("FDA SelectBoost result\n")
+  cat("  family:", x$family, "\n")
   cat("  mode:", x$mode, "\n")
   cat("  features:", nrow(x$feature_selection), "\n")
+  cat("  groups:", length(unique(x$groups)), "\n")
   cat("  c0 values:", ncol(x$feature_selection), "\n")
   invisible(x)
 }

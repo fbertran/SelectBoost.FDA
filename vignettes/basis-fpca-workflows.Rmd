@@ -15,52 +15,57 @@ knitr::opts_chunk$set(
 has_glmnet <- requireNamespace("glmnet", quietly = TRUE)
 ```
 
-When functional predictors are already represented by spline coefficients or
-FPCA scores, `SelectBoost.FDA` can still use the same design object and summary
-machinery. The main difference is interpretive: scores/components are often the
-units of interest rather than grid intervals.
+`SelectBoost.FDA` can fit spline-basis and FPCA preprocessing directly from raw
+curves, store the fitted transforms, and then reuse the same design/selection
+machinery as before.
 
-## Build a design from FPCA scores
+## Fit preprocessing from raw curves
 
 ```{r}
 library(SelectBoost.FDA)
+data("motion_example", package = "SelectBoost.FDA")
 
-set.seed(2026)
-n <- 90
-
-signal_scores <- cbind(
-  rnorm(n),
-  rnorm(n),
-  rnorm(n)
-)
-noise_scores <- cbind(
-  rnorm(n),
-  rnorm(n)
-)
-
-y <- 2 * signal_scores[, 1] - 1.2 * signal_scores[, 2] + rnorm(n, sd = 0.35)
-
-design <- fda_design(
-  response = y,
-  predictors = list(
-    signal_fpca = fda_basis(
-      signal_scores,
-      basis_type = "fpca",
-      component_names = paste0("PC", 1:3),
-      name = "signal_fpca"
-    ),
-    noise_fpca = fda_basis(
-      noise_scores,
-      basis_type = "fpca",
-      component_names = paste0("PC", 1:2),
-      name = "noise_fpca"
-    )
+predictors <- list(
+  signal = fda_grid(
+    motion_example$predictors$signal,
+    argvals = motion_example$grid,
+    name = "signal",
+    unit = "time"
   ),
+  nuisance = fda_grid(
+    motion_example$predictors$nuisance,
+    argvals = motion_example$grid,
+    name = "nuisance",
+    unit = "time"
+  )
+)
+
+prep <- fit_fda_preprocessor(
+  predictors = predictors,
+  scalar_covariates = motion_example$scalar_covariates,
+  transforms = list(
+    signal = fda_fpca(n_components = 3),
+    nuisance = fda_bspline(df = 5, center = TRUE)
+  ),
+  scalar_transform = fda_standardize()
+)
+
+prep
+summary(prep)
+```
+
+## Build a design with the fitted preprocessor
+
+```{r}
+design <- fda_design(
+  response = motion_example$response,
+  predictors = predictors,
+  scalar_covariates = motion_example$scalar_covariates,
+  preprocessor = prep,
   family = "gaussian"
 )
 
-design
-selection_map(design)
+head(selection_map(design))
 selection_map(design, level = "basis")
 ```
 
@@ -80,6 +85,7 @@ fit
 summary(fit)
 selection_map(fit)
 selection_map(fit, level = "basis")
+selected(fit, level = "basis")
 plot(fit, type = "basis", value = "mean")
 ```
 
@@ -94,5 +100,5 @@ The basis-level summary is often the most convenient table for reporting:
 
 For FPCA in particular, scores are often much less correlated than dense raw
 grid points. In that setting, grouped stability selection is usually the more
-natural default, while `SelectBoost` is often most useful for dense
+natural default, while `SelectBoost` remains most useful for dense
 discretizations or strongly correlated basis systems.
