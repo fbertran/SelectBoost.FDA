@@ -1,3 +1,9 @@
+url: https://fbertran.github.io/SelectBoost.FDA/
+title: "SelectBoost.FDA"
+lang: en
+
+news:
+  one_page: true
 
 template:
   bootstrap: 5
@@ -12,13 +18,27 @@ template:
         .navbar-brand img { height: 28px; }
       </style>
 
-url: https://fbertran.github.io/SelectBoost.FDA/
-title: "SelectBoost.FDA"
-lang: en
 
+development:
+  mode: auto
 
-news:
-  one_page: true
+navbar:
+  structure:
+    left:
+      - intro
+      - reference
+      - articles
+      - news
+
+articles:
+  - title: End-to-End Workflows
+    navbar: End-to-End Workflows
+    contents:
+      - discretized-curves
+      - selectboost-spectra
+      - basis-fpca-workflows
+      - methods-and-formulas
+      - simulation-and-benchmarks
 
 footer:
   structure:

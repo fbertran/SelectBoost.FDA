@@ -1,0 +1,195 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+if (requireNamespace("pkgload", quietly = TRUE)) {
+  pkgload::load_all(".", export_all = FALSE, helpers = FALSE, quiet = TRUE)
+} else {
+  library(SelectBoost.FDA)
+}
+```
+
+# SelectBoost.FDA
+
+`SelectBoost.FDA` is an R package for variable selection in functional data
+analysis. It combines FDA-native preprocessing and design objects with grouped
+stability selection, interval summaries, FDA-aware `SelectBoost`, and a small
+validation layer for simulation and benchmarking.
+
+The package is designed for workflows where functional predictors are observed
+on a grid, represented through basis expansions, or reduced to FPCA scores, and
+where strong local or block-wise correlation makes ordinary variable selection
+unstable.
+
+## Main features
+
+- FDA-native design objects built directly from raw curves, basis
+  representations, FPCA scores, and scalar covariates.
+- Train/test-safe preprocessing with identity transforms, standardization,
+  spline-basis expansion, and FPCA.
+- Grouped stability selection for functional blocks and interval summaries.
+- FDA-aware `SelectBoost` wrappers plus a plain `SelectBoost` baseline.
+- Simulation, benchmark, and evaluation helpers with mapped ground truth.
+
+## Installation
+
+You can install the development version from GitHub with:
+
+```r
+# install.packages("remotes")
+remotes::install_github("bertran7/SelectBoost.FDA")
+```
+
+Some workflows rely on optional backends:
+
+- `glmnet` for lasso-based grouped stability selection.
+- `grpreg` for group lasso.
+- `SGL` for sparse-group lasso.
+- `FDboost` and `stabs` for the native `FDboost` stability-selection route.
+
+## A first FDA-native workflow
+
+The package ships with small example datasets so the full workflow can start
+from raw functional inputs.
+
+```{r}
+data("spectra_example", package = "SelectBoost.FDA")
+
+idx <- 1:30
+
+design <- fda_design(
+  response = spectra_example$response[idx],
+  predictors = list(
+    signal = fda_grid(
+      spectra_example$predictors$signal[idx, ],
+      argvals = spectra_example$grid,
+      name = "signal",
+      unit = "nm"
+    ),
+    nuisance = fda_grid(
+      spectra_example$predictors$nuisance[idx, ],
+      argvals = spectra_example$grid,
+      name = "nuisance",
+      unit = "nm"
+    )
+  ),
+  scalar_covariates = spectra_example$scalar_covariates[idx, ],
+  transforms = list(
+    signal = fda_fpca(n_components = 3),
+    nuisance = fda_bspline(df = 5)
+  ),
+  scalar_transform = fda_standardize(),
+  family = "gaussian"
+)
+
+summary(design)
+head(selection_map(design, level = "basis"))
+```
+
+## FDA-aware SelectBoost
+
+`SelectBoost.FDA` extends `SelectBoost` with block-aware and region-aware
+grouping while keeping the original perturbation engine.
+
+```{r}
+fit_sb <- fit_selectboost(
+  design,
+  mode = "fast",
+  steps.seq = c(0.6, 0.3),
+  c0lim = FALSE,
+  B = 4
+)
+
+summary(fit_sb)
+head(selection_map(fit_sb, level = "group", c0 = colnames(fit_sb$feature_selection)[1]))
+```
+
+## Grouped stability selection
+
+Grouped stability selection is available through a common FDA interface. The
+lasso route below requires the optional `glmnet` package.
+
+```{r}
+if (requireNamespace("glmnet", quietly = TRUE)) {
+  fit_stab <- fit_stability(
+    design,
+    selector = "lasso",
+    B = 8,
+    cutoff = 0.5,
+    seed = 1
+  )
+
+  summary(fit_stab)
+  head(selection_map(fit_stab, level = "group"))
+}
+```
+
+Interval summaries can be requested directly:
+
+```{r}
+if (requireNamespace("glmnet", quietly = TRUE)) {
+  fit_interval <- interval_stability_selection(
+    x = design,
+    selector = "lasso",
+    width = 4,
+    B = 8,
+    cutoff = 0.5,
+    seed = 1
+  )
+
+  head(selection_map(fit_interval, level = "group"))
+}
+```
+
+## Benchmarking on simulated FDA designs
+
+The validation layer can be used to compare FDA-aware `SelectBoost` with a
+plain `SelectBoost` baseline on the same simulated design and mapped truth.
+
+```{r}
+sim <- simulate_fda_scenario(
+  n = 30,
+  grid_length = 20,
+  representation = "grid",
+  seed = 1
+)
+
+bench <- benchmark_selection_methods(
+  sim,
+  methods = c("selectboost", "plain_selectboost"),
+  levels = c("feature", "group"),
+  selectboost_args = list(B = 3, steps.seq = 0.5, c0lim = FALSE),
+  plain_selectboost_args = list(B = 3, steps.seq = 0.5, c0lim = FALSE)
+)
+
+head(bench$metrics)
+```
+
+## Further documentation
+
+The package vignettes cover the main workflow families:
+
+- discretized curves
+- spectra and interval-aware `SelectBoost`
+- basis and FPCA workflows
+- methods, calibration, and formula interfaces
+- simulation and benchmark workflows
+
+## References
+
+- Bertrand F., Aouadi I., Jung N., Carapito R., Vallat L., Bahram S., and
+  Maumy-Bertrand M. SelectBoost: a general algorithm to enhance the performance
+  of variable selection methods in correlated datasets. *Bioinformatics*.
+  doi:10.1093/bioinformatics/btaa855
+- Hofner B., Boccuto L., and Göker M. Stability selection and related
+  subsampling-based selection procedures.
+- Brockhaus S., Melcher M., Leisch F., and Greven S. FDboost:
+  boosting functional regression models.

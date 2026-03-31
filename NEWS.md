@@ -1,5 +1,10 @@
 # SelectBoost.FDA News
 
+## SelectBoost.FDA 0.5.0
+
+- Added pkgdown website
+- Added readme
+
 ## SelectBoost.FDA 0.4.0
 
 - Added minimal examples to the core functions of the package
