@@ -1,0 +1,87 @@
+---
+title: "Simulation and Benchmark Workflows"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Simulation and Benchmark Workflows}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+has_glmnet <- requireNamespace("glmnet", quietly = TRUE)
+```
+
+`SelectBoost.FDA` now includes a validation layer for repeated simulations,
+method benchmarks, and plain-SelectBoost baselines.
+
+## Simulate a benchmark scenario
+
+```{r}
+library(SelectBoost.FDA)
+
+sim_grid <- simulate_fda_scenario(
+  n = 60,
+  grid_length = 30,
+  representation = "grid",
+  seed = 1
+)
+
+sim_grid
+head(selection_map(sim_grid$design))
+sim_grid$truth$active_predictors
+```
+
+The returned object keeps both the fitted `fda_design` and the mapped truth for
+the transformed feature space.
+
+## Benchmark multiple methods on shared truth
+
+```{r, eval = has_glmnet}
+bench <- benchmark_selection_methods(
+  sim_grid,
+  methods = c("stability", "interval", "selectboost", "plain_selectboost"),
+  levels = c("feature", "group"),
+  stability_args = list(selector = "lasso", B = 8, cutoff = 0.5, seed = 2),
+  interval_args = list(selector = "lasso", width = 5, B = 8, cutoff = 0.5, seed = 3),
+  selectboost_args = list(selector = "lasso", B = 4, steps.seq = c(0.7, 0.4), c0lim = FALSE),
+  plain_selectboost_args = list(selector = "lasso", B = 4, steps.seq = c(0.7, 0.4), c0lim = FALSE)
+)
+
+bench
+bench$metrics
+head(selection_map(bench, level = "group"))
+```
+
+This keeps the comparison object available, so the same `selection_map()` and
+`selected()` methods work on top of the benchmark output.
+
+## Run a repeated study
+
+```{r, eval = has_glmnet}
+study <- run_simulation_study(
+  n_rep = 2,
+  simulate_args = list(
+    n = 50,
+    grid_length = 28,
+    representation = "basis"
+  ),
+  benchmark_args = list(
+    methods = c("stability", "selectboost", "plain_selectboost"),
+    levels = c("feature", "group", "basis"),
+    stability_args = list(selector = "lasso", B = 6, cutoff = 0.5, seed = 4),
+    selectboost_args = list(selector = "lasso", B = 4, steps.seq = c(0.7, 0.4), c0lim = FALSE),
+    plain_selectboost_args = list(selector = "lasso", B = 4, steps.seq = c(0.7, 0.4), c0lim = FALSE)
+  ),
+  seed = 10
+)
+
+study
+summary(study)
+```
+
+The repeated-study summary reports the mean and standard deviation of recovery
+metrics by method, evaluation level, and `c0` when applicable.

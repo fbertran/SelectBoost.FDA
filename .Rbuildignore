@@ -10,3 +10,9 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 data-raw
+^\.github$
+^\.github/
+^\.github/.*
+^\.github
+^_pkgdown\.yml$
+^docs$

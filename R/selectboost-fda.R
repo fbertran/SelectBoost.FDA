@@ -17,15 +17,16 @@ resolve_selectboost_selector <- function(selector,
     })
   }
 
-  selector <- match.arg(selector, c("msgps", "glmnet", "grpreg"))
+  selector_name <- selector_alias(selector, allow_msgps = TRUE)
+  selector_groups <- resolve_selector_groups(selector_name, groups)
 
-  if (identical(selector, "msgps")) {
+  if (identical(selector_name, "msgps")) {
     return(function(X, Y, ...) {
       do.call(SelectBoost::lasso_msgps_AICc, c(list(X = X, Y = Y), selector_args, list(...)))
     })
   }
 
-  if (identical(selector, "glmnet")) {
+  if (identical(selector_name, "lasso")) {
     return(function(X, Y, ...) {
       do.call(
         glmnet_coefficients,
@@ -34,10 +35,19 @@ resolve_selectboost_selector <- function(selector,
     })
   }
 
+  if (identical(selector_name, "group_lasso")) {
+    return(function(X, Y, ...) {
+      do.call(
+        grpreg_coefficients,
+        c(list(X = X, y = Y, groups = selector_groups, family = family), selector_args, list(...))
+      )
+    })
+  }
+
   function(X, Y, ...) {
     do.call(
-      grpreg_coefficients,
-      c(list(X = X, y = Y, groups = groups, family = family), selector_args, list(...))
+      sgl_coefficients,
+      c(list(X = X, y = Y, groups = selector_groups, family = family), selector_args, list(...))
     )
   }
 }
@@ -52,8 +62,10 @@ resolve_selectboost_selector <- function(selector,
 #' @param y Response vector. Leave as `NULL` when `x` is an `fda_design`.
 #' @param mode `"fast"` for a fixed `c0` grid or `"auto"` for the adaptive
 #'   version.
-#' @param selector Base selector used inside SelectBoost. Choose from `"msgps"`,
-#'   `"glmnet"`, `"grpreg"`, or provide a custom function.
+#' @param selector Base selector used inside SelectBoost. Choose from
+#'   `"msgps"`, `"lasso"`, `"group_lasso"`, `"sparse_group_lasso"`, the
+#'   backend-specific aliases `"glmnet"`, `"grpreg"`, `"sgl"`, or provide a
+#'   custom function.
 #' @param selector_fun Optional custom base selector. It must return a
 #'   coefficient vector of length `p`.
 #' @param selector_args Optional named list of arguments forwarded to the base
@@ -65,8 +77,12 @@ resolve_selectboost_selector <- function(selector,
 #'   FDA-aware groups.
 #' @param group_method Functional grouping backend: threshold-based or
 #'   community-based.
+#' @param association_method Association structure used to build FDA-aware
+#'   groups.
 #' @param within_blocks Should SelectBoost groups stay within functional blocks?
 #' @param bandwidth Optional maximum within-block lag retained in groups.
+#' @param interval_groups,width,step,decay Additional arguments passed to
+#'   [make_functional_grouping_function()].
 #' @param ... Additional arguments passed to `SelectBoost::fastboost()` or
 #'   `SelectBoost::autoboost()`.
 #'
@@ -75,15 +91,20 @@ resolve_selectboost_selector <- function(selector,
 selectboost_fda <- function(x,
                             y = NULL,
                             mode = c("fast", "auto"),
-                            selector = c("msgps", "glmnet", "grpreg"),
+                            selector = "msgps",
                             selector_fun = NULL,
                             selector_args = list(),
                             groups = NULL,
                             family = c("gaussian", "binomial"),
                             association = NULL,
                             group_method = c("threshold", "community"),
+                            association_method = c("correlation", "neighborhood", "hybrid", "interval"),
                             within_blocks = TRUE,
                             bandwidth = NULL,
+                            interval_groups = NULL,
+                            width = NULL,
+                            step = width,
+                            decay = 1,
                             ...) {
   family_input <- if (missing(family)) NULL else family
   input <- resolve_fit_input(x = x, y = y, family = family_input)
@@ -92,6 +113,7 @@ selectboost_fda <- function(x,
   mode <- match.arg(mode)
   family <- input$family
   group_method <- match.arg(group_method)
+  association_method <- match.arg(association_method)
 
   groups <- normalize_groups(
     groups %||% if (length(unique(fda_x$blocks)) > 1L) fda_x$blocks else NULL,
@@ -102,8 +124,13 @@ selectboost_fda <- function(x,
     x = fda_x,
     association = association,
     method = group_method,
+    association_method = association_method,
     within_blocks = within_blocks,
-    bandwidth = bandwidth
+    bandwidth = bandwidth,
+    interval_groups = interval_groups,
+    width = width,
+    step = step,
+    decay = decay
   )
   selector_fn <- resolve_selectboost_selector(
     selector = selector,
@@ -144,8 +171,10 @@ selectboost_fda <- function(x,
     family = family,
     mode = mode,
     group_method = group_method,
+    association_method = association_method,
     within_blocks = within_blocks,
     bandwidth = bandwidth,
+    interval_groups = interval_groups,
     feature_selection = feature_selection
   )
   class(output) <- c("selectboost_fda_result", "fda_selection_fit")
@@ -158,7 +187,7 @@ print.selectboost_fda_result <- function(x, ...) {
   cat("  family:", x$family, "\n")
   cat("  mode:", x$mode, "\n")
   cat("  features:", nrow(x$feature_selection), "\n")
-  cat("  groups:", length(unique(x$groups)), "\n")
+  cat("  groups:", length(group_names(x$groups)), "\n")
   cat("  c0 values:", ncol(x$feature_selection), "\n")
   invisible(x)
 }

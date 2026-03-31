@@ -1,0 +1,23 @@
+template:
+  bootstrap: 5
+
+development:
+  mode: auto
+
+navbar:
+  structure:
+    left:
+      - intro
+      - reference
+      - articles
+      - news
+
+articles:
+  - title: End-to-End Workflows
+    navbar: End-to-End Workflows
+    contents:
+      - discretized-curves
+      - selectboost-spectra
+      - basis-fpca-workflows
+      - methods-and-formulas
+      - simulation-and-benchmarks

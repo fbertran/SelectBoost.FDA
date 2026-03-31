@@ -17,3 +17,16 @@ An object inheriting from \code{fda_stability_selection}.
 \description{
 Fit Grouped Stability Selection from an FDA Design
 }
+\examples{
+sim <- simulate_fda_scenario(n = 24, grid_length = 16, seed = 1)
+if (requireNamespace("glmnet", quietly = TRUE)) {
+  fit <- fit_stability(
+    sim$design,
+    selector = "lasso",
+    B = 4,
+    cutoff = 0.4,
+    seed = 1
+  )
+  head(selection_map(fit))
+}
+}

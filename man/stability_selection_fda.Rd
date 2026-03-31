@@ -7,7 +7,7 @@
 stability_selection_fda(
   x,
   y = NULL,
-  selector = c("grpreg", "glmnet"),
+  selector = "group_lasso",
   selector_fun = NULL,
   groups = NULL,
   family = c("gaussian", "binomial"),
@@ -25,7 +25,9 @@ object.}
 
 \item{y}{Response vector. Leave as \code{NULL} when \code{x} is an \code{fda_design}.}
 
-\item{selector}{Either \code{"glmnet"}, \code{"grpreg"}, or a custom function.}
+\item{selector}{Either \code{"lasso"}, \code{"group_lasso"},
+\code{"sparse_group_lasso"}, one of the backend-specific aliases
+(\code{"glmnet"}, \code{"grpreg"}, \code{"sgl"}), or a custom function.}
 
 \item{selector_fun}{Optional custom selector. It must accept \code{X}, \code{y},
 \code{groups}, and \code{family}, and return either a coefficient vector or a logical

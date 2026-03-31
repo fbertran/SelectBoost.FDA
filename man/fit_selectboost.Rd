@@ -17,3 +17,14 @@ An object inheriting from \code{selectboost_fda_result}.
 \description{
 Fit SelectBoost from an FDA Design
 }
+\examples{
+sim <- simulate_fda_scenario(n = 24, grid_length = 16, seed = 1)
+fit <- fit_selectboost(
+  sim$design,
+  mode = "fast",
+  steps.seq = 0.5,
+  c0lim = FALSE,
+  B = 3
+)
+head(selection_map(fit, c0 = colnames(fit$feature_selection)[1]))
+}

@@ -4,7 +4,14 @@
 \alias{interval_stability_selection}
 \title{Interval Stability Selection}
 \usage{
-interval_stability_selection(x, y = NULL, width, step = width, ...)
+interval_stability_selection(
+  x,
+  y = NULL,
+  width,
+  step = width,
+  overlap = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{Any input accepted by \code{as_functional_matrix()}, or an \code{fda_design}
@@ -14,8 +21,9 @@ object.}
 
 \item{width}{Positive interval width.}
 
-\item{step}{Step size between interval starts. Only non-overlapping intervals
-are supported, so \code{step} must equal \code{width}.}
+\item{step}{Step size between interval starts.}
+
+\item{overlap}{Logical; should the interval groups overlap?}
 
 \item{...}{Additional arguments forwarded to \code{stability_selection_fda()}.}
 }

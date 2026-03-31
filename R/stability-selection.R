@@ -1,72 +1,3 @@
-glmnet_coefficients <- function(X,
-                                y,
-                                family = "gaussian",
-                                alpha = 1,
-                                lambda_rule = c("lambda.1se", "lambda.min"),
-                                nfolds = 5L,
-                                ...) {
-  if (!requireNamespace("glmnet", quietly = TRUE)) {
-    stop("Package `glmnet` is required for `selector = \"glmnet\"`.", call. = FALSE)
-  }
-
-  lambda_rule <- match.arg(lambda_rule)
-  nfolds <- min(as.integer(nfolds), nrow(X))
-  if (nfolds < 3L) {
-    stop("At least three observations are required for the glmnet selector.", call. = FALSE)
-  }
-
-  fit <- glmnet::cv.glmnet(
-    x = X,
-    y = y,
-    family = family,
-    alpha = alpha,
-    nfolds = nfolds,
-    ...
-  )
-
-  as.numeric(stats::coef(fit, s = fit[[lambda_rule]]))[-1L]
-}
-
-grpreg_coefficients <- function(X,
-                                y,
-                                groups,
-                                family = "gaussian",
-                                penalty = "grLasso",
-                                lambda_rule = c("lambda.1se", "lambda.min"),
-                                nfolds = 5L,
-                                ...) {
-  if (!requireNamespace("grpreg", quietly = TRUE)) {
-    stop("Package `grpreg` is required for `selector = \"grpreg\"`.", call. = FALSE)
-  }
-
-  lambda_rule <- match.arg(lambda_rule)
-  nfolds <- min(as.integer(nfolds), nrow(X))
-  if (nfolds < 3L) {
-    stop("At least three observations are required for the grpreg selector.", call. = FALSE)
-  }
-
-  fit <- grpreg::cv.grpreg(
-    X = X,
-    y = y,
-    group = groups,
-    family = family,
-    penalty = penalty,
-    nfolds = nfolds,
-    ...
-  )
-
-  lambda_value <- if (identical(lambda_rule, "lambda.min")) {
-    fit$lambda.min
-  } else if (!is.null(fit$lambda.1se)) {
-    fit$lambda.1se
-  } else {
-    threshold <- fit$cve[fit$min] + fit$cvse[fit$min]
-    max(fit$lambda[fit$cve <= threshold])
-  }
-
-  as.numeric(stats::coef(fit, lambda = lambda_value))[-1L]
-}
-
 resolve_selector <- function(selector,
                              selector_fun,
                              groups,
@@ -86,9 +17,10 @@ resolve_selector <- function(selector,
     })
   }
 
-  selector <- match.arg(selector, c("glmnet", "grpreg"))
+  selector_name <- selector_alias(selector, allow_msgps = FALSE)
+  selector_groups <- resolve_selector_groups(selector_name, groups)
 
-  if (identical(selector, "glmnet")) {
+  if (identical(selector_name, "lasso")) {
     return(function(X, y) {
       do.call(
         glmnet_coefficients,
@@ -97,10 +29,19 @@ resolve_selector <- function(selector,
     })
   }
 
+  if (identical(selector_name, "group_lasso")) {
+    return(function(X, y) {
+      do.call(
+        grpreg_coefficients,
+        c(list(X = X, y = y, groups = selector_groups, family = family), selector_args)
+      )
+    })
+  }
+
   function(X, y) {
     do.call(
-      grpreg_coefficients,
-      c(list(X = X, y = y, groups = groups, family = family), selector_args)
+      sgl_coefficients,
+      c(list(X = X, y = y, groups = selector_groups, family = family), selector_args)
     )
   }
 }
@@ -125,7 +66,9 @@ coerce_selected <- function(value, p, tol = 1e-12) {
 #' @param x Any input accepted by `as_functional_matrix()`, or an `fda_design`
 #'   object.
 #' @param y Response vector. Leave as `NULL` when `x` is an `fda_design`.
-#' @param selector Either `"glmnet"`, `"grpreg"`, or a custom function.
+#' @param selector Either `"lasso"`, `"group_lasso"`,
+#'   `"sparse_group_lasso"`, one of the backend-specific aliases
+#'   (`"glmnet"`, `"grpreg"`, `"sgl"`), or a custom function.
 #' @param selector_fun Optional custom selector. It must accept `X`, `y`,
 #'   `groups`, and `family`, and return either a coefficient vector or a logical
 #'   selection vector of length `p`.
@@ -145,7 +88,7 @@ coerce_selected <- function(value, p, tol = 1e-12) {
 #' @export
 stability_selection_fda <- function(x,
                                     y = NULL,
-                                    selector = c("grpreg", "glmnet"),
+                                    selector = "group_lasso",
                                     selector_fun = NULL,
                                     groups = NULL,
                                     family = c("gaussian", "binomial"),
@@ -234,6 +177,7 @@ stability_selection_fda <- function(x,
     x = fda_x,
     design = input$design,
     groups = groups,
+    interval_table = attr(groups, "interval_table", exact = TRUE),
     family = family,
     B = as.integer(B),
     sample_fraction = sample_fraction,
@@ -259,14 +203,19 @@ stability_selection_fda <- function(x,
 #'   object.
 #' @param y Response vector. Leave as `NULL` when `x` is an `fda_design`.
 #' @param width Positive interval width.
-#' @param step Step size between interval starts. Only non-overlapping intervals
-#'   are supported, so `step` must equal `width`.
+#' @param step Step size between interval starts.
+#' @param overlap Logical; should the interval groups overlap?
 #' @param ... Additional arguments forwarded to `stability_selection_fda()`.
 #'
 #' @returns An object of class `fda_interval_stability_selection`.
 #' @export
-interval_stability_selection <- function(x, y = NULL, width, step = width, ...) {
-  interval_groups <- functional_interval_groups(x, width = width, step = step)
+interval_stability_selection <- function(x, y = NULL, width, step = width, overlap = FALSE, ...) {
+  interval_groups <- functional_interval_groups(
+    x = x,
+    width = width,
+    step = step,
+    overlap = overlap
+  )
   result <- stability_selection_fda(x = x, y = y, groups = interval_groups, ...)
   result$interval_table <- attr(interval_groups, "interval_table")
   class(result) <- c("fda_interval_stability_selection", class(result))
@@ -298,7 +247,7 @@ print.fda_stability_selection <- function(x, ...) {
   cat("FDA stability selection\n")
   cat("  family:", x$family, "\n")
   cat("  features:", ncol(x$x$x), "\n")
-  cat("  groups:", length(unique(x$groups)), "\n")
+  cat("  groups:", length(group_names(x$groups)), "\n")
   cat("  replicates:", x$B, "\n")
   cat("  cutoff:", x$cutoff, "\n")
   invisible(x)

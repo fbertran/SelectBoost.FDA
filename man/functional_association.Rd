@@ -7,8 +7,13 @@
 functional_association(
   x,
   association = NULL,
+  method = c("correlation", "neighborhood", "hybrid", "interval"),
   within_blocks = TRUE,
-  bandwidth = NULL
+  bandwidth = NULL,
+  interval_groups = NULL,
+  width = NULL,
+  step = width,
+  decay = 1
 )
 }
 \arguments{
@@ -17,10 +22,23 @@ functional_association(
 \item{association}{Optional square association matrix supplied by the user.
 When omitted, \code{abs(stats::cor(X))} is used.}
 
+\item{method}{Association structure. \code{"correlation"} uses the absolute
+correlation matrix, \code{"neighborhood"} uses local positional similarity,
+\code{"hybrid"} multiplies correlation by a neighborhood kernel, and
+\code{"interval"} induces associations within interval groups.}
+
 \item{within_blocks}{Should cross-block associations be zeroed out?}
 
 \item{bandwidth}{Optional maximum within-block lag retained in the
 association matrix.}
+
+\item{interval_groups}{Optional interval grouping used when
+\code{method = "interval"}.}
+
+\item{width, step}{Interval parameters used when \code{method = "interval"} and
+\code{interval_groups} is omitted.}
+
+\item{decay}{Positive exponent controlling the neighborhood kernel.}
 }
 \value{
 A square absolute association matrix with unit diagonal.

@@ -49,3 +49,26 @@ Bundles the response, functional predictors, family, and a reversible feature
 map. This is the FDA-native entry point for the higher-level fitting
 functions.
 }
+\examples{
+data("spectra_example", package = "SelectBoost.FDA")
+idx <- 1:20
+design <- fda_design(
+  response = spectra_example$response[idx],
+  predictors = list(
+    signal = fda_grid(
+      spectra_example$predictors$signal[idx, ],
+      argvals = spectra_example$grid,
+      name = "signal"
+    ),
+    nuisance = fda_grid(
+      spectra_example$predictors$nuisance[idx, ],
+      argvals = spectra_example$grid,
+      name = "nuisance"
+    )
+  ),
+  scalar_covariates = spectra_example$scalar_covariates[idx, ],
+  scalar_transform = fda_standardize(),
+  family = "gaussian"
+)
+summary(design)
+}

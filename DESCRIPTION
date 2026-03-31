@@ -1,6 +1,6 @@
 Package: SelectBoost.FDA
 Title: SelectBoost-Style Variable Selection for Functional Data Analysis
-Version: 0.2.0
+Version: 0.4.0
 Authors@R: c(
 	person(given = "Frederic", family= "Bertrand", role = c("cre", "aut"), 
 	email = "frederic.bertrand@lecnam.net", comment = c(ORCID = "0000-0002-0837-8281")))
@@ -10,10 +10,13 @@ Description: Implements SelectBoost-style variable selection workflows for
     functional data analysis. The package provides FDA-native design and
     preprocessing objects for raw curves, spline-basis expansions, FPCA
     scores, and scalar covariates; grouped stability-selection routines
-    based on repeated subject-level subsampling; FDA-aware grouping
-    functions for SelectBoost; small example datasets; and an optional
-    adapter to the native stability-selection interface from the 'FDboost'
-    package.
+    based on repeated subject-level subsampling; multiple selector
+    backends including lasso, group lasso, and sparse-group lasso;
+    FDA-aware grouping functions and calibration helpers for SelectBoost;
+    method-comparison utilities; a formula interface; simulation,
+    benchmarking, and validation helpers with mapped ground truth; small
+    example datasets; and an optional adapter to the native
+    stability-selection interface from the 'FDboost' package.
 LazyData: true
 License: GPL-3
 Encoding: UTF-8
@@ -28,8 +31,13 @@ Suggests:
     glmnet,
     grpreg,
     knitr,
+    pkgdown,
     rmarkdown,
+    SGL,
     stabs,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
+Config/Needs/website: pkgdown
+URL: https://github.com/bertran7/SelectBoost.FDA
+BugReports: https://github.com/bertran7/SelectBoost.FDA/issues

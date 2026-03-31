@@ -62,6 +62,24 @@ normalize_groups <- function(groups, p) {
     return(values)
   }
 
+  if (inherits(groups, "fda_group_list")) {
+    labels <- attr(groups, "group_labels", exact = TRUE) %||% names(groups) %||% paste0("group", seq_along(groups))
+    attr(groups, "group_labels") <- labels
+
+    for (i in seq_along(groups)) {
+      idx <- sort(unique(as.integer(groups[[i]])))
+      if (length(idx) == 0L) {
+        next
+      }
+      if (any(idx < 1L | idx > p)) {
+        stop("Group indices must be between 1 and `ncol(x)`.", call. = FALSE)
+      }
+      groups[[i]] <- idx
+    }
+
+    return(groups)
+  }
+
   if (is.list(groups)) {
     membership <- rep.int(NA_integer_, p)
     labels <- names(groups) %||% paste0("group", seq_along(groups))
@@ -74,7 +92,7 @@ normalize_groups <- function(groups, p) {
         stop("Group indices must be between 1 and `ncol(x)`.", call. = FALSE)
       }
       if (any(!is.na(membership[idx]))) {
-        stop("Overlapping groups are not supported in this interface.", call. = FALSE)
+        stop("Overlapping groups must inherit from class `fda_group_list`.", call. = FALSE)
       }
       membership[idx] <- i
     }
@@ -97,11 +115,54 @@ normalize_groups <- function(groups, p) {
 }
 
 split_groups <- function(groups) {
+  if (inherits(groups, "fda_group_list")) {
+    return(groups)
+  }
   split(seq_along(groups), groups)
 }
 
 group_names <- function(groups) {
+  if (inherits(groups, "fda_group_list")) {
+    return(attr(groups, "group_labels", exact = TRUE) %||% names(groups) %||% paste0("group", seq_along(groups)))
+  }
   attr(groups, "group_labels") %||% as.character(sort(unique(groups)))
+}
+
+groups_overlap <- function(groups) {
+  inherits(groups, "fda_group_list") && isTRUE(attr(groups, "overlap", exact = TRUE))
+}
+
+group_index_vector <- function(groups) {
+  if (inherits(groups, "fda_group_list")) {
+    if (groups_overlap(groups)) {
+      return(NULL)
+    }
+
+    p <- max(unlist(groups, use.names = FALSE))
+    membership <- rep.int(NA_integer_, p)
+    for (i in seq_along(groups)) {
+      membership[groups[[i]]] <- i
+    }
+    attr(membership, "group_labels") <- group_names(groups)
+    return(membership)
+  }
+
+  groups
+}
+
+feature_group_labels <- function(groups, p) {
+  labels <- group_names(groups)
+  if (!inherits(groups, "fda_group_list")) {
+    return(labels[groups])
+  }
+
+  members <- split_groups(groups)
+  output <- rep.int(NA_character_, p)
+  for (j in seq_len(p)) {
+    current <- labels[vapply(members, function(idx) j %in% idx, logical(1))]
+    output[j] <- if (length(current) == 0L) NA_character_ else paste(current, collapse = " | ")
+  }
+  output
 }
 
 mask_by_structure <- function(association, blocks, positions, within_blocks = TRUE, bandwidth = NULL) {
@@ -202,11 +263,14 @@ functional_block_groups <- function(x) {
 #' @param x Any input accepted by `as_functional_matrix()`.
 #' @param width Positive integer interval width within each block.
 #' @param step Step size between interval starts. Only non-overlapping intervals
-#'   are supported in this interface, so `step` must equal `width`.
+#'   are supported by default.
+#' @param overlap Logical; should intervals be allowed to overlap? When `TRUE`,
+#'   the result is returned as an overlapping group structure.
 #'
-#' @returns An integer group vector with an `interval_table` attribute.
+#' @returns Either an integer group vector with an `interval_table` attribute or
+#'   an overlapping group structure of class `fda_group_list`.
 #' @export
-functional_interval_groups <- function(x, width, step = width) {
+functional_interval_groups <- function(x, width, step = width, overlap = FALSE) {
   fda_x <- as_functional_matrix(x)
 
   if (!is.numeric(width) || length(width) != 1L || width < 1) {
@@ -218,11 +282,11 @@ functional_interval_groups <- function(x, width, step = width) {
 
   width <- as.integer(width)
   step <- as.integer(step)
-  if (step != width) {
-    stop("Only non-overlapping intervals are supported, so `step` must equal `width`.", call. = FALSE)
+  if (!isTRUE(overlap) && step != width) {
+    stop("When `overlap = FALSE`, `step` must equal `width`.", call. = FALSE)
   }
 
-  groups <- integer(ncol(fda_x$x))
+  groups <- if (isTRUE(overlap)) vector("list", 0L) else integer(ncol(fda_x$x))
   interval_table <- vector("list", 0L)
   counter <- 1L
 
@@ -231,7 +295,12 @@ functional_interval_groups <- function(x, width, step = width) {
     starts <- seq.int(1L, length(idx), by = step)
     for (start in starts) {
       end <- min(length(idx), start + width - 1L)
-      groups[idx[start:end]] <- counter
+      current_idx <- idx[start:end]
+      if (isTRUE(overlap)) {
+        groups[[counter]] <- current_idx
+      } else {
+        groups[current_idx] <- counter
+      }
       interval_table[[counter]] <- data.frame(
         group = counter,
         block = block_name,
@@ -245,6 +314,15 @@ functional_interval_groups <- function(x, width, step = width) {
   }
 
   interval_table <- do.call(rbind, interval_table)
+  if (isTRUE(overlap)) {
+    names(groups) <- interval_table$label
+    attr(groups, "group_labels") <- interval_table$label
+    attr(groups, "interval_table") <- interval_table
+    attr(groups, "overlap") <- TRUE
+    class(groups) <- c("fda_group_list", class(groups))
+    return(groups)
+  }
+
   attr(groups, "group_labels") <- interval_table$label
   attr(groups, "interval_table") <- interval_table
   names(groups) <- colnames(fda_x$x)
@@ -259,21 +337,62 @@ functional_interval_groups <- function(x, width, step = width) {
 #' @param x Any input accepted by `as_functional_matrix()`.
 #' @param association Optional square association matrix supplied by the user.
 #'   When omitted, `abs(stats::cor(X))` is used.
+#' @param method Association structure. `"correlation"` uses the absolute
+#'   correlation matrix, `"neighborhood"` uses local positional similarity,
+#'   `"hybrid"` multiplies correlation by a neighborhood kernel, and
+#'   `"interval"` induces associations within interval groups.
 #' @param within_blocks Should cross-block associations be zeroed out?
 #' @param bandwidth Optional maximum within-block lag retained in the
 #'   association matrix.
+#' @param interval_groups Optional interval grouping used when
+#'   `method = "interval"`.
+#' @param width,step Interval parameters used when `method = "interval"` and
+#'   `interval_groups` is omitted.
+#' @param decay Positive exponent controlling the neighborhood kernel.
 #'
 #' @returns A square absolute association matrix with unit diagonal.
 #' @export
 functional_association <- function(x,
                                    association = NULL,
+                                   method = c("correlation", "neighborhood", "hybrid", "interval"),
                                    within_blocks = TRUE,
-                                   bandwidth = NULL) {
+                                   bandwidth = NULL,
+                                   interval_groups = NULL,
+                                   width = NULL,
+                                   step = width,
+                                   decay = 1) {
   fda_x <- as_functional_matrix(x)
   p <- ncol(fda_x$x)
+  method <- match.arg(method)
 
   if (is.null(association)) {
-    association <- abs(stats::cor(fda_x$x))
+    if (identical(method, "correlation")) {
+      association <- abs(stats::cor(fda_x$x))
+    } else if (identical(method, "neighborhood")) {
+      distance <- abs(outer(fda_x$positions, fda_x$positions, `-`))
+      association <- 1 / (1 + distance ^ decay)
+    } else if (identical(method, "hybrid")) {
+      distance <- abs(outer(fda_x$positions, fda_x$positions, `-`))
+      neighborhood <- 1 / (1 + distance ^ decay)
+      association <- abs(stats::cor(fda_x$x)) * neighborhood
+    } else {
+      if (is.null(interval_groups)) {
+        if (is.null(width)) {
+          stop("`width` must be supplied when `method = \"interval\"` and `interval_groups` is omitted.", call. = FALSE)
+        }
+        interval_groups <- functional_interval_groups(
+          x = fda_x,
+          width = width,
+          step = step,
+          overlap = step < width
+        )
+      }
+      interval_groups <- normalize_groups(interval_groups, p = p)
+      association <- matrix(0, nrow = p, ncol = p)
+      for (member_idx in split_groups(interval_groups)) {
+        association[member_idx, member_idx] <- 1
+      }
+    }
   } else {
     association <- as.matrix(association)
     if (!identical(dim(association), c(p, p))) {
@@ -312,9 +431,13 @@ functional_association <- function(x,
 #' @param method Grouping strategy. `"threshold"` wraps
 #'   [SelectBoost::group_func_1()] and `"community"` wraps
 #'   [SelectBoost::group_func_2()].
+#' @param association_method Association structure passed to
+#'   [functional_association()].
 #' @param within_blocks Should groups be restricted to features coming from the
 #'   same functional block?
 #' @param bandwidth Optional maximum within-block lag retained in groups.
+#' @param interval_groups,width,step,decay Additional arguments passed to
+#'   [functional_association()] when using region-aware associations.
 #'
 #' @returns A function with signature `(absXcor, c0)` compatible with
 #'   `SelectBoost`.
@@ -322,18 +445,29 @@ functional_association <- function(x,
 make_functional_grouping_function <- function(x,
                                               association = NULL,
                                               method = c("threshold", "community"),
+                                              association_method = c("correlation", "neighborhood", "hybrid", "interval"),
                                               within_blocks = TRUE,
-                                              bandwidth = NULL) {
+                                              bandwidth = NULL,
+                                              interval_groups = NULL,
+                                              width = NULL,
+                                              step = width,
+                                              decay = 1) {
   fda_x <- as_functional_matrix(x)
   method <- match.arg(method)
+  association_method <- match.arg(association_method)
   fixed_association <- NULL
 
   if (!is.null(association)) {
     fixed_association <- functional_association(
       x = fda_x,
       association = association,
+      method = association_method,
       within_blocks = within_blocks,
-      bandwidth = bandwidth
+      bandwidth = bandwidth,
+      interval_groups = interval_groups,
+      width = width,
+      step = step,
+      decay = decay
     )
   }
 
@@ -343,8 +477,13 @@ make_functional_grouping_function <- function(x,
       current_association <- functional_association(
         x = fda_x,
         association = abs(absXcor),
+        method = association_method,
         within_blocks = within_blocks,
-        bandwidth = bandwidth
+        bandwidth = bandwidth,
+        interval_groups = interval_groups,
+        width = width,
+        step = step,
+        decay = decay
       )
     }
 

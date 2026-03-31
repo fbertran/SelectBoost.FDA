@@ -4,7 +4,7 @@
 \alias{functional_interval_groups}
 \title{Interval Groups for Discretized Functional Predictors}
 \usage{
-functional_interval_groups(x, width, step = width)
+functional_interval_groups(x, width, step = width, overlap = FALSE)
 }
 \arguments{
 \item{x}{Any input accepted by \code{as_functional_matrix()}.}
@@ -12,10 +12,14 @@ functional_interval_groups(x, width, step = width)
 \item{width}{Positive integer interval width within each block.}
 
 \item{step}{Step size between interval starts. Only non-overlapping intervals
-are supported in this interface, so \code{step} must equal \code{width}.}
+are supported by default.}
+
+\item{overlap}{Logical; should intervals be allowed to overlap? When \code{TRUE},
+the result is returned as an overlapping group structure.}
 }
 \value{
-An integer group vector with an \code{interval_table} attribute.
+Either an integer group vector with an \code{interval_table} attribute or
+an overlapping group structure of class \code{fda_group_list}.
 }
 \description{
 Creates non-overlapping interval groups within each functional block. This is

@@ -344,6 +344,28 @@ print.fda_basis <- function(x, ...) {
 #'   reused instead of fitting preprocessing from the current data.
 #'
 #' @returns An object of class `fda_design`.
+#' @examples
+#' data("spectra_example", package = "SelectBoost.FDA")
+#' idx <- 1:20
+#' design <- fda_design(
+#'   response = spectra_example$response[idx],
+#'   predictors = list(
+#'     signal = fda_grid(
+#'       spectra_example$predictors$signal[idx, ],
+#'       argvals = spectra_example$grid,
+#'       name = "signal"
+#'     ),
+#'     nuisance = fda_grid(
+#'       spectra_example$predictors$nuisance[idx, ],
+#'       argvals = spectra_example$grid,
+#'       name = "nuisance"
+#'     )
+#'   ),
+#'   scalar_covariates = spectra_example$scalar_covariates[idx, ],
+#'   scalar_transform = fda_standardize(),
+#'   family = "gaussian"
+#' )
+#' summary(design)
 #' @export
 fda_design <- function(response = NULL,
                        predictors,
@@ -468,6 +490,18 @@ print.summary.fda_design <- function(x, ...) {
 #' @param ... Additional arguments forwarded to `stability_selection_fda()`.
 #'
 #' @returns An object inheriting from `fda_stability_selection`.
+#' @examples
+#' sim <- simulate_fda_scenario(n = 24, grid_length = 16, seed = 1)
+#' if (requireNamespace("glmnet", quietly = TRUE)) {
+#'   fit <- fit_stability(
+#'     sim$design,
+#'     selector = "lasso",
+#'     B = 4,
+#'     cutoff = 0.4,
+#'     seed = 1
+#'   )
+#'   head(selection_map(fit))
+#' }
 #' @export
 fit_stability <- function(design, ...) {
   if (!inherits(design, "fda_design")) {
@@ -486,6 +520,16 @@ fit_stability <- function(design, ...) {
 #' @param ... Additional arguments forwarded to `selectboost_fda()`.
 #'
 #' @returns An object inheriting from `selectboost_fda_result`.
+#' @examples
+#' sim <- simulate_fda_scenario(n = 24, grid_length = 16, seed = 1)
+#' fit <- fit_selectboost(
+#'   sim$design,
+#'   mode = "fast",
+#'   steps.seq = 0.5,
+#'   c0lim = FALSE,
+#'   B = 3
+#' )
+#' head(selection_map(fit, c0 = colnames(fit$feature_selection)[1]))
 #' @export
 fit_selectboost <- function(design, ...) {
   if (!inherits(design, "fda_design")) {
@@ -528,6 +572,12 @@ attach_group_metadata <- function(map,
     return(map)
   }
 
+  if (inherits(groups, "fda_group_list")) {
+    memberships <- feature_group_labels(groups, max(map$feature_index))
+    map$group <- memberships[map$feature_index]
+    return(map)
+  }
+
   map$group_id <- unname(groups[map$feature_index])
   map$group <- group_names(groups)[map$group_id]
 
@@ -549,6 +599,89 @@ attach_group_metadata <- function(map,
   }
 
   map
+}
+
+summarise_group_map <- function(map,
+                                groups,
+                                group_frequency = NULL,
+                                cutoff = NULL,
+                                selected_groups = NULL,
+                                interval_table = NULL) {
+  members <- split_groups(groups)
+  labels <- group_names(groups)
+  c0_values <- if ("c0" %in% names(map)) unique(map$c0) else NA_character_
+  output <- vector("list", 0L)
+  counter <- 1L
+
+  for (c0_value in c0_values) {
+    current_map <- if (is.na(c0_value)) {
+      map
+    } else {
+      map[map$c0 == c0_value, , drop = FALSE]
+    }
+
+    for (i in seq_along(members)) {
+      rows <- current_map[current_map$feature_index %in% members[[i]], , drop = FALSE]
+      if (nrow(rows) == 0L) {
+        next
+      }
+      rows <- rows[order(rows$position), , drop = FALSE]
+
+      out <- data.frame(
+        predictor = paste(unique(rows$predictor), collapse = ", "),
+        group_id = i,
+        group = labels[i],
+        representation = paste(unique(rows$representation), collapse = ", "),
+        basis_type = paste(unique(stats::na.omit(rows$basis_type)), collapse = ", "),
+        source_representation = paste(unique(rows$source_representation), collapse = ", "),
+        n_features = nrow(rows),
+        start_position = min(rows$position),
+        end_position = max(rows$position),
+        start_argval = rows$argval[1],
+        end_argval = rows$argval[nrow(rows)],
+        domain_start = rows$domain_start[1],
+        domain_end = rows$domain_end[nrow(rows)],
+        stringsAsFactors = FALSE
+      )
+
+      if (!is.na(c0_value)) {
+        out$c0 <- c0_value
+      }
+      if ("feature_frequency" %in% names(rows)) {
+        out$mean_feature_frequency <- mean(rows$feature_frequency)
+        out$max_feature_frequency <- max(rows$feature_frequency)
+      }
+      if ("selected" %in% names(rows)) {
+        out$selected_features <- sum(rows$selected)
+      }
+      if (!is.null(group_frequency)) {
+        out$group_frequency <- unname(group_frequency[labels[i]])
+      }
+      if (!is.null(cutoff) && !is.null(group_frequency)) {
+        out$group_selected <- out$group_frequency >= cutoff
+      } else if (!is.null(selected_groups)) {
+        out$group_selected <- labels[i] %in% selected_groups
+      }
+      if ("selection" %in% names(rows)) {
+        out$mean_selection <- mean(rows$selection)
+        out$max_selection <- max(rows$selection)
+        out$selected_features <- sum(rows$selection > 0)
+      }
+      if (!is.null(interval_table)) {
+        idx <- match(labels[i], interval_table$label)
+        if (!is.na(idx)) {
+          out$interval_start <- interval_table$start[idx]
+          out$interval_end <- interval_table$end[idx]
+          out$interval_label <- interval_table$label[idx]
+        }
+      }
+
+      output[[counter]] <- out
+      counter <- counter + 1L
+    }
+  }
+
+  do.call(rbind, output)
 }
 
 summarise_selection_map <- function(map, level = c("feature", "group", "basis")) {
@@ -701,9 +834,20 @@ selection_map.fda_stability_selection <- function(x,
                                                   level = c("feature", "group", "basis"),
                                                   cutoff = x$cutoff,
                                                   ...) {
+  level <- match.arg(level)
   map <- decorate_selection_feature_map(x$x$feature_map)
   map$feature_frequency <- unname(x$feature_frequency[map$feature])
   map$selected <- map$feature_frequency >= cutoff
+  if (identical(level, "group")) {
+    return(summarise_group_map(
+      map = map,
+      groups = x$groups,
+      group_frequency = x$group_frequency,
+      cutoff = cutoff,
+      selected_groups = x$selected_groups,
+      interval_table = x$interval_table %||% NULL
+    ))
+  }
   map <- attach_group_metadata(
     map = map,
     groups = x$groups,
@@ -712,7 +856,7 @@ selection_map.fda_stability_selection <- function(x,
     interval_table = x$interval_table %||% NULL,
     selected_groups = x$selected_groups
   )
-  summarise_selection_map(map, level = match.arg(level))
+  summarise_selection_map(map, level = level)
 }
 
 #' @export
@@ -720,6 +864,7 @@ selection_map.selectboost_fda_result <- function(x,
                                                  level = c("feature", "group", "basis"),
                                                  c0 = NULL,
                                                  ...) {
+  level <- match.arg(level)
   feature_map <- decorate_selection_feature_map(x$x$feature_map)
   selection <- x$feature_selection
 
@@ -729,22 +874,36 @@ selection_map.selectboost_fda_result <- function(x,
     }
     feature_map$selection <- selection[, c0]
     feature_map$c0 <- c0
+    if (identical(level, "group")) {
+      return(summarise_group_map(
+        map = feature_map,
+        groups = x$groups,
+        interval_table = attr(x$groups, "interval_table", exact = TRUE)
+      ))
+    }
     feature_map <- attach_group_metadata(map = feature_map, groups = x$groups)
-    return(summarise_selection_map(feature_map, level = match.arg(level)))
+    return(summarise_selection_map(feature_map, level = level))
   }
 
   output <- feature_map[rep(seq_len(nrow(feature_map)), times = ncol(selection)), , drop = FALSE]
   output$c0 <- rep(colnames(selection), each = nrow(feature_map))
   output$selection <- as.vector(selection)
+  if (identical(level, "group")) {
+    return(summarise_group_map(
+      map = output,
+      groups = x$groups,
+      interval_table = attr(x$groups, "interval_table", exact = TRUE)
+    ))
+  }
   output <- attach_group_metadata(map = output, groups = x$groups)
-  summarise_selection_map(output, level = match.arg(level))
+  summarise_selection_map(output, level = level)
 }
 
 selection_fit_metadata <- function(object) {
   list(
     family = object$family,
     n_features = ncol(object$x$x),
-    n_groups = length(unique(object$groups)),
+    n_groups = length(group_names(object$groups)),
     n_predictors = length(unique(object$x$feature_map$predictor))
   )
 }

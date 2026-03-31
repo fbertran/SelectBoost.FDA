@@ -8,8 +8,13 @@ make_functional_grouping_function(
   x,
   association = NULL,
   method = c("threshold", "community"),
+  association_method = c("correlation", "neighborhood", "hybrid", "interval"),
   within_blocks = TRUE,
-  bandwidth = NULL
+  bandwidth = NULL,
+  interval_groups = NULL,
+  width = NULL,
+  step = width,
+  decay = 1
 )
 }
 \arguments{
@@ -23,10 +28,16 @@ FDA-specific masks.}
 \code{\link[SelectBoost:group_func_1]{SelectBoost::group_func_1()}} and \code{"community"} wraps
 \code{\link[SelectBoost:group_func_2]{SelectBoost::group_func_2()}}.}
 
+\item{association_method}{Association structure passed to
+\code{\link[=functional_association]{functional_association()}}.}
+
 \item{within_blocks}{Should groups be restricted to features coming from the
 same functional block?}
 
 \item{bandwidth}{Optional maximum within-block lag retained in groups.}
+
+\item{interval_groups, width, step, decay}{Additional arguments passed to
+\code{\link[=functional_association]{functional_association()}} when using region-aware associations.}
 }
 \value{
 A function with signature \verb{(absXcor, c0)} compatible with
