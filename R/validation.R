@@ -15,6 +15,21 @@ resolve_plain_grouping_function <- function(association = NULL,
   }
 }
 
+benchmark_setting_columns <- function(names) {
+  intersect(
+    c(
+      "association_method",
+      "bandwidth",
+      "group_method",
+      "within_blocks",
+      "confounding_strength",
+      "active_region_scale",
+      "local_correlation"
+    ),
+    names
+  )
+}
+
 metric_row <- function(predicted, active, universe, level) {
   universe <- unique(as.character(universe))
 
@@ -148,7 +163,14 @@ summarise_simulation_metrics <- function(metrics) {
     return(data.frame())
   }
 
-  by_cols <- intersect(c("method", "level", "c0", "width"), names(metrics))
+  by_cols <- intersect(
+    c(
+      "scenario", "representation", "family",
+      benchmark_setting_columns(names(metrics)),
+      "method", "level", "c0", "width"
+    ),
+    names(metrics)
+  )
   numeric_cols <- intersect(c(
     "n_truth", "n_selected", "tp", "fp", "fn", "tn",
     "precision", "recall", "specificity", "f1", "jaccard", "selection_rate"
@@ -172,6 +194,231 @@ summarise_simulation_metrics <- function(metrics) {
 
     out
   }))
+}
+
+benchmark_metrics_from_object <- function(x) {
+  if (inherits(x, c("fda_benchmark", "fda_simulation_study"))) {
+    return(x$metrics)
+  }
+
+  stop("`x` must inherit from class `fda_benchmark` or `fda_simulation_study`.", call. = FALSE)
+}
+
+best_metric_rows <- function(metrics,
+                             level = c("feature", "group", "basis"),
+                             metric = "f1",
+                             optimize = c("max", "min"),
+                             select_c0 = c("best", "all")) {
+  level <- match.arg(level)
+  optimize <- match.arg(optimize)
+  select_c0 <- match.arg(select_c0)
+
+  if (!metric %in% names(metrics)) {
+    stop(sprintf("Metric `%s` was not found in the benchmark table.", metric), call. = FALSE)
+  }
+
+  metrics <- metrics[metrics$level == level, , drop = FALSE]
+  if (nrow(metrics) == 0L || identical(select_c0, "all") || !"c0" %in% names(metrics)) {
+    return(metrics)
+  }
+
+  split_cols <- intersect(
+    c(
+      "scenario", "representation", "family",
+      benchmark_setting_columns(names(metrics)),
+      "replicate", "method", "level", "width"
+    ),
+    names(metrics)
+  )
+  if (length(split_cols) == 0L) {
+    split_cols <- c("method", "level")
+  }
+
+  split_keys <- interaction(metrics[split_cols], drop = TRUE, lex.order = TRUE)
+  do.call(rbind, lapply(split(seq_len(nrow(metrics)), split_keys), function(idx) {
+    part <- metrics[idx, , drop = FALSE]
+    values <- part[[metric]]
+    values[is.na(values)] <- if (identical(optimize, "max")) -Inf else Inf
+    keep <- if (identical(optimize, "max")) which.max(values) else which.min(values)
+    part[keep, , drop = FALSE]
+  }))
+}
+
+aggregate_benchmark_rows <- function(metrics) {
+  if (nrow(metrics) == 0L) {
+    return(metrics)
+  }
+
+  by_cols <- intersect(
+    c(
+      "scenario", "representation", "family",
+      benchmark_setting_columns(names(metrics)),
+      "method", "level", "width"
+    ),
+    names(metrics)
+  )
+  numeric_cols <- intersect(c(
+    "n_truth", "n_selected", "tp", "fp", "fn", "tn",
+    "precision", "recall", "specificity", "f1", "jaccard", "selection_rate"
+  ), names(metrics))
+
+  split_keys <- interaction(metrics[by_cols], drop = TRUE, lex.order = TRUE)
+  do.call(rbind, lapply(split(seq_len(nrow(metrics)), split_keys), function(idx) {
+    part <- metrics[idx, , drop = FALSE]
+    out <- part[1, by_cols, drop = FALSE]
+    out$n_rep <- length(unique(part$replicate %||% seq_len(nrow(part))))
+
+    for (name in numeric_cols) {
+      out[[paste0(name, "_mean")]] <- mean(part[[name]], na.rm = TRUE)
+      out[[paste0(name, "_sd")]] <- if (nrow(part) > 1L) stats::sd(part[[name]], na.rm = TRUE) else 0
+    }
+
+    out
+  }))
+}
+
+advantage_rows <- function(metrics,
+                           target = "selectboost",
+                           reference = c("plain_selectboost", "stability"),
+                           metric = "f1") {
+  if (!metric %in% names(metrics)) {
+    stop(sprintf("Metric `%s` was not found in the benchmark table.", metric), call. = FALSE)
+  }
+
+  split_cols <- intersect(
+    c(
+      "scenario", "representation", "family",
+      benchmark_setting_columns(names(metrics)),
+      "replicate", "level", "width"
+    ),
+    names(metrics)
+  )
+  split_keys <- interaction(metrics[split_cols], drop = TRUE, lex.order = TRUE)
+  rows <- vector("list", 0L)
+  counter <- 1L
+
+  for (idx in split(seq_len(nrow(metrics)), split_keys)) {
+    part <- metrics[idx, , drop = FALSE]
+    target_rows <- part[part$method == target, , drop = FALSE]
+    if (nrow(target_rows) == 0L) {
+      next
+    }
+
+    target_value <- target_rows[[metric]][1]
+    for (ref in reference) {
+      ref_rows <- part[part$method == ref, , drop = FALSE]
+      if (nrow(ref_rows) == 0L) {
+        next
+      }
+
+      out <- target_rows[1, split_cols, drop = FALSE]
+      out$target <- target
+      out$reference <- ref
+      out$metric <- metric
+      out$target_value <- target_value
+      out$reference_value <- ref_rows[[metric]][1]
+      out$delta <- out$target_value - out$reference_value
+      out$target_wins <- out$delta > 0
+      rows[[counter]] <- out
+      counter <- counter + 1L
+    }
+  }
+
+  rbind_fill_data_frames(rows)
+}
+
+aggregate_advantage_rows <- function(rows) {
+  if (nrow(rows) == 0L) {
+    return(rows)
+  }
+
+  by_cols <- intersect(
+    c(
+      "scenario", "representation", "family",
+      benchmark_setting_columns(names(rows)),
+      "level", "target", "reference", "metric", "width"
+    ),
+    names(rows)
+  )
+  split_keys <- interaction(rows[by_cols], drop = TRUE, lex.order = TRUE)
+  do.call(rbind, lapply(split(seq_len(nrow(rows)), split_keys), function(idx) {
+    part <- rows[idx, , drop = FALSE]
+    out <- part[1, by_cols, drop = FALSE]
+    out$n_rep <- length(unique(part$replicate %||% seq_len(nrow(part))))
+    out$target_value_mean <- mean(part$target_value, na.rm = TRUE)
+    out$reference_value_mean <- mean(part$reference_value, na.rm = TRUE)
+    out$delta_mean <- mean(part$delta, na.rm = TRUE)
+    out$delta_sd <- if (nrow(part) > 1L) stats::sd(part$delta, na.rm = TRUE) else 0
+    out$win_rate <- mean(part$target_wins, na.rm = TRUE)
+    out
+  }))
+}
+
+smooth_curve_matrix <- function(values, local_correlation = 0) {
+  if (!is.numeric(local_correlation) || length(local_correlation) != 1L || is.na(local_correlation) || local_correlation < 0) {
+    stop("`local_correlation` must be a single non-negative number.", call. = FALSE)
+  }
+
+  if (local_correlation <= 0) {
+    return(values)
+  }
+
+  positions <- seq_len(ncol(values))
+  weights <- outer(positions, positions, function(i, j) {
+    exp(-0.5 * ((i - j) / local_correlation) ^ 2)
+  })
+  weights <- sweep(weights, 2L, colSums(weights), "/")
+  values %*% weights
+}
+
+rescale_region_bounds <- function(region_bounds, active_region_scale, grid_length) {
+  if (!is.numeric(active_region_scale) || length(active_region_scale) != 1L || is.na(active_region_scale) || active_region_scale <= 0) {
+    stop("`active_region_scale` must be a single positive number.", call. = FALSE)
+  }
+
+  widths <- pmax(2L, round((region_bounds[, 2] - region_bounds[, 1] + 1L) * active_region_scale))
+  centers <- round(rowMeans(region_bounds))
+  starts <- pmax(1L, centers - floor((widths - 1L) / 2L))
+  ends <- pmin(grid_length, starts + widths - 1L)
+  starts <- pmax(1L, ends - widths + 1L)
+  cbind(starts, ends)
+}
+
+grid_row_as_list <- function(grid, i, na_to_null = FALSE) {
+  row <- lapply(grid[i, , drop = FALSE], function(value) {
+    if (is.factor(value)) {
+      value <- as.character(value)
+    }
+    if (isTRUE(na_to_null) && length(value) == 1L && is.atomic(value) && is.na(value)) {
+      return(NULL)
+    }
+    value
+  })
+
+  if (isTRUE(na_to_null)) {
+    row <- row[!vapply(row, is.null, logical(1))]
+  }
+
+  row
+}
+
+append_parameter_columns <- function(data, params) {
+  if (nrow(data) == 0L || length(params) == 0L) {
+    return(data)
+  }
+
+  for (name in names(params)) {
+    value <- params[[name]]
+    if (is.null(value) || length(value) != 1L) {
+      next
+    }
+    if (is.factor(value)) {
+      value <- as.character(value)
+    }
+    data[[name]] <- rep(value, nrow(data))
+  }
+
+  data
 }
 
 build_truth_from_design <- function(design,
@@ -360,6 +607,17 @@ print.summary.plain_selectboost_result <- function(x, ...) {
 #' @param basis_df Degrees of freedom used when `representation = "basis"`.
 #' @param n_components Number of FPCA components used when
 #'   `representation = "fpca"`.
+#' @param scenario Benchmark scenario. `"localized_dense"` emphasizes narrow
+#'   active regions under strong local correlation, `"distributed_smooth"`
+#'   spreads the effect over broader smooth regions, and `"confounded_blocks"`
+#'   adds stronger nuisance structure near the active block.
+#' @param confounding_strength Strength of cross-block confounding injected into
+#'   the nuisance curve. Higher values make plain `SelectBoost` less able to
+#'   separate true local signals from correlated nuisance structure.
+#' @param active_region_scale Positive multiplier applied to the width of the
+#'   active regions. Values below `1` create narrower active regions.
+#' @param local_correlation Non-negative smoothing parameter applied to the
+#'   simulated curves. Larger values increase local correlation along the grid.
 #' @param include_scalar Should scalar covariates be included in the design and
 #'   truth object?
 #' @param noise_sd Observation noise level.
@@ -378,6 +636,10 @@ simulate_fda_scenario <- function(n = 80L,
                                   transforms = NULL,
                                   basis_df = 7L,
                                   n_components = 5L,
+                                  scenario = c("localized_dense", "distributed_smooth", "confounded_blocks"),
+                                  confounding_strength = NULL,
+                                  active_region_scale = 1,
+                                  local_correlation = 0,
                                   include_scalar = TRUE,
                                   noise_sd = 0.4,
                                   seed = NULL) {
@@ -387,32 +649,75 @@ simulate_fda_scenario <- function(n = 80L,
 
   family <- match.arg(family)
   representation <- match.arg(representation)
+  scenario <- match.arg(scenario)
   n <- as.integer(n)
   grid_length <- as.integer(grid_length)
   basis_df <- as.integer(basis_df)
   n_components <- as.integer(n_components)
+  if (is.null(confounding_strength)) {
+    confounding_strength <- if (identical(scenario, "confounded_blocks")) 0.7 else 0
+  }
 
   grid <- seq(0, 1, length.out = grid_length)
   latent_signal_1 <- stats::rnorm(n)
   latent_signal_2 <- stats::rnorm(n)
   latent_nuisance <- stats::rnorm(n)
-  signal_shape_1 <- exp(-((grid - 0.25) / 0.08) ^ 2)
-  signal_shape_2 <- sin(2 * pi * grid) * exp(-((grid - 0.65) / 0.18) ^ 2)
-  nuisance_shape_1 <- cos(pi * grid)
-  nuisance_shape_2 <- exp(-((grid - 0.78) / 0.09) ^ 2)
+  if (identical(scenario, "localized_dense")) {
+    signal_shape_1 <- exp(-((grid - 0.25) / 0.08) ^ 2)
+    signal_shape_2 <- sin(2 * pi * grid) * exp(-((grid - 0.65) / 0.18) ^ 2)
+    nuisance_shape_1 <- cos(pi * grid)
+    nuisance_shape_2 <- exp(-((grid - 0.78) / 0.09) ^ 2)
+    signal_noise_sd <- 0.10
+    nuisance_noise_sd <- 0.12
+    region_bounds <- rbind(
+      c(max(1L, floor(0.15 * grid_length)), max(2L, floor(0.28 * grid_length))),
+      c(max(1L, floor(0.52 * grid_length)), max(2L, floor(0.68 * grid_length)))
+    )
+    region_bounds <- rescale_region_bounds(region_bounds, active_region_scale = active_region_scale, grid_length = grid_length)
+    region_weights <- c(1.6, -1.25)
+    nuisance <- confounding_strength * outer(latent_signal_1, nuisance_shape_2) +
+      outer(latent_nuisance, nuisance_shape_1) +
+      outer(stats::rnorm(n), nuisance_shape_2)
+  } else if (identical(scenario, "distributed_smooth")) {
+    signal_shape_1 <- sin(pi * grid)
+    signal_shape_2 <- cos(2 * pi * grid)
+    nuisance_shape_1 <- sin(3 * pi * grid)
+    nuisance_shape_2 <- cos(pi * grid)
+    signal_noise_sd <- 0.12
+    nuisance_noise_sd <- 0.14
+    region_bounds <- rbind(
+      c(max(1L, floor(0.10 * grid_length)), max(2L, floor(0.42 * grid_length))),
+      c(max(1L, floor(0.58 * grid_length)), max(2L, floor(0.92 * grid_length)))
+    )
+    region_bounds <- rescale_region_bounds(region_bounds, active_region_scale = active_region_scale, grid_length = grid_length)
+    region_weights <- c(1.0, -0.9)
+    nuisance <- confounding_strength * outer(latent_signal_1, nuisance_shape_2) +
+      outer(latent_nuisance, nuisance_shape_1) +
+      outer(stats::rnorm(n), nuisance_shape_2)
+  } else {
+    signal_shape_1 <- exp(-((grid - 0.22) / 0.07) ^ 2)
+    signal_shape_2 <- exp(-((grid - 0.62) / 0.10) ^ 2)
+    nuisance_shape_1 <- exp(-((grid - 0.28) / 0.08) ^ 2)
+    nuisance_shape_2 <- cos(2 * pi * grid)
+    signal_noise_sd <- 0.10
+    nuisance_noise_sd <- 0.12
+    region_bounds <- rbind(
+      c(max(1L, floor(0.16 * grid_length)), max(2L, floor(0.26 * grid_length))),
+      c(max(1L, floor(0.56 * grid_length)), max(2L, floor(0.70 * grid_length)))
+    )
+    region_bounds <- rescale_region_bounds(region_bounds, active_region_scale = active_region_scale, grid_length = grid_length)
+    region_weights <- c(1.5, -1.1)
+    nuisance <- confounding_strength * outer(latent_signal_1, nuisance_shape_1) +
+      outer(latent_nuisance, nuisance_shape_2)
+  }
 
   signal <- outer(latent_signal_1, signal_shape_1) +
     outer(latent_signal_2, signal_shape_2) +
-    matrix(stats::rnorm(n * grid_length, sd = 0.12), nrow = n)
-  nuisance <- outer(latent_nuisance, nuisance_shape_1) +
-    outer(stats::rnorm(n), nuisance_shape_2) +
-    matrix(stats::rnorm(n * grid_length, sd = 0.14), nrow = n)
+    matrix(stats::rnorm(n * grid_length, sd = signal_noise_sd), nrow = n)
+  nuisance <- nuisance + matrix(stats::rnorm(n * grid_length, sd = nuisance_noise_sd), nrow = n)
+  signal <- smooth_curve_matrix(signal, local_correlation = local_correlation)
+  nuisance <- smooth_curve_matrix(nuisance, local_correlation = local_correlation)
 
-  region_bounds <- rbind(
-    c(max(1L, floor(0.15 * grid_length)), max(2L, floor(0.28 * grid_length))),
-    c(max(1L, floor(0.52 * grid_length)), max(2L, floor(0.68 * grid_length)))
-  )
-  region_weights <- c(1.6, -1.25)
   region_effects <- vapply(seq_len(nrow(region_bounds)), function(i) {
     idx <- seq.int(region_bounds[i, 1], region_bounds[i, 2])
     rowMeans(signal[, idx, drop = FALSE]) * region_weights[i]
@@ -493,7 +798,13 @@ simulate_fda_scenario <- function(n = 80L,
     scalar_covariates = scalar_covariates,
     design = design,
     truth = truth,
-    linear_predictor = linear_predictor
+    linear_predictor = linear_predictor,
+    scenario = scenario,
+    confounding_strength = confounding_strength,
+    active_region_scale = active_region_scale,
+    local_correlation = local_correlation,
+    representation = representation,
+    family = family
   )
   class(output) <- "fda_simulation_data"
   output
@@ -505,6 +816,10 @@ print.fda_simulation_data <- function(x, ...) {
   cat("  observations:", nrow(x$design$matrix$x), "\n")
   cat("  features:", ncol(x$design$matrix$x), "\n")
   cat("  active features:", length(x$truth$active_features), "\n")
+  cat("  scenario:", x$scenario, "\n")
+  cat("  confounding strength:", x$confounding_strength, "\n")
+  cat("  active region scale:", x$active_region_scale, "\n")
+  cat("  local correlation:", x$local_correlation, "\n")
   cat("  active predictors:", paste(x$truth$active_predictors, collapse = ", "), "\n")
   invisible(x)
 }
@@ -651,6 +966,9 @@ benchmark_selection_methods <- function(data,
   metrics <- rbind_fill_data_frames(lapply(levels, function(level) {
     out <- evaluate_selection(comparison, truth = data, level = level)
     out$level <- level
+    out$scenario <- data$scenario
+    out$representation <- data$representation
+    out$family <- data$family
     out
   }))
 
@@ -670,6 +988,78 @@ print.fda_benchmark <- function(x, ...) {
   cat("  methods:", paste(unique(x$metrics$method), collapse = ", "), "\n")
   cat("  rows:", nrow(x$metrics), "\n")
   invisible(x)
+}
+
+#' Summarize Benchmark Performance by Method
+#'
+#' Collapses raw benchmark rows into method-level performance summaries, with an
+#' option to retain only the best `c0` per method and replication.
+#'
+#' @param x An `fda_benchmark` or `fda_simulation_study` object.
+#' @param level Evaluation level.
+#' @param metric Metric used to pick the best `c0` when `select_c0 = "best"`.
+#' @param optimize Should larger or smaller values of `metric` be preferred?
+#' @param select_c0 Keep all `c0` rows or only the best one per method and
+#'   replicate.
+#'
+#' @returns A data frame.
+#' @export
+summarise_benchmark_performance <- function(x,
+                                            level = c("feature", "group", "basis"),
+                                            metric = "f1",
+                                            optimize = c("max", "min"),
+                                            select_c0 = c("best", "all")) {
+  metrics <- benchmark_metrics_from_object(x)
+  rows <- best_metric_rows(
+    metrics = metrics,
+    level = match.arg(level),
+    metric = metric,
+    optimize = match.arg(optimize),
+    select_c0 = match.arg(select_c0)
+  )
+  aggregate_benchmark_rows(rows)
+}
+
+#' Summarize the Advantage of FDA-SelectBoost Over Baselines
+#'
+#' Computes the per-scenario and per-level gain of a target method over one or
+#' more reference methods. This is intended to make the benchmark story explicit
+#' when comparing FDA-aware `SelectBoost` to existing baselines.
+#'
+#' @param x An `fda_benchmark` or `fda_simulation_study` object.
+#' @param target Method whose gain should be assessed.
+#' @param reference One or more baseline methods.
+#' @param level Evaluation level.
+#' @param metric Metric used both for best-`c0` selection and for the reported
+#'   gains.
+#' @param optimize Should larger or smaller values of `metric` be preferred?
+#' @param select_c0 Keep all `c0` rows or only the best one per method and
+#'   replicate.
+#'
+#' @returns A data frame.
+#' @export
+summarise_benchmark_advantage <- function(x,
+                                          target = "selectboost",
+                                          reference = c("plain_selectboost", "stability"),
+                                          level = c("feature", "group", "basis"),
+                                          metric = "f1",
+                                          optimize = c("max", "min"),
+                                          select_c0 = c("best", "all")) {
+  metrics <- benchmark_metrics_from_object(x)
+  rows <- best_metric_rows(
+    metrics = metrics,
+    level = match.arg(level),
+    metric = metric,
+    optimize = match.arg(optimize),
+    select_c0 = match.arg(select_c0)
+  )
+  advantage <- advantage_rows(
+    metrics = rows,
+    target = target,
+    reference = reference,
+    metric = metric
+  )
+  aggregate_advantage_rows(advantage)
 }
 
 #' @export
@@ -757,6 +1147,168 @@ run_simulation_study <- function(n_rep = 10L,
       results = benchmark_results
     ),
     class = "fda_simulation_study"
+  )
+}
+
+#' Run a Targeted Sensitivity Study for FDA-SelectBoost
+#'
+#' Repeats the FDA benchmark over a grid of simulation settings and a grid of
+#' FDA-aware `SelectBoost` settings. This is intended to answer the specific
+#' benchmark question of when `selectboost_fda()` improves on plain
+#' `SelectBoost`.
+#'
+#' @param n_rep Number of replications per setting combination.
+#' @param simulate_grid Data frame of simulation-setting combinations. Columns
+#'   are merged into `simulate_args` and can include `scenario`,
+#'   `confounding_strength`, `active_region_scale`, and `local_correlation`.
+#' @param selectboost_grid Data frame of `selectboost_fda()` setting
+#'   combinations. Columns are merged into `benchmark_args$selectboost_args`
+#'   and can include `association_method`, `bandwidth`, `width`, or `step`.
+#' @param simulate_args Named list forwarded to `simulate_fda_scenario()`.
+#' @param benchmark_args Named list forwarded to `benchmark_selection_methods()`.
+#'   When omitted, the study compares FDA-aware `SelectBoost`, plain
+#'   `SelectBoost`, and grouped stability selection.
+#' @param seed Optional seed used to derive deterministic per-replication and
+#'   per-setting seeds.
+#' @param keep_results Should the individual benchmark objects be returned?
+#'
+#' @returns An object inheriting from `fda_selectboost_sensitivity_study` and
+#'   `fda_simulation_study`.
+#' @examples
+#' grid <- data.frame(
+#'   scenario = "confounded_blocks",
+#'   confounding_strength = 0.9,
+#'   active_region_scale = 0.7,
+#'   local_correlation = 2,
+#'   stringsAsFactors = FALSE
+#' )
+#' methods <- data.frame(
+#'   association_method = c("correlation", "hybrid"),
+#'   bandwidth = c(NA, 4),
+#'   stringsAsFactors = FALSE
+#' )
+#' study <- run_selectboost_sensitivity_study(
+#'   n_rep = 1,
+#'   simulate_grid = grid,
+#'   selectboost_grid = methods,
+#'   simulate_args = list(n = 24, grid_length = 16),
+#'   benchmark_args = list(
+#'     methods = c("selectboost", "plain_selectboost"),
+#'     levels = "feature",
+#'     selectboost_args = list(B = 3, steps.seq = 0.5, c0lim = FALSE),
+#'     plain_selectboost_args = list(B = 3, steps.seq = 0.5, c0lim = FALSE)
+#'   ),
+#'   seed = 1
+#' )
+#' summarise_benchmark_advantage(
+#'   study,
+#'   target = "selectboost",
+#'   reference = "plain_selectboost",
+#'   level = "feature"
+#' )
+#' @export
+run_selectboost_sensitivity_study <- function(n_rep = 10L,
+                                              simulate_grid = expand.grid(
+                                                scenario = c("localized_dense", "confounded_blocks"),
+                                                confounding_strength = c(0.4, 0.9),
+                                                active_region_scale = c(1, 0.7),
+                                                local_correlation = c(0, 2),
+                                                stringsAsFactors = FALSE
+                                              ),
+                                              selectboost_grid = expand.grid(
+                                                association_method = c("correlation", "neighborhood", "hybrid", "interval"),
+                                                bandwidth = c(NA, 4, 8),
+                                                stringsAsFactors = FALSE
+                                              ),
+                                              simulate_args = list(),
+                                              benchmark_args = list(),
+                                              seed = NULL,
+                                              keep_results = FALSE) {
+  n_rep <- as.integer(n_rep)
+  if (n_rep < 1L) {
+    stop("`n_rep` must be a positive integer.", call. = FALSE)
+  }
+  if (!is.data.frame(simulate_grid) || nrow(simulate_grid) == 0L) {
+    stop("`simulate_grid` must be a non-empty data frame.", call. = FALSE)
+  }
+  if (!is.data.frame(selectboost_grid) || nrow(selectboost_grid) == 0L) {
+    stop("`selectboost_grid` must be a non-empty data frame.", call. = FALSE)
+  }
+
+  benchmark_args <- benchmark_args %||% list()
+  if (is.null(benchmark_args$methods)) {
+    benchmark_args$methods <- c("stability", "selectboost", "plain_selectboost")
+  }
+
+  total_runs <- n_rep * nrow(simulate_grid) * nrow(selectboost_grid)
+  benchmark_results <- if (isTRUE(keep_results)) vector("list", total_runs) else NULL
+  metric_rows <- vector("list", total_runs)
+  counter <- 1L
+
+  for (replicate in seq_len(n_rep)) {
+    replicate_seed <- next_seed(seed, replicate)
+
+    for (i in seq_len(nrow(simulate_grid))) {
+      simulate_args_current <- utils::modifyList(
+        simulate_args,
+        grid_row_as_list(simulate_grid, i, na_to_null = TRUE)
+      )
+      simulate_args_current$seed <- next_seed(replicate_seed, i)
+      sim <- do.call(simulate_fda_scenario, simulate_args_current)
+      simulate_labels <- grid_row_as_list(simulate_grid, i, na_to_null = FALSE)
+
+      for (j in seq_len(nrow(selectboost_grid))) {
+        selectboost_labels <- grid_row_as_list(selectboost_grid, j, na_to_null = FALSE)
+        selectboost_args_current <- utils::modifyList(
+          benchmark_args$selectboost_args %||% list(),
+          grid_row_as_list(selectboost_grid, j, na_to_null = TRUE)
+        )
+
+        if (identical(selectboost_args_current$association_method, "interval") &&
+            is.null(selectboost_args_current$width)) {
+          selectboost_args_current$width <- default_interval_width(sim$design)
+          if (is.null(selectboost_args_current$step)) {
+            selectboost_args_current$step <- selectboost_args_current$width
+          }
+        }
+
+        benchmark_args_current <- benchmark_args
+        benchmark_args_current$selectboost_args <- selectboost_args_current
+        bench <- do.call(
+          benchmark_selection_methods,
+          c(list(data = sim), benchmark_args_current)
+        )
+
+        metrics <- bench$metrics
+        metrics$replicate <- replicate
+        metrics <- append_parameter_columns(metrics, simulate_labels)
+        metrics <- append_parameter_columns(metrics, selectboost_labels)
+        metric_rows[[counter]] <- metrics
+
+        if (isTRUE(keep_results)) {
+          benchmark_results[[counter]] <- list(
+            replicate = replicate,
+            simulation = simulate_labels,
+            selectboost = selectboost_labels,
+            benchmark = bench
+          )
+        }
+
+        counter <- counter + 1L
+      }
+    }
+  }
+
+  metrics <- rbind_fill_data_frames(metric_rows)
+  structure(
+    list(
+      metrics = metrics,
+      summary_table = summarise_simulation_metrics(metrics),
+      results = benchmark_results,
+      simulate_grid = simulate_grid,
+      selectboost_grid = selectboost_grid
+    ),
+    class = c("fda_selectboost_sensitivity_study", "fda_simulation_study")
   )
 }
 

@@ -12,6 +12,10 @@ simulate_fda_scenario(
   transforms = NULL,
   basis_df = 7L,
   n_components = 5L,
+  scenario = c("localized_dense", "distributed_smooth", "confounded_blocks"),
+  confounding_strength = NULL,
+  active_region_scale = 1,
+  local_correlation = 0,
   include_scalar = TRUE,
   noise_sd = 0.4,
   seed = NULL
@@ -35,6 +39,21 @@ omitted, a sensible default is chosen from \code{representation}.}
 
 \item{n_components}{Number of FPCA components used when
 \code{representation = "fpca"}.}
+
+\item{scenario}{Benchmark scenario. \code{"localized_dense"} emphasizes narrow
+active regions under strong local correlation, \code{"distributed_smooth"}
+spreads the effect over broader smooth regions, and \code{"confounded_blocks"}
+adds stronger nuisance structure near the active block.}
+
+\item{confounding_strength}{Strength of cross-block confounding injected into
+the nuisance curve. Higher values make plain \code{SelectBoost} less able to
+separate true local signals from correlated nuisance structure.}
+
+\item{active_region_scale}{Positive multiplier applied to the width of the
+active regions. Values below \code{1} create narrower active regions.}
+
+\item{local_correlation}{Non-negative smoothing parameter applied to the
+simulated curves. Larger values increase local correlation along the grid.}
 
 \item{include_scalar}{Should scalar covariates be included in the design and
 truth object?}

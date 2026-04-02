@@ -62,6 +62,10 @@ mapped ground truth for the transformed design matrix.</p>
 <span>  transforms <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  basis_df <span class="op">=</span> <span class="fl">7L</span>,</span>
 <span>  n_components <span class="op">=</span> <span class="fl">5L</span>,</span>
+<span>  scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"localized_dense"</span>, <span class="st">"distributed_smooth"</span>, <span class="st">"confounded_blocks"</span><span class="op">)</span>,</span>
+<span>  confounding_strength <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  active_region_scale <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  local_correlation <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  include_scalar <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  noise_sd <span class="op">=</span> <span class="fl">0.4</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -104,6 +108,29 @@ omitted, a sensible default is chosen from <code>representation</code>.</p></dd>
 <code>representation = "fpca"</code>.</p></dd>
 
 
+<dt id="arg-scenario">scenario<a class="anchor" aria-label="anchor" href="#arg-scenario"></a></dt>
+<dd><p>Benchmark scenario. <code>"localized_dense"</code> emphasizes narrow
+active regions under strong local correlation, <code>"distributed_smooth"</code>
+spreads the effect over broader smooth regions, and <code>"confounded_blocks"</code>
+adds stronger nuisance structure near the active block.</p></dd>
+
+
+<dt id="arg-confounding-strength">confounding_strength<a class="anchor" aria-label="anchor" href="#arg-confounding-strength"></a></dt>
+<dd><p>Strength of cross-block confounding injected into
+the nuisance curve. Higher values make plain <code>SelectBoost</code> less able to
+separate true local signals from correlated nuisance structure.</p></dd>
+
+
+<dt id="arg-active-region-scale">active_region_scale<a class="anchor" aria-label="anchor" href="#arg-active-region-scale"></a></dt>
+<dd><p>Positive multiplier applied to the width of the
+active regions. Values below <code>1</code> create narrower active regions.</p></dd>
+
+
+<dt id="arg-local-correlation">local_correlation<a class="anchor" aria-label="anchor" href="#arg-local-correlation"></a></dt>
+<dd><p>Non-negative smoothing parameter applied to the
+simulated curves. Larger values increase local correlation along the grid.</p></dd>
+
+
 <dt id="arg-include-scalar">include_scalar<a class="anchor" aria-label="anchor" href="#arg-include-scalar"></a></dt>
 <dd><p>Should scalar covariates be included in the design and
 truth object?</p></dd>
@@ -130,6 +157,10 @@ truth object?</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   observations: 24 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   features: 34 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   active features: 8 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   scenario: localized_dense </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   confounding strength: 0 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   active region scale: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   local correlation: 0 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   active predictors: signal, age, treatment </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">truth</span><span class="op">$</span><span class="va">active_features</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "signal_2"  "signal_3"  "signal_4"  "signal_8"  "signal_9"  "signal_10"</span>

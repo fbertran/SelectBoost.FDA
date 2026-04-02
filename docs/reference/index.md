@@ -65,6 +65,8 @@
 - [`plot(`*`<fda_stability_selection>`*`)`](https://fbertran.github.io/SelectBoost.FDA/reference/plot.fda_selection.md)
   [`plot(`*`<selectboost_fda_result>`*`)`](https://fbertran.github.io/SelectBoost.FDA/reference/plot.fda_selection.md)
   : Plot FDA Selection Results
+- [`run_selectboost_sensitivity_study()`](https://fbertran.github.io/SelectBoost.FDA/reference/run_selectboost_sensitivity_study.md)
+  : Run a Targeted Sensitivity Study for FDA-SelectBoost
 - [`run_simulation_study()`](https://fbertran.github.io/SelectBoost.FDA/reference/run_simulation_study.md)
   : Run a Repeated FDA Simulation Study
 - [`selectboost_fda()`](https://fbertran.github.io/SelectBoost.FDA/reference/selectboost_fda.md)
@@ -81,3 +83,7 @@
   : Grouped Stability Selection for Functional Predictors
 - [`suggest_c0_grid()`](https://fbertran.github.io/SelectBoost.FDA/reference/suggest_c0_grid.md)
   : Suggest a c0 Grid for FDA-SelectBoost
+- [`summarise_benchmark_advantage()`](https://fbertran.github.io/SelectBoost.FDA/reference/summarise_benchmark_advantage.md)
+  : Summarize the Advantage of FDA-SelectBoost Over Baselines
+- [`summarise_benchmark_performance()`](https://fbertran.github.io/SelectBoost.FDA/reference/summarise_benchmark_performance.md)
+  : Summarize Benchmark Performance by Method

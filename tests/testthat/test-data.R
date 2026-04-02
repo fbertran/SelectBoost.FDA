@@ -33,3 +33,26 @@ test_that("package datasets support end-to-end design construction", {
   expect_true(any(selection_map(motion_design)$basis_type == "fpca"))
   expect_true(any(selection_map(motion_design)$basis_type == "spline"))
 })
+
+test_that("saved benchmark summaries are shipped with the package", {
+  benchmark_dir <- system.file("extdata", "benchmarks", package = "SelectBoost.FDA")
+  top_settings_path <- file.path(benchmark_dir, "selectboost_sensitivity_top_settings.csv")
+  performance_path <- file.path(benchmark_dir, "selectboost_sensitivity_feature_performance.csv")
+
+  expect_true(nzchar(benchmark_dir))
+  expect_true(file.exists(top_settings_path))
+  expect_true(file.exists(performance_path))
+
+  top_settings <- utils::read.csv(top_settings_path, stringsAsFactors = FALSE)
+  performance <- utils::read.csv(performance_path, stringsAsFactors = FALSE)
+
+  expect_true(all(c(
+    "scenario",
+    "association_method",
+    "selectboost_f1_mean",
+    "plain_selectboost_f1_mean",
+    "delta_mean",
+    "win_rate"
+  ) %in% names(top_settings)))
+  expect_true(all(c("method", "f1_mean") %in% names(performance)))
+})

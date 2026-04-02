@@ -2,8 +2,18 @@
 
 ## SelectBoost.FDA 0.5.0
 
-- Added pkgdown website
-- Added readme
+- Added pkgdown website and a package-style README.
+- Added targeted FDA benchmark sensitivity utilities with
+  `run_selectboost_sensitivity_study()`.
+- Added simulation controls for `confounding_strength`,
+  `active_region_scale`, and `local_correlation` so benchmarks can stress the
+  settings where FDA-aware grouping is expected to help.
+- Added shipped benchmark artifacts under `inst/extdata/benchmarks/`,
+  including feature-level mean `F1` summaries and ranked `selectboost_fda()`
+  versus plain `SelectBoost` settings.
+- Added a reproducible benchmark script in
+  `tools/run_selectboost_sensitivity_study.R` and updated the benchmark
+  vignette to read the saved study outputs directly.
 
 ## SelectBoost.FDA 0.4.0
 

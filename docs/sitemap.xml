@@ -41,6 +41,7 @@
 <url><loc>https://fbertran.github.io/SelectBoost.FDA/reference/motion_example.html</loc></url>
 <url><loc>https://fbertran.github.io/SelectBoost.FDA/reference/plain_selectboost.html</loc></url>
 <url><loc>https://fbertran.github.io/SelectBoost.FDA/reference/plot.fda_selection.html</loc></url>
+<url><loc>https://fbertran.github.io/SelectBoost.FDA/reference/run_selectboost_sensitivity_study.html</loc></url>
 <url><loc>https://fbertran.github.io/SelectBoost.FDA/reference/run_simulation_study.html</loc></url>
 <url><loc>https://fbertran.github.io/SelectBoost.FDA/reference/selectboost_fda.html</loc></url>
 <url><loc>https://fbertran.github.io/SelectBoost.FDA/reference/selected.html</loc></url>
@@ -49,5 +50,7 @@
 <url><loc>https://fbertran.github.io/SelectBoost.FDA/reference/spectra_example.html</loc></url>
 <url><loc>https://fbertran.github.io/SelectBoost.FDA/reference/stability_selection_fda.html</loc></url>
 <url><loc>https://fbertran.github.io/SelectBoost.FDA/reference/suggest_c0_grid.html</loc></url>
+<url><loc>https://fbertran.github.io/SelectBoost.FDA/reference/summarise_benchmark_advantage.html</loc></url>
+<url><loc>https://fbertran.github.io/SelectBoost.FDA/reference/summarise_benchmark_performance.html</loc></url>
 </urlset>
 
