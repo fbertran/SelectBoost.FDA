@@ -8,11 +8,11 @@ Author: Frederic Bertrand [cre, aut] (<https://orcid.org/0000-0002-0837-8281>)
 Maintainer: Frederic Bertrand <frederic.bertrand@lecnam.net>
 Description: Implements 'SelectBoost'-style variable selection workflows for
     functional data analysis. The package provides FDA-native design and
-    preprocessing objects for raw curves, spline-basis expansions, FPCA
-    scores, and scalar covariates; grouped stability-selection routines
-    based on repeated subject-level subsampling; multiple selector
-    backends including lasso, group lasso, and sparse-group lasso;
-    FDA-aware grouping functions and calibration helpers for 'SelectBoost';
+    preprocessing objects for raw curves, spline-basis expansions, Functional 
+    principal component analysis scores, and scalar covariates; grouped 
+    stability-selection routines based on repeated subject-level subsampling; 
+    multiple selector backends including lasso, group lasso, and sparse-group 
+    lasso; FDA-aware grouping functions and calibration helpers for 'SelectBoost';
     method-comparison utilities; a formula interface; simulation,
     benchmarking, and validation helpers with mapped ground truth;
     targeted sensitivity-study utilities and shipped benchmark summaries
