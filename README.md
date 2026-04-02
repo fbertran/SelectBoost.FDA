@@ -154,13 +154,13 @@ head(selection_map(fit_sb, level = "group", c0 = colnames(fit_sb$feature_selecti
 #> 4              1            1    treatment  treatment
 #>   domain_start domain_end       c0 mean_selection
 #> 1         1100       2500 c0 = 0.6      0.6666667
-#> 2         1100       2500 c0 = 0.6      0.5000000
-#> 3          age        age c0 = 0.6      0.5000000
+#> 2         1100       2500 c0 = 0.6      0.3500000
+#> 3          age        age c0 = 0.6      0.2500000
 #> 4    treatment  treatment c0 = 0.6      1.0000000
 #>   max_selection selected_features
 #> 1          1.00                 2
-#> 2          0.75                 5
-#> 3          0.50                 1
+#> 2          1.00                 4
+#> 3          0.25                 1
 #> 4          1.00                 1
 ```
 
@@ -299,18 +299,18 @@ bench <- benchmark_selection_methods(
 
 head(bench$metrics)
 #>     level n_universe n_truth n_selected tp fp fn tn
-#> 1 feature         42       9         35  8 27  1  6
-#> 2 feature         42       9         37  9 28  0  5
+#> 1 feature         42       9         33  8 25  1  8
+#> 2 feature         42       9         29  8 21  1 12
 #> 3   group          4       3          4  3  1  0  0
 #> 4   group          4       3          4  3  1  0  0
 #>   precision    recall specificity        f1   jaccard
-#> 1 0.2285714 0.8888889   0.1818182 0.3636364 0.2222222
-#> 2 0.2432432 1.0000000   0.1515152 0.3913043 0.2432432
+#> 1 0.2424242 0.8888889   0.2424242 0.3809524 0.2352941
+#> 2 0.2758621 0.8888889   0.3636364 0.4210526 0.2666667
 #> 3 0.7500000 1.0000000   0.0000000 0.8571429 0.7500000
 #> 4 0.7500000 1.0000000   0.0000000 0.8571429 0.7500000
 #>   selection_rate       c0            method
-#> 1      0.8333333 c0 = 0.5       selectboost
-#> 2      0.8809524 c0 = 0.5 plain_selectboost
+#> 1      0.7857143 c0 = 0.5       selectboost
+#> 2      0.6904762 c0 = 0.5 plain_selectboost
 #> 3      1.0000000 c0 = 0.5       selectboost
 #> 4      1.0000000 c0 = 0.5 plain_selectboost
 #>          scenario representation   family

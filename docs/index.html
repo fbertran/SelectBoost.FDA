@@ -201,13 +201,13 @@
 <span><span class="co">#&gt; 4              1            1    treatment  treatment</span></span>
 <span><span class="co">#&gt;   domain_start domain_end       c0 mean_selection</span></span>
 <span><span class="co">#&gt; 1         1100       2500 c0 = 0.6      0.6666667</span></span>
-<span><span class="co">#&gt; 2         1100       2500 c0 = 0.6      0.5000000</span></span>
-<span><span class="co">#&gt; 3          age        age c0 = 0.6      0.5000000</span></span>
+<span><span class="co">#&gt; 2         1100       2500 c0 = 0.6      0.3500000</span></span>
+<span><span class="co">#&gt; 3          age        age c0 = 0.6      0.2500000</span></span>
 <span><span class="co">#&gt; 4    treatment  treatment c0 = 0.6      1.0000000</span></span>
 <span><span class="co">#&gt;   max_selection selected_features</span></span>
 <span><span class="co">#&gt; 1          1.00                 2</span></span>
-<span><span class="co">#&gt; 2          0.75                 5</span></span>
-<span><span class="co">#&gt; 3          0.50                 1</span></span>
+<span><span class="co">#&gt; 2          1.00                 4</span></span>
+<span><span class="co">#&gt; 3          0.25                 1</span></span>
 <span><span class="co">#&gt; 4          1.00                 1</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -336,18 +336,18 @@
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">bench</span><span class="op">$</span><span class="va">metrics</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     level n_universe n_truth n_selected tp fp fn tn</span></span>
-<span><span class="co">#&gt; 1 feature         42       9         35  8 27  1  6</span></span>
-<span><span class="co">#&gt; 2 feature         42       9         37  9 28  0  5</span></span>
+<span><span class="co">#&gt; 1 feature         42       9         33  8 25  1  8</span></span>
+<span><span class="co">#&gt; 2 feature         42       9         29  8 21  1 12</span></span>
 <span><span class="co">#&gt; 3   group          4       3          4  3  1  0  0</span></span>
 <span><span class="co">#&gt; 4   group          4       3          4  3  1  0  0</span></span>
 <span><span class="co">#&gt;   precision    recall specificity        f1   jaccard</span></span>
-<span><span class="co">#&gt; 1 0.2285714 0.8888889   0.1818182 0.3636364 0.2222222</span></span>
-<span><span class="co">#&gt; 2 0.2432432 1.0000000   0.1515152 0.3913043 0.2432432</span></span>
+<span><span class="co">#&gt; 1 0.2424242 0.8888889   0.2424242 0.3809524 0.2352941</span></span>
+<span><span class="co">#&gt; 2 0.2758621 0.8888889   0.3636364 0.4210526 0.2666667</span></span>
 <span><span class="co">#&gt; 3 0.7500000 1.0000000   0.0000000 0.8571429 0.7500000</span></span>
 <span><span class="co">#&gt; 4 0.7500000 1.0000000   0.0000000 0.8571429 0.7500000</span></span>
 <span><span class="co">#&gt;   selection_rate       c0            method</span></span>
-<span><span class="co">#&gt; 1      0.8333333 c0 = 0.5       selectboost</span></span>
-<span><span class="co">#&gt; 2      0.8809524 c0 = 0.5 plain_selectboost</span></span>
+<span><span class="co">#&gt; 1      0.7857143 c0 = 0.5       selectboost</span></span>
+<span><span class="co">#&gt; 2      0.6904762 c0 = 0.5 plain_selectboost</span></span>
 <span><span class="co">#&gt; 3      1.0000000 c0 = 0.5       selectboost</span></span>
 <span><span class="co">#&gt; 4      1.0000000 c0 = 0.5 plain_selectboost</span></span>
 <span><span class="co">#&gt;          scenario representation   family</span></span>
