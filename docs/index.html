@@ -12,8 +12,8 @@
 <link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="SelectBoost-Style Variable Selection for Functional Data Analysis">
-<meta name="description" content="Implements SelectBoost-style variable selection workflows for functional data analysis. The package provides FDA-native design and preprocessing objects for raw curves, spline-basis expansions, FPCA scores, and scalar covariates; grouped stability-selection routines based on repeated subject-level subsampling; multiple selector backends including lasso, group lasso, and sparse-group lasso; FDA-aware grouping functions and calibration helpers for SelectBoost; method-comparison utilities; a formula interface; simulation, benchmarking, and validation helpers with mapped ground truth; targeted sensitivity-study utilities and shipped benchmark summaries for mean F1 comparisons between FDA-aware and plain SelectBoost workflows; small example datasets; and an optional adapter to the native stability-selection interface from the FDboost package.">
-<meta property="og:description" content="Implements SelectBoost-style variable selection workflows for functional data analysis. The package provides FDA-native design and preprocessing objects for raw curves, spline-basis expansions, FPCA scores, and scalar covariates; grouped stability-selection routines based on repeated subject-level subsampling; multiple selector backends including lasso, group lasso, and sparse-group lasso; FDA-aware grouping functions and calibration helpers for SelectBoost; method-comparison utilities; a formula interface; simulation, benchmarking, and validation helpers with mapped ground truth; targeted sensitivity-study utilities and shipped benchmark summaries for mean F1 comparisons between FDA-aware and plain SelectBoost workflows; small example datasets; and an optional adapter to the native stability-selection interface from the FDboost package.">
+<meta name="description" content="Implements SelectBoost-style variable selection workflows for functional data analysis. The package provides FDA-native design and preprocessing objects for raw curves, spline-basis expansions, Functional principal component analysis scores, and scalar covariates; grouped stability-selection routines based on repeated subject-level subsampling; multiple selector backends including lasso, group lasso, and sparse-group lasso; FDA-aware grouping functions and calibration helpers for SelectBoost; method-comparison utilities; a formula interface; simulation, benchmarking, and validation helpers with mapped ground truth; targeted sensitivity-study utilities and shipped benchmark summaries for mean F1 comparisons between FDA-aware and plain SelectBoost workflows; small example datasets; and an optional adapter to the native stability-selection interface from the FDboost package.">
+<meta property="og:description" content="Implements SelectBoost-style variable selection workflows for functional data analysis. The package provides FDA-native design and preprocessing objects for raw curves, spline-basis expansions, Functional principal component analysis scores, and scalar covariates; grouped stability-selection routines based on repeated subject-level subsampling; multiple selector backends including lasso, group lasso, and sparse-group lasso; FDA-aware grouping functions and calibration helpers for SelectBoost; method-comparison utilities; a formula interface; simulation, benchmarking, and validation helpers with mapped ground truth; targeted sensitivity-study utilities and shipped benchmark summaries for mean F1 comparisons between FDA-aware and plain SelectBoost workflows; small example datasets; and an optional adapter to the native stability-selection interface from the FDboost package.">
 <style>
   .navbar-brand img { height: 28px; }
 </style>
@@ -65,6 +65,8 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="selectboostfda">SelectBoost.FDA<a class="anchor" aria-label="anchor" href="#selectboostfda"></a>
 </h1></div>
+<!-- badges: start -->
+
 <p><code>SelectBoost.FDA</code> is an R package for variable selection in functional data analysis. It combines FDA-native preprocessing and design objects with grouped stability selection, interval summaries, FDA-aware <code>SelectBoost</code>, and a small validation layer for simulation and benchmarking.</p>
 <p>The package is designed for workflows where functional predictors are observed on a grid, represented through basis expansions, or reduced to FPCA scores, and where strong local or block-wise correlation makes ordinary variable selection unstable.</p>
 <div class="section level2">
@@ -200,14 +202,14 @@
 <span><span class="co">#&gt; 3              1            1          age        age</span></span>
 <span><span class="co">#&gt; 4              1            1    treatment  treatment</span></span>
 <span><span class="co">#&gt;   domain_start domain_end       c0 mean_selection</span></span>
-<span><span class="co">#&gt; 1         1100       2500 c0 = 0.6      0.6666667</span></span>
-<span><span class="co">#&gt; 2         1100       2500 c0 = 0.6      0.3500000</span></span>
-<span><span class="co">#&gt; 3          age        age c0 = 0.6      0.2500000</span></span>
-<span><span class="co">#&gt; 4    treatment  treatment c0 = 0.6      1.0000000</span></span>
+<span><span class="co">#&gt; 1         1100       2500 c0 = 0.6           0.75</span></span>
+<span><span class="co">#&gt; 2         1100       2500 c0 = 0.6           0.55</span></span>
+<span><span class="co">#&gt; 3          age        age c0 = 0.6           0.75</span></span>
+<span><span class="co">#&gt; 4    treatment  treatment c0 = 0.6           1.00</span></span>
 <span><span class="co">#&gt;   max_selection selected_features</span></span>
-<span><span class="co">#&gt; 1          1.00                 2</span></span>
-<span><span class="co">#&gt; 2          1.00                 4</span></span>
-<span><span class="co">#&gt; 3          0.25                 1</span></span>
+<span><span class="co">#&gt; 1          1.00                 3</span></span>
+<span><span class="co">#&gt; 2          0.75                 5</span></span>
+<span><span class="co">#&gt; 3          0.75                 1</span></span>
 <span><span class="co">#&gt; 4          1.00                 1</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -336,18 +338,18 @@
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">bench</span><span class="op">$</span><span class="va">metrics</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     level n_universe n_truth n_selected tp fp fn tn</span></span>
-<span><span class="co">#&gt; 1 feature         42       9         33  8 25  1  8</span></span>
-<span><span class="co">#&gt; 2 feature         42       9         29  8 21  1 12</span></span>
+<span><span class="co">#&gt; 1 feature         42       9         32  9 23  0 10</span></span>
+<span><span class="co">#&gt; 2 feature         42       9         36  9 27  0  6</span></span>
 <span><span class="co">#&gt; 3   group          4       3          4  3  1  0  0</span></span>
 <span><span class="co">#&gt; 4   group          4       3          4  3  1  0  0</span></span>
-<span><span class="co">#&gt;   precision    recall specificity        f1   jaccard</span></span>
-<span><span class="co">#&gt; 1 0.2424242 0.8888889   0.2424242 0.3809524 0.2352941</span></span>
-<span><span class="co">#&gt; 2 0.2758621 0.8888889   0.3636364 0.4210526 0.2666667</span></span>
-<span><span class="co">#&gt; 3 0.7500000 1.0000000   0.0000000 0.8571429 0.7500000</span></span>
-<span><span class="co">#&gt; 4 0.7500000 1.0000000   0.0000000 0.8571429 0.7500000</span></span>
+<span><span class="co">#&gt;   precision recall specificity        f1 jaccard</span></span>
+<span><span class="co">#&gt; 1   0.28125      1   0.3030303 0.4390244 0.28125</span></span>
+<span><span class="co">#&gt; 2   0.25000      1   0.1818182 0.4000000 0.25000</span></span>
+<span><span class="co">#&gt; 3   0.75000      1   0.0000000 0.8571429 0.75000</span></span>
+<span><span class="co">#&gt; 4   0.75000      1   0.0000000 0.8571429 0.75000</span></span>
 <span><span class="co">#&gt;   selection_rate       c0            method</span></span>
-<span><span class="co">#&gt; 1      0.7857143 c0 = 0.5       selectboost</span></span>
-<span><span class="co">#&gt; 2      0.6904762 c0 = 0.5 plain_selectboost</span></span>
+<span><span class="co">#&gt; 1      0.7619048 c0 = 0.5       selectboost</span></span>
+<span><span class="co">#&gt; 2      0.8571429 c0 = 0.5 plain_selectboost</span></span>
 <span><span class="co">#&gt; 3      1.0000000 c0 = 0.5       selectboost</span></span>
 <span><span class="co">#&gt; 4      1.0000000 c0 = 0.5 plain_selectboost</span></span>
 <span><span class="co">#&gt;          scenario representation   family</span></span>

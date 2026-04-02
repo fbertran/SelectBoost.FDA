@@ -17,7 +17,14 @@ if (requireNamespace("pkgload", quietly = TRUE)) {
 }
 ```
 
+
 # SelectBoost.FDA
+
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/fbertran/SelectBoost.FDA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/fbertran/SelectBoost.FDA/actions/workflows/R-CMD-check.yaml)
+[![R-hub](https://github.com/fbertran/SelectBoost.FDA/actions/workflows/rhub.yaml/badge.svg)](https://github.com/fbertran/SelectBoost.FDA/actions/workflows/rhub.yaml)
+<!-- badges: end -->
+
 
 `SelectBoost.FDA` is an R package for variable selection in functional data
 analysis. It combines FDA-native preprocessing and design objects with grouped

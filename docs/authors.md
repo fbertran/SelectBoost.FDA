@@ -10,12 +10,13 @@
 Source:
 [`inst/CITATION`](https://github.com/bertran7/SelectBoost.FDA/blob/HEAD/inst/CITATION)
 
-Frederic Bertrand (). SelectBoost-Style Variable Selection for
+Frederic Bertrand (2026). SelectBoost-Style Variable Selection for
 Functional Data Analysis, R package version 0.5.0
 
     @Manual{,
       title = {SelectBoost-Style Variable Selection for Functional Data Analysis},
       author = {Frederic Bertrand},
+      year = {2026},
       note = {R package version 0.5.0},
       url = {https://CRAN.R-project.org/package=SelectBoost.FDA},
     }
