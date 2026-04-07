@@ -18,7 +18,8 @@ if (requireNamespace("pkgload", quietly = TRUE)) {
 ```
 
 
-# SelectBoost.FDA
+# SelectBoost.FDA <img src="man/figures/logo_selectboost_FDA.png" align="right" width="200"/>
+## Frédéric Bertrand
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/fbertran/SelectBoost.FDA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/fbertran/SelectBoost.FDA/actions/workflows/R-CMD-check.yaml)
