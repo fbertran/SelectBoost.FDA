@@ -1,6 +1,4 @@
-# SelectBoost.FDA News
-
-## SelectBoost.FDA 0.5.1
+# SelectBoost.FDA 0.5.1
 
 - Localized RNG handling in exported simulation and stability-selection
   functions so `seed=` no longer leaves the caller's RNG state modified.
@@ -10,7 +8,7 @@
 - Updated tests and top-level documentation to match the revised RNG and
   benchmark-output behavior.
 
-## SelectBoost.FDA 0.5.0
+# SelectBoost.FDA 0.5.0
 
 - Added pkgdown website and a package-style README.
 - Added targeted FDA benchmark sensitivity utilities with
@@ -25,7 +23,7 @@
   `tools/run_selectboost_sensitivity_study.R` and updated the benchmark
   vignette to read the saved study outputs directly.
 
-## SelectBoost.FDA 0.4.0
+# SelectBoost.FDA 0.4.0
 
 - Added minimal examples to the core functions of the package
 - Added a validation layer with `plain_selectboost()`,
@@ -36,7 +34,7 @@
 - Added a simulation and benchmarks vignette plus release-hardening metadata
   for CI and pkgdown workflows.
 
-## SelectBoost.FDA 0.3.0
+# SelectBoost.FDA 0.3.0
 
 - Added a broader selector interface with `lasso`, `group_lasso`, and `sparse_group_lasso` aliases, while keeping backend-specific names available.
 - Added sparse-group lasso support through the `SGL` package.
@@ -45,7 +43,7 @@
 - Added method-comparison utilities to run grouped stability selection, interval stability selection, FDA-SelectBoost, and optional FDboost workflows on the same `fda_design`.
 - Added a formula interface with `fda_design_formula()`, `fit_stability_formula()`, and `fit_selectboost_formula()`.
 
-## SelectBoost.FDA 0.2.0
+# SelectBoost.FDA 0.2.0
 
 - Added FDA-native preprocessing objects for identity transforms, scalar standardization, spline-basis expansion, and FPCA.
 - Added fitted preprocessing workflows with `fit_fda_preprocessor()` and `apply_fda_preprocessor()` so training and new-data transforms use the same mapping.
@@ -54,7 +52,7 @@
 - Added packaged example datasets for end-to-end workflows and updated the vignettes to start from raw functional inputs.
 - Expanded test coverage and refreshed package documentation for the FDA-native core API.
 
-## SelectBoost.FDA 0.1.0
+# SelectBoost.FDA 0.1.0
 
 - Initial package release.
 - Added grouped stability selection for functional predictors represented on grids or in basis form.

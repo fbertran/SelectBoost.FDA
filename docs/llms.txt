@@ -140,8 +140,8 @@ head(selection_map(fit_sb, level = "group", c0 = colnames(fit_sb$feature_selecti
 #> 4              1            1    treatment  treatment    treatment  treatment c0 = 0.6
 #>   mean_selection max_selection selected_features
 #> 1      0.6666667          1.00                 2
-#> 2      0.3000000          0.75                 3
-#> 3      0.2500000          0.25                 1
+#> 2      0.3000000          0.50                 4
+#> 3      0.7500000          0.75                 1
 #> 4      1.0000000          1.00                 1
 ```
 
@@ -250,21 +250,21 @@ bench <- benchmark_selection_methods(
 )
 
 head(bench$metrics)
-#>     level n_universe n_truth n_selected tp fp fn tn precision    recall specificity
-#> 1 feature         42       9         36  9 27  0  6 0.2500000 1.0000000  0.18181818
-#> 2 feature         42       9         38  8 30  1  3 0.2105263 0.8888889  0.09090909
-#> 3   group          4       3          4  3  1  0  0 0.7500000 1.0000000  0.00000000
-#> 4   group          4       3          4  3  1  0  0 0.7500000 1.0000000  0.00000000
-#>          f1   jaccard selection_rate       c0            method        scenario
-#> 1 0.4000000 0.2500000      0.8571429 c0 = 0.5       selectboost localized_dense
-#> 2 0.3404255 0.2051282      0.9047619 c0 = 0.5 plain_selectboost localized_dense
-#> 3 0.8571429 0.7500000      1.0000000 c0 = 0.5       selectboost localized_dense
-#> 4 0.8571429 0.7500000      1.0000000 c0 = 0.5 plain_selectboost localized_dense
-#>   representation   family
-#> 1           grid gaussian
-#> 2           grid gaussian
-#> 3           grid gaussian
-#> 4           grid gaussian
+#>     level n_universe n_truth n_selected tp fp fn tn precision recall specificity        f1
+#> 1 feature         42       9         35  9 26  0  7 0.2571429      1   0.2121212 0.4090909
+#> 2 feature         42       9         36  9 27  0  6 0.2500000      1   0.1818182 0.4000000
+#> 3   group          4       3          4  3  1  0  0 0.7500000      1   0.0000000 0.8571429
+#> 4   group          4       3          4  3  1  0  0 0.7500000      1   0.0000000 0.8571429
+#>     jaccard selection_rate       c0            method        scenario representation
+#> 1 0.2571429      0.8333333 c0 = 0.5       selectboost localized_dense           grid
+#> 2 0.2500000      0.8571429 c0 = 0.5 plain_selectboost localized_dense           grid
+#> 3 0.7500000      1.0000000 c0 = 0.5       selectboost localized_dense           grid
+#> 4 0.7500000      1.0000000 c0 = 0.5 plain_selectboost localized_dense           grid
+#>     family
+#> 1 gaussian
+#> 2 gaussian
+#> 3 gaussian
+#> 4 gaussian
 ```
 
 The package also ships a larger saved sensitivity study under

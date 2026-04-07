@@ -44,7 +44,53 @@
       <small>Source: <a href="https://github.com/fbertran/SelectBoost.FDA/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
-  </main></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.5.1" id="selectboostfda-051">SelectBoost.FDA 0.5.1<a class="anchor" aria-label="anchor" href="#selectboostfda-051"></a></h2>
+<ul><li>Localized RNG handling in exported simulation and stability-selection functions so <code>seed=</code> no longer leaves the caller’s RNG state modified.</li>
+<li>Reworked the benchmark generation script so it writes to an explicit <code>--output-dir=...</code> path when supplied and otherwise defaults to <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>, rather than writing into the package tree by default.</li>
+<li>Updated tests and top-level documentation to match the revised RNG and benchmark-output behavior.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.5.0" id="selectboostfda-050">SelectBoost.FDA 0.5.0<a class="anchor" aria-label="anchor" href="#selectboostfda-050"></a></h2>
+<ul><li>Added pkgdown website and a package-style README.</li>
+<li>Added targeted FDA benchmark sensitivity utilities with <code><a href="../reference/run_selectboost_sensitivity_study.html">run_selectboost_sensitivity_study()</a></code>.</li>
+<li>Added simulation controls for <code>confounding_strength</code>, <code>active_region_scale</code>, and <code>local_correlation</code> so benchmarks can stress the settings where FDA-aware grouping is expected to help.</li>
+<li>Added shipped benchmark artifacts under <code>inst/extdata/benchmarks/</code>, including feature-level mean <code>F1</code> summaries and ranked <code><a href="../reference/selectboost_fda.html">selectboost_fda()</a></code> versus plain <code>SelectBoost</code> settings.</li>
+<li>Added a reproducible benchmark script in <code>tools/run_selectboost_sensitivity_study.R</code> and updated the benchmark vignette to read the saved study outputs directly.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.0" id="selectboostfda-040">SelectBoost.FDA 0.4.0<a class="anchor" aria-label="anchor" href="#selectboostfda-040"></a></h2>
+<ul><li>Added minimal examples to the core functions of the package</li>
+<li>Added a validation layer with <code><a href="../reference/plain_selectboost.html">plain_selectboost()</a></code>, <code><a href="../reference/simulate_fda_scenario.html">simulate_fda_scenario()</a></code>, <code><a href="../reference/evaluate_selection.html">evaluate_selection()</a></code>, <code><a href="../reference/benchmark_selection_methods.html">benchmark_selection_methods()</a></code>, and <code><a href="../reference/run_simulation_study.html">run_simulation_study()</a></code>.</li>
+<li>Added mapped ground-truth utilities so feature-, group-, and basis-level recovery can be evaluated on transformed FDA designs.</li>
+<li>Added a simulation and benchmarks vignette plus release-hardening metadata for CI and pkgdown workflows.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="selectboostfda-030">SelectBoost.FDA 0.3.0<a class="anchor" aria-label="anchor" href="#selectboostfda-030"></a></h2>
+<ul><li>Added a broader selector interface with <code>lasso</code>, <code>group_lasso</code>, and <code>sparse_group_lasso</code> aliases, while keeping backend-specific names available.</li>
+<li>Added sparse-group lasso support through the <code>SGL</code> package.</li>
+<li>Added overlapping interval groups and region-aware association structures for FDA grouping.</li>
+<li>Added calibration helpers for stability-selection parameters, interval widths, and SelectBoost <code>c0</code> grids.</li>
+<li>Added method-comparison utilities to run grouped stability selection, interval stability selection, FDA-SelectBoost, and optional FDboost workflows on the same <code>fda_design</code>.</li>
+<li>Added a formula interface with <code><a href="../reference/fda_design_formula.html">fda_design_formula()</a></code>, <code><a href="../reference/fit_stability_formula.html">fit_stability_formula()</a></code>, and <code><a href="../reference/fit_selectboost_formula.html">fit_selectboost_formula()</a></code>.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="selectboostfda-020">SelectBoost.FDA 0.2.0<a class="anchor" aria-label="anchor" href="#selectboostfda-020"></a></h2>
+<ul><li>Added FDA-native preprocessing objects for identity transforms, scalar standardization, spline-basis expansion, and FPCA.</li>
+<li>Added fitted preprocessing workflows with <code><a href="../reference/fit_fda_preprocessor.html">fit_fda_preprocessor()</a></code> and <code><a href="../reference/apply_fda_preprocessor.html">apply_fda_preprocessor()</a></code> so training and new-data transforms use the same mapping.</li>
+<li>Extended <code><a href="../reference/fda_design.html">fda_design()</a></code> to support multiple functional predictors, scalar covariates, optional fitted preprocessors, and richer reversible domain metadata.</li>
+<li>Standardized fit outputs across stability selection and SelectBoost with consistent <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, <code><a href="../reference/selection_map.html">selection_map()</a></code>, <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, and <code><a href="../reference/selected.html">selected()</a></code> behavior.</li>
+<li>Added packaged example datasets for end-to-end workflows and updated the vignettes to start from raw functional inputs.</li>
+<li>Expanded test coverage and refreshed package documentation for the FDA-native core API.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.0" id="selectboostfda-010">SelectBoost.FDA 0.1.0<a class="anchor" aria-label="anchor" href="#selectboostfda-010"></a></h2>
+<ul><li>Initial package release.</li>
+<li>Added grouped stability selection for functional predictors represented on grids or in basis form.</li>
+<li>Added FDA-aware SelectBoost wrappers, interval grouping helpers, plotting methods, and introductory vignettes.</li>
+</ul></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
