@@ -129,69 +129,67 @@ stability_selection_fda <- function(x,
     selector_args = list(...)
   )
 
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
-
-  n <- nrow(fda_x$x)
-  subsample_size <- max(1L, floor(sample_fraction * n))
-  feature_selected <- matrix(
-    FALSE,
-    nrow = ncol(fda_x$x),
-    ncol = as.integer(B),
-    dimnames = list(colnames(fda_x$x), paste0("rep", seq_len(as.integer(B))))
-  )
-
-  members <- split_groups(groups)
-  group_selected <- matrix(
-    FALSE,
-    nrow = length(members),
-    ncol = as.integer(B),
-    dimnames = list(group_names(groups), colnames(feature_selected))
-  )
-
-  sampled_indices <- if (isTRUE(keep_subsamples)) vector("list", as.integer(B)) else NULL
-
-  for (b in seq_len(as.integer(B))) {
-    idx <- sort(sample.int(n, size = subsample_size, replace = FALSE))
-    if (isTRUE(keep_subsamples)) {
-      sampled_indices[[b]] <- idx
-    }
-
-    selected <- coerce_selected(
-      selector_fn(fda_x$x[idx, , drop = FALSE], y[idx]),
-      p = ncol(fda_x$x)
+  with_optional_seed(seed, {
+    n <- nrow(fda_x$x)
+    subsample_size <- max(1L, floor(sample_fraction * n))
+    feature_selected <- matrix(
+      FALSE,
+      nrow = ncol(fda_x$x),
+      ncol = as.integer(B),
+      dimnames = list(colnames(fda_x$x), paste0("rep", seq_len(as.integer(B))))
     )
 
-    feature_selected[, b] <- selected
-    group_selected[, b] <- vapply(members, function(member_idx) {
-      any(selected[member_idx])
-    }, logical(1))
-  }
+    members <- split_groups(groups)
+    group_selected <- matrix(
+      FALSE,
+      nrow = length(members),
+      ncol = as.integer(B),
+      dimnames = list(group_names(groups), colnames(feature_selected))
+    )
 
-  feature_frequency <- rowMeans(feature_selected)
-  group_frequency <- rowMeans(group_selected)
+    sampled_indices <- if (isTRUE(keep_subsamples)) vector("list", as.integer(B)) else NULL
 
-  result <- list(
-    call = match.call(),
-    x = fda_x,
-    design = input$design,
-    groups = groups,
-    interval_table = attr(groups, "interval_table", exact = TRUE),
-    family = family,
-    B = as.integer(B),
-    sample_fraction = sample_fraction,
-    cutoff = cutoff,
-    feature_frequency = feature_frequency,
-    group_frequency = group_frequency,
-    feature_selected = feature_selected,
-    group_selected = group_selected,
-    selected_features = names(feature_frequency)[feature_frequency >= cutoff],
-    selected_groups = names(group_frequency)[group_frequency >= cutoff],
-    sampled_indices = sampled_indices
-  )
-  class(result) <- c("fda_stability_selection", "fda_selection_fit")
-  result
+    for (b in seq_len(as.integer(B))) {
+      idx <- sort(sample.int(n, size = subsample_size, replace = FALSE))
+      if (isTRUE(keep_subsamples)) {
+        sampled_indices[[b]] <- idx
+      }
+
+      selected <- coerce_selected(
+        selector_fn(fda_x$x[idx, , drop = FALSE], y[idx]),
+        p = ncol(fda_x$x)
+      )
+
+      feature_selected[, b] <- selected
+      group_selected[, b] <- vapply(members, function(member_idx) {
+        any(selected[member_idx])
+      }, logical(1))
+    }
+
+    feature_frequency <- rowMeans(feature_selected)
+    group_frequency <- rowMeans(group_selected)
+
+    result <- list(
+      call = match.call(),
+      x = fda_x,
+      design = input$design,
+      groups = groups,
+      interval_table = attr(groups, "interval_table", exact = TRUE),
+      family = family,
+      B = as.integer(B),
+      sample_fraction = sample_fraction,
+      cutoff = cutoff,
+      feature_frequency = feature_frequency,
+      group_frequency = group_frequency,
+      feature_selected = feature_selected,
+      group_selected = group_selected,
+      selected_features = names(feature_frequency)[feature_frequency >= cutoff],
+      selected_groups = names(group_frequency)[group_frequency >= cutoff],
+      sampled_indices = sampled_indices
+    )
+    class(result) <- c("fda_stability_selection", "fda_selection_fit")
+    result
+  })
 }
 
 #' Interval Stability Selection

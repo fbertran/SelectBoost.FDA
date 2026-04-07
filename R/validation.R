@@ -643,10 +643,6 @@ simulate_fda_scenario <- function(n = 80L,
                                   include_scalar = TRUE,
                                   noise_sd = 0.4,
                                   seed = NULL) {
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
-
   family <- match.arg(family)
   representation <- match.arg(representation)
   scenario <- match.arg(scenario)
@@ -658,156 +654,159 @@ simulate_fda_scenario <- function(n = 80L,
     confounding_strength <- if (identical(scenario, "confounded_blocks")) 0.7 else 0
   }
 
-  grid <- seq(0, 1, length.out = grid_length)
-  latent_signal_1 <- stats::rnorm(n)
-  latent_signal_2 <- stats::rnorm(n)
-  latent_nuisance <- stats::rnorm(n)
-  if (identical(scenario, "localized_dense")) {
-    signal_shape_1 <- exp(-((grid - 0.25) / 0.08) ^ 2)
-    signal_shape_2 <- sin(2 * pi * grid) * exp(-((grid - 0.65) / 0.18) ^ 2)
-    nuisance_shape_1 <- cos(pi * grid)
-    nuisance_shape_2 <- exp(-((grid - 0.78) / 0.09) ^ 2)
-    signal_noise_sd <- 0.10
-    nuisance_noise_sd <- 0.12
-    region_bounds <- rbind(
-      c(max(1L, floor(0.15 * grid_length)), max(2L, floor(0.28 * grid_length))),
-      c(max(1L, floor(0.52 * grid_length)), max(2L, floor(0.68 * grid_length)))
-    )
-    region_bounds <- rescale_region_bounds(region_bounds, active_region_scale = active_region_scale, grid_length = grid_length)
-    region_weights <- c(1.6, -1.25)
-    nuisance <- confounding_strength * outer(latent_signal_1, nuisance_shape_2) +
-      outer(latent_nuisance, nuisance_shape_1) +
-      outer(stats::rnorm(n), nuisance_shape_2)
-  } else if (identical(scenario, "distributed_smooth")) {
-    signal_shape_1 <- sin(pi * grid)
-    signal_shape_2 <- cos(2 * pi * grid)
-    nuisance_shape_1 <- sin(3 * pi * grid)
-    nuisance_shape_2 <- cos(pi * grid)
-    signal_noise_sd <- 0.12
-    nuisance_noise_sd <- 0.14
-    region_bounds <- rbind(
-      c(max(1L, floor(0.10 * grid_length)), max(2L, floor(0.42 * grid_length))),
-      c(max(1L, floor(0.58 * grid_length)), max(2L, floor(0.92 * grid_length)))
-    )
-    region_bounds <- rescale_region_bounds(region_bounds, active_region_scale = active_region_scale, grid_length = grid_length)
-    region_weights <- c(1.0, -0.9)
-    nuisance <- confounding_strength * outer(latent_signal_1, nuisance_shape_2) +
-      outer(latent_nuisance, nuisance_shape_1) +
-      outer(stats::rnorm(n), nuisance_shape_2)
-  } else {
-    signal_shape_1 <- exp(-((grid - 0.22) / 0.07) ^ 2)
-    signal_shape_2 <- exp(-((grid - 0.62) / 0.10) ^ 2)
-    nuisance_shape_1 <- exp(-((grid - 0.28) / 0.08) ^ 2)
-    nuisance_shape_2 <- cos(2 * pi * grid)
-    signal_noise_sd <- 0.10
-    nuisance_noise_sd <- 0.12
-    region_bounds <- rbind(
-      c(max(1L, floor(0.16 * grid_length)), max(2L, floor(0.26 * grid_length))),
-      c(max(1L, floor(0.56 * grid_length)), max(2L, floor(0.70 * grid_length)))
-    )
-    region_bounds <- rescale_region_bounds(region_bounds, active_region_scale = active_region_scale, grid_length = grid_length)
-    region_weights <- c(1.5, -1.1)
-    nuisance <- confounding_strength * outer(latent_signal_1, nuisance_shape_1) +
-      outer(latent_nuisance, nuisance_shape_2)
-  }
+  with_optional_seed(seed, {
+    grid <- seq(0, 1, length.out = grid_length)
+    latent_signal_1 <- stats::rnorm(n)
+    latent_signal_2 <- stats::rnorm(n)
+    latent_nuisance <- stats::rnorm(n)
+    if (identical(scenario, "localized_dense")) {
+      signal_shape_1 <- exp(-((grid - 0.25) / 0.08) ^ 2)
+      signal_shape_2 <- sin(2 * pi * grid) * exp(-((grid - 0.65) / 0.18) ^ 2)
+      nuisance_shape_1 <- cos(pi * grid)
+      nuisance_shape_2 <- exp(-((grid - 0.78) / 0.09) ^ 2)
+      signal_noise_sd <- 0.10
+      nuisance_noise_sd <- 0.12
+      region_bounds <- rbind(
+        c(max(1L, floor(0.15 * grid_length)), max(2L, floor(0.28 * grid_length))),
+        c(max(1L, floor(0.52 * grid_length)), max(2L, floor(0.68 * grid_length)))
+      )
+      region_bounds <- rescale_region_bounds(region_bounds, active_region_scale = active_region_scale, grid_length = grid_length)
+      region_weights <- c(1.6, -1.25)
+      nuisance <- confounding_strength * outer(latent_signal_1, nuisance_shape_2) +
+        outer(latent_nuisance, nuisance_shape_1) +
+        outer(stats::rnorm(n), nuisance_shape_2)
+    } else if (identical(scenario, "distributed_smooth")) {
+      signal_shape_1 <- sin(pi * grid)
+      signal_shape_2 <- cos(2 * pi * grid)
+      nuisance_shape_1 <- sin(3 * pi * grid)
+      nuisance_shape_2 <- cos(pi * grid)
+      signal_noise_sd <- 0.12
+      nuisance_noise_sd <- 0.14
+      region_bounds <- rbind(
+        c(max(1L, floor(0.10 * grid_length)), max(2L, floor(0.42 * grid_length))),
+        c(max(1L, floor(0.58 * grid_length)), max(2L, floor(0.92 * grid_length)))
+      )
+      region_bounds <- rescale_region_bounds(region_bounds, active_region_scale = active_region_scale, grid_length = grid_length)
+      region_weights <- c(1.0, -0.9)
+      nuisance <- confounding_strength * outer(latent_signal_1, nuisance_shape_2) +
+        outer(latent_nuisance, nuisance_shape_1) +
+        outer(stats::rnorm(n), nuisance_shape_2)
+    } else {
+      signal_shape_1 <- exp(-((grid - 0.22) / 0.07) ^ 2)
+      signal_shape_2 <- exp(-((grid - 0.62) / 0.10) ^ 2)
+      nuisance_shape_1 <- exp(-((grid - 0.28) / 0.08) ^ 2)
+      nuisance_shape_2 <- cos(2 * pi * grid)
+      signal_noise_sd <- 0.10
+      nuisance_noise_sd <- 0.12
+      region_bounds <- rbind(
+        c(max(1L, floor(0.16 * grid_length)), max(2L, floor(0.26 * grid_length))),
+        c(max(1L, floor(0.56 * grid_length)), max(2L, floor(0.70 * grid_length)))
+      )
+      region_bounds <- rescale_region_bounds(region_bounds, active_region_scale = active_region_scale, grid_length = grid_length)
+      region_weights <- c(1.5, -1.1)
+      nuisance <- confounding_strength * outer(latent_signal_1, nuisance_shape_1) +
+        outer(latent_nuisance, nuisance_shape_2)
+    }
 
-  signal <- outer(latent_signal_1, signal_shape_1) +
-    outer(latent_signal_2, signal_shape_2) +
-    matrix(stats::rnorm(n * grid_length, sd = signal_noise_sd), nrow = n)
-  nuisance <- nuisance + matrix(stats::rnorm(n * grid_length, sd = nuisance_noise_sd), nrow = n)
-  signal <- smooth_curve_matrix(signal, local_correlation = local_correlation)
-  nuisance <- smooth_curve_matrix(nuisance, local_correlation = local_correlation)
+    signal <- outer(latent_signal_1, signal_shape_1) +
+      outer(latent_signal_2, signal_shape_2) +
+      matrix(stats::rnorm(n * grid_length, sd = signal_noise_sd), nrow = n)
+    nuisance <- nuisance + matrix(stats::rnorm(n * grid_length, sd = nuisance_noise_sd), nrow = n)
+    signal <- smooth_curve_matrix(signal, local_correlation = local_correlation)
+    nuisance <- smooth_curve_matrix(nuisance, local_correlation = local_correlation)
 
-  region_effects <- vapply(seq_len(nrow(region_bounds)), function(i) {
-    idx <- seq.int(region_bounds[i, 1], region_bounds[i, 2])
-    rowMeans(signal[, idx, drop = FALSE]) * region_weights[i]
-  }, numeric(n))
+    region_effects <- vapply(seq_len(nrow(region_bounds)), function(i) {
+      idx <- seq.int(region_bounds[i, 1], region_bounds[i, 2])
+      rowMeans(signal[, idx, drop = FALSE]) * region_weights[i]
+    }, numeric(n))
 
-  scalar_covariates <- NULL
-  scalar_truth <- NULL
-  linear_predictor <- rowSums(region_effects)
-  if (isTRUE(include_scalar)) {
-    age <- stats::rnorm(n, mean = 50, sd = 7)
-    treatment <- stats::rbinom(n, size = 1, prob = 0.45)
-    scalar_covariates <- data.frame(age = age, treatment = treatment)
-    linear_predictor <- linear_predictor + 0.05 * age - 0.6 * treatment
-    scalar_truth <- data.frame(
-      predictor = c("age", "treatment"),
-      feature = c("age", "treatment"),
-      weight = c(0.05, -0.6),
+    scalar_covariates <- NULL
+    scalar_truth <- NULL
+    linear_predictor <- rowSums(region_effects)
+    if (isTRUE(include_scalar)) {
+      age <- stats::rnorm(n, mean = 50, sd = 7)
+      treatment <- stats::rbinom(n, size = 1, prob = 0.45)
+      scalar_covariates <- data.frame(age = age, treatment = treatment)
+      linear_predictor <- linear_predictor + 0.05 * age - 0.6 * treatment
+      scalar_truth <- data.frame(
+        predictor = c("age", "treatment"),
+        feature = c("age", "treatment"),
+        weight = c(0.05, -0.6),
+        stringsAsFactors = FALSE
+      )
+    }
+
+    response <- if (identical(family, "gaussian")) {
+      linear_predictor + stats::rnorm(n, sd = noise_sd)
+    } else {
+      prob <- stats::plogis(scale(linear_predictor)[, 1])
+      stats::rbinom(n, size = 1, prob = prob)
+    }
+
+    predictors <- list(
+      signal = fda_grid(signal, argvals = grid, name = "signal"),
+      nuisance = fda_grid(nuisance, argvals = grid, name = "nuisance")
+    )
+
+    current_transforms <- transforms
+    if (is.null(current_transforms)) {
+      current_transforms <- switch(
+        representation,
+        grid = NULL,
+        basis = list(
+          signal = fda_bspline(df = basis_df),
+          nuisance = fda_bspline(df = max(4L, basis_df - 1L))
+        ),
+        fpca = list(
+          signal = fda_fpca(n_components = n_components),
+          nuisance = fda_fpca(n_components = max(2L, n_components - 1L))
+        )
+      )
+    }
+
+    design <- fda_design(
+      response = response,
+      predictors = predictors,
+      scalar_covariates = scalar_covariates,
+      family = family,
+      transforms = current_transforms,
+      scalar_transform = if (isTRUE(include_scalar)) fda_standardize() else NULL
+    )
+
+    active_functional <- data.frame(
+      predictor = rep("signal", nrow(region_bounds)),
+      start_position = region_bounds[, 1],
+      end_position = region_bounds[, 2],
+      start_argval = grid[region_bounds[, 1]],
+      end_argval = grid[region_bounds[, 2]],
+      weight = region_weights,
       stringsAsFactors = FALSE
     )
-  }
 
-  response <- if (identical(family, "gaussian")) {
-    linear_predictor + stats::rnorm(n, sd = noise_sd)
-  } else {
-    prob <- stats::plogis(scale(linear_predictor)[, 1])
-    stats::rbinom(n, size = 1, prob = prob)
-  }
-
-  predictors <- list(
-    signal = fda_grid(signal, argvals = grid, name = "signal"),
-    nuisance = fda_grid(nuisance, argvals = grid, name = "nuisance")
-  )
-
-  if (is.null(transforms)) {
-    transforms <- switch(
-      representation,
-      grid = NULL,
-      basis = list(
-        signal = fda_bspline(df = basis_df),
-        nuisance = fda_bspline(df = max(4L, basis_df - 1L))
-      ),
-      fpca = list(
-        signal = fda_fpca(n_components = n_components),
-        nuisance = fda_fpca(n_components = max(2L, n_components - 1L))
-      )
+    truth <- build_truth_from_design(
+      design = design,
+      active_functional = active_functional,
+      active_scalar = scalar_truth
     )
-  }
 
-  design <- fda_design(
-    response = response,
-    predictors = predictors,
-    scalar_covariates = scalar_covariates,
-    family = family,
-    transforms = transforms,
-    scalar_transform = if (isTRUE(include_scalar)) fda_standardize() else NULL
-  )
-
-  active_functional <- data.frame(
-    predictor = rep("signal", nrow(region_bounds)),
-    start_position = region_bounds[, 1],
-    end_position = region_bounds[, 2],
-    start_argval = grid[region_bounds[, 1]],
-    end_argval = grid[region_bounds[, 2]],
-    weight = region_weights,
-    stringsAsFactors = FALSE
-  )
-
-  truth <- build_truth_from_design(
-    design = design,
-    active_functional = active_functional,
-    active_scalar = scalar_truth
-  )
-
-  output <- list(
-    grid = grid,
-    response = response,
-    predictors = lapply(predictors, `[[`, "values"),
-    scalar_covariates = scalar_covariates,
-    design = design,
-    truth = truth,
-    linear_predictor = linear_predictor,
-    scenario = scenario,
-    confounding_strength = confounding_strength,
-    active_region_scale = active_region_scale,
-    local_correlation = local_correlation,
-    representation = representation,
-    family = family
-  )
-  class(output) <- "fda_simulation_data"
-  output
+    output <- list(
+      grid = grid,
+      response = response,
+      predictors = lapply(predictors, `[[`, "values"),
+      scalar_covariates = scalar_covariates,
+      design = design,
+      truth = truth,
+      linear_predictor = linear_predictor,
+      scenario = scenario,
+      confounding_strength = confounding_strength,
+      active_region_scale = active_region_scale,
+      local_correlation = local_correlation,
+      representation = representation,
+      family = family
+    )
+    class(output) <- "fda_simulation_data"
+    output
+  })
 }
 
 #' @export

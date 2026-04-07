@@ -1,5 +1,15 @@
 # SelectBoost.FDA News
 
+## SelectBoost.FDA 0.5.1
+
+- Localized RNG handling in exported simulation and stability-selection
+  functions so `seed=` no longer leaves the caller's RNG state modified.
+- Reworked the benchmark generation script so it writes to an explicit
+  `--output-dir=...` path when supplied and otherwise defaults to
+  `tempdir()`, rather than writing into the package tree by default.
+- Updated tests and top-level documentation to match the revised RNG and
+  benchmark-output behavior.
+
 ## SelectBoost.FDA 0.5.0
 
 - Added pkgdown website and a package-style README.

@@ -1,7 +1,7 @@
 script_args <- commandArgs(trailingOnly = FALSE)
 script_path <- sub("^--file=", "", script_args[grepl("^--file=", script_args)][1])
 project_root <- normalizePath(file.path(dirname(script_path), ".."), mustWork = TRUE)
-setwd(project_root)
+trailing_args <- commandArgs(trailingOnly = TRUE)
 
 if (requireNamespace("pkgload", quietly = TRUE)) {
   pkgload::load_all(project_root, export_all = FALSE, helpers = FALSE, quiet = TRUE)
@@ -9,7 +9,16 @@ if (requireNamespace("pkgload", quietly = TRUE)) {
   library(SelectBoost.FDA)
 }
 
-output_dir <- file.path(project_root, "inst", "extdata", "benchmarks")
+output_dir_arg <- grep("^--output-dir=", trailing_args, value = TRUE)
+output_dir <- if (length(output_dir_arg) > 0L) {
+  sub("^--output-dir=", "", output_dir_arg[1])
+} else {
+  Sys.getenv("SELECTBOOST_FDA_BENCHMARK_DIR", unset = "")
+}
+if (!nzchar(output_dir)) {
+  output_dir <- file.path(tempdir(), "SelectBoost.FDA-benchmarks")
+}
+
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 study_settings <- list(

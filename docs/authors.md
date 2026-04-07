@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/bertran7/SelectBoost.FDA/blob/HEAD/inst/CITATION)
+[`inst/CITATION`](https://github.com/fbertran/SelectBoost.FDA/blob/HEAD/inst/CITATION)
 
 Frederic Bertrand (2026). SelectBoost-Style Variable Selection for
 Functional Data Analysis, R package version 0.5.0

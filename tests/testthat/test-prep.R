@@ -31,15 +31,16 @@ test_that("interval groups are created within each block", {
 })
 
 test_that("association matrices respect block and lag constraints", {
-  set.seed(10)
-  x <- list(
-    a = matrix(rnorm(30), nrow = 10, ncol = 3),
-    b = matrix(rnorm(30), nrow = 10, ncol = 3)
-  )
+  withr::with_seed(10, {
+    x <- list(
+      a = matrix(rnorm(30), nrow = 10, ncol = 3),
+      b = matrix(rnorm(30), nrow = 10, ncol = 3)
+    )
 
-  assoc <- functional_association(x, within_blocks = TRUE, bandwidth = 1)
+    assoc <- functional_association(x, within_blocks = TRUE, bandwidth = 1)
 
-  expect_equal(assoc[1, 4], 0)
-  expect_equal(assoc[1, 3], 0)
-  expect_equal(unname(diag(assoc)), rep(1, 6))
+    expect_equal(assoc[1, 4], 0)
+    expect_equal(assoc[1, 3], 0)
+    expect_equal(unname(diag(assoc)), rep(1, 6))
+  })
 })

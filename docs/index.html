@@ -54,7 +54,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/bertran7/SelectBoost.FDA/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/fbertran/SelectBoost.FDA/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -202,14 +202,14 @@
 <span><span class="co">#&gt; 3              1            1          age        age</span></span>
 <span><span class="co">#&gt; 4              1            1    treatment  treatment</span></span>
 <span><span class="co">#&gt;   domain_start domain_end       c0 mean_selection</span></span>
-<span><span class="co">#&gt; 1         1100       2500 c0 = 0.6           0.75</span></span>
-<span><span class="co">#&gt; 2         1100       2500 c0 = 0.6           0.55</span></span>
-<span><span class="co">#&gt; 3          age        age c0 = 0.6           0.75</span></span>
-<span><span class="co">#&gt; 4    treatment  treatment c0 = 0.6           1.00</span></span>
+<span><span class="co">#&gt; 1         1100       2500 c0 = 0.6      0.6666667</span></span>
+<span><span class="co">#&gt; 2         1100       2500 c0 = 0.6      0.2500000</span></span>
+<span><span class="co">#&gt; 3          age        age c0 = 0.6      0.2500000</span></span>
+<span><span class="co">#&gt; 4    treatment  treatment c0 = 0.6      1.0000000</span></span>
 <span><span class="co">#&gt;   max_selection selected_features</span></span>
-<span><span class="co">#&gt; 1          1.00                 3</span></span>
-<span><span class="co">#&gt; 2          0.75                 5</span></span>
-<span><span class="co">#&gt; 3          0.75                 1</span></span>
+<span><span class="co">#&gt; 1          1.00                 2</span></span>
+<span><span class="co">#&gt; 2          0.50                 4</span></span>
+<span><span class="co">#&gt; 3          0.25                 1</span></span>
 <span><span class="co">#&gt; 4          1.00                 1</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -338,18 +338,18 @@
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">bench</span><span class="op">$</span><span class="va">metrics</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     level n_universe n_truth n_selected tp fp fn tn</span></span>
-<span><span class="co">#&gt; 1 feature         42       9         32  9 23  0 10</span></span>
-<span><span class="co">#&gt; 2 feature         42       9         36  9 27  0  6</span></span>
+<span><span class="co">#&gt; 1 feature         42       9         34  9 25  0  8</span></span>
+<span><span class="co">#&gt; 2 feature         42       9         38  9 29  0  4</span></span>
 <span><span class="co">#&gt; 3   group          4       3          4  3  1  0  0</span></span>
 <span><span class="co">#&gt; 4   group          4       3          4  3  1  0  0</span></span>
-<span><span class="co">#&gt;   precision recall specificity        f1 jaccard</span></span>
-<span><span class="co">#&gt; 1   0.28125      1   0.3030303 0.4390244 0.28125</span></span>
-<span><span class="co">#&gt; 2   0.25000      1   0.1818182 0.4000000 0.25000</span></span>
-<span><span class="co">#&gt; 3   0.75000      1   0.0000000 0.8571429 0.75000</span></span>
-<span><span class="co">#&gt; 4   0.75000      1   0.0000000 0.8571429 0.75000</span></span>
+<span><span class="co">#&gt;   precision recall specificity        f1   jaccard</span></span>
+<span><span class="co">#&gt; 1 0.2647059      1   0.2424242 0.4186047 0.2647059</span></span>
+<span><span class="co">#&gt; 2 0.2368421      1   0.1212121 0.3829787 0.2368421</span></span>
+<span><span class="co">#&gt; 3 0.7500000      1   0.0000000 0.8571429 0.7500000</span></span>
+<span><span class="co">#&gt; 4 0.7500000      1   0.0000000 0.8571429 0.7500000</span></span>
 <span><span class="co">#&gt;   selection_rate       c0            method</span></span>
-<span><span class="co">#&gt; 1      0.7619048 c0 = 0.5       selectboost</span></span>
-<span><span class="co">#&gt; 2      0.8571429 c0 = 0.5 plain_selectboost</span></span>
+<span><span class="co">#&gt; 1      0.8095238 c0 = 0.5       selectboost</span></span>
+<span><span class="co">#&gt; 2      0.9047619 c0 = 0.5 plain_selectboost</span></span>
 <span><span class="co">#&gt; 3      1.0000000 c0 = 0.5       selectboost</span></span>
 <span><span class="co">#&gt; 4      1.0000000 c0 = 0.5 plain_selectboost</span></span>
 <span><span class="co">#&gt;          scenario representation   family</span></span>
@@ -436,8 +436,8 @@
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/bertran7/SelectBoost.FDA/" class="external-link">Browse source code</a></li>
-<li><a href="https://github.com/bertran7/SelectBoost.FDA/issues" class="external-link">Report a bug</a></li>
+<li><a href="https://github.com/fbertran/SelectBoost.FDA/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/fbertran/SelectBoost.FDA/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
 

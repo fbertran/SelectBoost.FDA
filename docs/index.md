@@ -149,14 +149,14 @@ head(selection_map(fit_sb, level = "group", c0 = colnames(fit_sb$feature_selecti
 #> 3              1            1          age        age
 #> 4              1            1    treatment  treatment
 #>   domain_start domain_end       c0 mean_selection
-#> 1         1100       2500 c0 = 0.6           0.75
-#> 2         1100       2500 c0 = 0.6           0.55
-#> 3          age        age c0 = 0.6           0.75
-#> 4    treatment  treatment c0 = 0.6           1.00
+#> 1         1100       2500 c0 = 0.6      0.6666667
+#> 2         1100       2500 c0 = 0.6      0.2500000
+#> 3          age        age c0 = 0.6      0.2500000
+#> 4    treatment  treatment c0 = 0.6      1.0000000
 #>   max_selection selected_features
-#> 1          1.00                 3
-#> 2          0.75                 5
-#> 3          0.75                 1
+#> 1          1.00                 2
+#> 2          0.50                 4
+#> 3          0.25                 1
 #> 4          1.00                 1
 ```
 
@@ -293,18 +293,18 @@ bench <- benchmark_selection_methods(
 
 head(bench$metrics)
 #>     level n_universe n_truth n_selected tp fp fn tn
-#> 1 feature         42       9         32  9 23  0 10
-#> 2 feature         42       9         36  9 27  0  6
+#> 1 feature         42       9         34  9 25  0  8
+#> 2 feature         42       9         38  9 29  0  4
 #> 3   group          4       3          4  3  1  0  0
 #> 4   group          4       3          4  3  1  0  0
-#>   precision recall specificity        f1 jaccard
-#> 1   0.28125      1   0.3030303 0.4390244 0.28125
-#> 2   0.25000      1   0.1818182 0.4000000 0.25000
-#> 3   0.75000      1   0.0000000 0.8571429 0.75000
-#> 4   0.75000      1   0.0000000 0.8571429 0.75000
+#>   precision recall specificity        f1   jaccard
+#> 1 0.2647059      1   0.2424242 0.4186047 0.2647059
+#> 2 0.2368421      1   0.1212121 0.3829787 0.2368421
+#> 3 0.7500000      1   0.0000000 0.8571429 0.7500000
+#> 4 0.7500000      1   0.0000000 0.8571429 0.7500000
 #>   selection_rate       c0            method
-#> 1      0.7619048 c0 = 0.5       selectboost
-#> 2      0.8571429 c0 = 0.5 plain_selectboost
+#> 1      0.8095238 c0 = 0.5       selectboost
+#> 2      0.9047619 c0 = 0.5 plain_selectboost
 #> 3      1.0000000 c0 = 0.5       selectboost
 #> 4      1.0000000 c0 = 0.5 plain_selectboost
 #>          scenario representation   family

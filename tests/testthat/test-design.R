@@ -62,32 +62,33 @@ test_that("design-driven fit wrappers return classed selection objects", {
 })
 
 test_that("basis summaries aggregate component-level stability information", {
-  set.seed(11)
-  scores1 <- matrix(rnorm(120), nrow = 40, ncol = 3)
-  scores2 <- matrix(rnorm(80), nrow = 40, ncol = 2)
-  y <- 2 * scores1[, 1] - 1.25 * scores1[, 2] + rnorm(40, sd = 0.3)
+  withr::with_seed(11, {
+    scores1 <- matrix(rnorm(120), nrow = 40, ncol = 3)
+    scores2 <- matrix(rnorm(80), nrow = 40, ncol = 2)
+    y <- 2 * scores1[, 1] - 1.25 * scores1[, 2] + rnorm(40, sd = 0.3)
 
-  design <- fda_design(
-    response = y,
-    predictors = list(
-      fpca_signal = fda_basis(scores1, basis_type = "fpca", component_names = paste0("PC", 1:3), name = "fpca_signal"),
-      fpca_noise = fda_basis(scores2, basis_type = "fpca", component_names = paste0("PC", 1:2), name = "fpca_noise")
-    ),
-    family = "gaussian"
-  )
+    design <- fda_design(
+      response = y,
+      predictors = list(
+        fpca_signal = fda_basis(scores1, basis_type = "fpca", component_names = paste0("PC", 1:3), name = "fpca_signal"),
+        fpca_noise = fda_basis(scores2, basis_type = "fpca", component_names = paste0("PC", 1:2), name = "fpca_noise")
+      ),
+      family = "gaussian"
+    )
 
-  fit <- fit_stability(
-    design,
-    selector = "glmnet",
-    B = 12,
-    cutoff = 0.5,
-    seed = 3
-  )
+    fit <- fit_stability(
+      design,
+      selector = "glmnet",
+      B = 12,
+      cutoff = 0.5,
+      seed = 3
+    )
 
-  basis_map <- selection_map(fit, level = "basis")
+    basis_map <- selection_map(fit, level = "basis")
 
-  expect_equal(nrow(basis_map), 2)
-  expect_true(all(c("predictor", "n_components", "selected_components") %in% names(basis_map)))
-  expect_true(basis_map$selected_components[basis_map$predictor == "fpca_signal"] >=
-                basis_map$selected_components[basis_map$predictor == "fpca_noise"])
+    expect_equal(nrow(basis_map), 2)
+    expect_true(all(c("predictor", "n_components", "selected_components") %in% names(basis_map)))
+    expect_true(basis_map$selected_components[basis_map$predictor == "fpca_signal"] >=
+                  basis_map$selected_components[basis_map$predictor == "fpca_noise"])
+  })
 })

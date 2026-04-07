@@ -1,7 +1,7 @@
 Package: SelectBoost.FDA
 Title: SelectBoost-Style Variable Selection for Functional Data Analysis
 Date: 2026-04-02
-Version: 0.5.0
+Version: 0.5.1
 Authors@R: c(
 	person(given = "Frederic", family= "Bertrand", role = c("cre", "aut"), 
 	email = "frederic.bertrand@lecnam.net", comment = c(ORCID = "0000-0002-0837-8281")))
@@ -28,7 +28,8 @@ RoxygenNote: 7.3.3
 Depends: R (>= 2.10)
 Imports:
     SelectBoost,
-    stats
+    stats,
+    withr
 Suggests:
     FDboost,
     glmnet,
@@ -42,5 +43,5 @@ Suggests:
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/Needs/website: pkgdown
-URL: https://fbertran.github.io/SelectBoost.FDA/, https://github.com/bertran7/SelectBoost.FDA
-BugReports: https://github.com/bertran7/SelectBoost.FDA/issues
+URL: https://fbertran.github.io/SelectBoost.FDA/, https://github.com/fbertran/SelectBoost.FDA
+BugReports: https://github.com/fbertran/SelectBoost.FDA/issues
