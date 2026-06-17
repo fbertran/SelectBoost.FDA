@@ -126,11 +126,11 @@ cal_width$grid
 #> 2                   1
 cal_selectboost$grid
 #>                c0 n_selected_features n_selected_groups mean_feature_selection
-#> c0 = 0.4 c0 = 0.4                   9                 5              0.5681818
-#> c0 = 0.7 c0 = 0.7                   9                 5              0.7045455
+#> c0 = 0.4 c0 = 0.4                  11                 5              0.6818182
+#> c0 = 0.7 c0 = 0.7                   9                 5              0.6818182
 #>          max_feature_selection mean_group_selection max_group_selection
-#> c0 = 0.4                     1                 0.69                   1
-#> c0 = 0.7                     1                 0.87                   1
+#> c0 = 0.4                     1                 0.82                   1
+#> c0 = 0.7                     1                 0.86                   1
 ```
 
 ## Compare methods on one design
@@ -154,8 +154,8 @@ summary(comparison)
 #>       method n_selected_features n_selected_groups mean_feature_frequency
 #>    stability                   5                 4              0.4886364
 #>     interval                   5                 4              0.5227273
-#>  selectboost                  11                 5                     NA
-#>  selectboost                   8                 5                     NA
+#>  selectboost                   9                 5                     NA
+#>  selectboost                   9                 5                     NA
 #>  max_feature_frequency mean_group_frequency max_group_frequency width       c0
 #>                      1                0.725                   1    NA     <NA>
 #>                      1                0.725                   1     3     <NA>
@@ -164,8 +164,8 @@ summary(comparison)
 #>  mean_feature_selection max_feature_selection mean_group_selection
 #>                      NA                    NA                   NA
 #>                      NA                    NA                   NA
-#>               0.6590909                     1                 0.73
-#>               0.6818182                     1                 0.86
+#>               0.6136364                     1                 0.71
+#>               0.6363636                     1                 0.76
 #>  max_group_selection
 #>                   NA
 #>                   NA

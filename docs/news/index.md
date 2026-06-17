@@ -1,5 +1,41 @@
 # Changelog
 
+## SelectBoost.FDA 0.6.0
+
+- Added a focused benchmarking and validation layer.
+- Added
+  [`fit_perturbation_grid()`](https://fbertran.github.io/SelectBoost.FDA/reference/fit_perturbation_grid.md),
+  [`selection_surface()`](https://fbertran.github.io/SelectBoost.FDA/reference/selection_surface.md),
+  [`selected_surface()`](https://fbertran.github.io/SelectBoost.FDA/reference/selected_surface.md),
+  and
+  [`summarise_perturbation_grid()`](https://fbertran.github.io/SelectBoost.FDA/reference/summarise_perturbation_grid.md)
+  for two-parameter selection surfaces indexed by subject subsampling
+  rate `q` and SelectBoost perturbation strength `c0`.
+- Added renderer-neutral extractors for selection surfaces, monotonicity
+  paths, precision-recall paths, association heatmaps, interval maps,
+  and benchmark summaries.
+- Added monotonicity diagnostics and post-processing helpers:
+  [`check_selection_monotonicity()`](https://fbertran.github.io/SelectBoost.FDA/reference/check_selection_monotonicity.md),
+  [`enforce_monotone_selection()`](https://fbertran.github.io/SelectBoost.FDA/reference/enforce_monotone_selection.md),
+  and
+  [`summarise_monotonicity()`](https://fbertran.github.io/SelectBoost.FDA/reference/summarise_monotonicity.md).
+- Added precision-recall helpers:
+  [`precision_recall_curve_fda()`](https://fbertran.github.io/SelectBoost.FDA/reference/precision_recall_curve_fda.md),
+  [`best_threshold_fda()`](https://fbertran.github.io/SelectBoost.FDA/reference/best_threshold_fda.md),
+  and
+  [`summarise_precision_recall_fda()`](https://fbertran.github.io/SelectBoost.FDA/reference/summarise_precision_recall_fda.md).
+- Added association diagnostics with
+  [`diagnose_functional_association()`](https://fbertran.github.io/SelectBoost.FDA/reference/diagnose_functional_association.md),
+  [`summarise_association_structure()`](https://fbertran.github.io/SelectBoost.FDA/reference/summarise_association_structure.md),
+  and
+  [`compare_association_methods()`](https://fbertran.github.io/SelectBoost.FDA/reference/compare_association_methods.md).
+- Added report extraction helpers and a CRAN-safe focused benchmark
+  driver at `tools/run_focused_benchmark.R`; the driver writes only to
+  `--output-dir` or to
+  [`tempdir()`](https://rdrr.io/r/base/tempfile.html) by default.
+- Added vignettes for perturbation grids, monotonicity/precision-recall
+  paths, association diagnostics, and the focused benchmark workflow.
+
 ## SelectBoost.FDA 0.5.1
 
 - Localized RNG handling in exported simulation and stability-selection
@@ -12,6 +48,8 @@
   benchmark-output behavior.
 
 ## SelectBoost.FDA 0.5.0
+
+CRAN release: 2026-04-10
 
 - Added pkgdown website and a package-style README.
 - Added targeted FDA benchmark sensitivity utilities with

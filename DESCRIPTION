@@ -1,7 +1,7 @@
 Package: SelectBoost.FDA
 Title: SelectBoost-Style Variable Selection for Functional Data Analysis
-Date: 2026-04-02
-Version: 0.5.1
+Date: 2026-06-16
+Version: 0.6.0
 Authors@R: c(
 	person(given = "Frederic", family= "Bertrand", role = c("cre", "aut"), 
 	email = "frederic.bertrand@lecnam.net", comment = c(ORCID = "0000-0002-0837-8281")))
@@ -16,7 +16,10 @@ Description: Implements 'SelectBoost'-style variable selection workflows for
     lasso; FDA-aware grouping functions and calibration helpers for 'SelectBoost';
     method-comparison utilities; a formula interface; simulation,
     benchmarking, and validation helpers with mapped ground truth;
-    targeted sensitivity-study utilities and shipped benchmark summaries
+    targeted sensitivity-study utilities, two-parameter perturbation-grid
+    workflows, renderer-neutral selection-surface and diagnostic extractors,
+    monotonicity and precision-recall utilities, association diagnostics,
+    report table helpers, and shipped benchmark summaries
     for mean 'F1' comparisons between FDA-aware and plain 'SelectBoost'
     workflows; small example datasets; and an optional adapter to the
     native stability-selection interface from the 'FDboost' package.

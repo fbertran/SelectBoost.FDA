@@ -12,8 +12,8 @@
 <link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="SelectBoost-Style Variable Selection for Functional Data Analysis">
-<meta name="description" content="Implements SelectBoost-style variable selection workflows for functional data analysis. The package provides FDA-native design and preprocessing objects for raw curves, spline-basis expansions, Functional principal component analysis scores, and scalar covariates; grouped stability-selection routines based on repeated subject-level subsampling; multiple selector backends including lasso, group lasso, and sparse-group lasso; FDA-aware grouping functions and calibration helpers for SelectBoost; method-comparison utilities; a formula interface; simulation, benchmarking, and validation helpers with mapped ground truth; targeted sensitivity-study utilities and shipped benchmark summaries for mean F1 comparisons between FDA-aware and plain SelectBoost workflows; small example datasets; and an optional adapter to the native stability-selection interface from the FDboost package.">
-<meta property="og:description" content="Implements SelectBoost-style variable selection workflows for functional data analysis. The package provides FDA-native design and preprocessing objects for raw curves, spline-basis expansions, Functional principal component analysis scores, and scalar covariates; grouped stability-selection routines based on repeated subject-level subsampling; multiple selector backends including lasso, group lasso, and sparse-group lasso; FDA-aware grouping functions and calibration helpers for SelectBoost; method-comparison utilities; a formula interface; simulation, benchmarking, and validation helpers with mapped ground truth; targeted sensitivity-study utilities and shipped benchmark summaries for mean F1 comparisons between FDA-aware and plain SelectBoost workflows; small example datasets; and an optional adapter to the native stability-selection interface from the FDboost package.">
+<meta name="description" content="Implements SelectBoost-style variable selection workflows for functional data analysis. The package provides FDA-native design and preprocessing objects for raw curves, spline-basis expansions, Functional principal component analysis scores, and scalar covariates; grouped stability-selection routines based on repeated subject-level subsampling; multiple selector backends including lasso, group lasso, and sparse-group lasso; FDA-aware grouping functions and calibration helpers for SelectBoost; method-comparison utilities; a formula interface; simulation, benchmarking, and validation helpers with mapped ground truth; targeted sensitivity-study utilities, two-parameter perturbation-grid workflows, renderer-neutral selection-surface and diagnostic extractors, monotonicity and precision-recall utilities, association diagnostics, report table helpers, and shipped benchmark summaries for mean F1 comparisons between FDA-aware and plain SelectBoost workflows; small example datasets; and an optional adapter to the native stability-selection interface from the FDboost package.">
+<meta property="og:description" content="Implements SelectBoost-style variable selection workflows for functional data analysis. The package provides FDA-native design and preprocessing objects for raw curves, spline-basis expansions, Functional principal component analysis scores, and scalar covariates; grouped stability-selection routines based on repeated subject-level subsampling; multiple selector backends including lasso, group lasso, and sparse-group lasso; FDA-aware grouping functions and calibration helpers for SelectBoost; method-comparison utilities; a formula interface; simulation, benchmarking, and validation helpers with mapped ground truth; targeted sensitivity-study utilities, two-parameter perturbation-grid workflows, renderer-neutral selection-surface and diagnostic extractors, monotonicity and precision-recall utilities, association diagnostics, report table helpers, and shipped benchmark summaries for mean F1 comparisons between FDA-aware and plain SelectBoost workflows; small example datasets; and an optional adapter to the native stability-selection interface from the FDboost package.">
 <style>
   .navbar-brand img { height: 28px; }
 </style>
@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="index.html">SelectBoost.FDA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,11 +41,16 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>End-to-End Workflows</h6></li>
+    <li><a class="dropdown-item" href="articles/workflow-guide.html">Workflow Guide</a></li>
     <li><a class="dropdown-item" href="articles/discretized-curves.html">Discretized Curves and Grouped Stability Selection</a></li>
-    <li><a class="dropdown-item" href="articles/selectboost-spectra.html">SelectBoost for Dense Spectra</a></li>
     <li><a class="dropdown-item" href="articles/basis-fpca-workflows.html">Basis and FPCA Workflows</a></li>
+    <li><a class="dropdown-item" href="articles/selectboost-spectra.html">SelectBoost for Dense Spectra</a></li>
     <li><a class="dropdown-item" href="articles/methods-and-formulas.html">Methods, Calibration, and Formula Workflows</a></li>
+    <li><a class="dropdown-item" href="articles/association-diagnostics.html">Association Diagnostics for Functional Predictors</a></li>
+    <li><a class="dropdown-item" href="articles/perturbation-grid.html">Perturbation Grids for FDA Selection</a></li>
+    <li><a class="dropdown-item" href="articles/monotonicity-and-pr-paths.html">Monotonicity and Precision-Recall Paths</a></li>
     <li><a class="dropdown-item" href="articles/simulation-and-benchmarks.html">Simulation and Benchmark Workflows</a></li>
+    <li><a class="dropdown-item" href="articles/focused-benchmark-workflow.html">Focused Benchmark Workflow</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -63,7 +68,7 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="selectboostfda-">SelectBoost.FDA <img src="reference/figures/logo_selectboost_FDA.png" align="right" width="200"><a class="anchor" aria-label="anchor" href="#selectboostfda-"></a>
+<div class="page-header"><h1 id="selectboostfda-">SelectBoost.FDA <img src="reference/figures/logo_selectboost_FDA.png" align="right" width="200" alt="SelectBoost.FDA logo"><a class="anchor" aria-label="anchor" href="#selectboostfda-"></a>
 </h1></div>
 <div class="section level2">
 <h2 id="frédéric-bertrand">Frédéric Bertrand<a class="anchor" aria-label="anchor" href="#fr%C3%A9d%C3%A9ric-bertrand"></a>
@@ -82,6 +87,9 @@
 <li>Grouped stability selection for functional blocks and interval summaries.</li>
 <li>FDA-aware <code>SelectBoost</code> wrappers plus a plain <code>SelectBoost</code> baseline.</li>
 <li>Simulation, benchmark, and evaluation helpers with mapped ground truth.</li>
+<li>Two-parameter perturbation grids over subsampling rate <code>q</code> and SelectBoost strength <code>c0</code>.</li>
+<li>Renderer-neutral extraction functions for selection surfaces, monotonicity paths, precision-recall paths, association heatmaps, interval maps, and benchmark summaries.</li>
+<li>Association diagnostics and report table helpers for scientific reporting material.</li>
 <li>Shipped sensitivity-study benchmark summaries for direct mean <code>F1</code> comparisons between <code><a href="reference/selectboost_fda.html">selectboost_fda()</a></code> and plain <code>SelectBoost</code>.</li>
 <li>Seeded simulation and stability-selection workflows that keep RNG changes local to the function call.</li>
 </ul>
@@ -153,12 +161,18 @@
 <span><span class="co">#&gt;        age         scalar          1</span></span>
 <span><span class="co">#&gt;  treatment         scalar          1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="reference/selection_map.html">selection_map</a></span><span class="op">(</span><span class="va">design</span>, level <span class="op">=</span> <span class="st">"basis"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                 predictor representation basis_type source_representation n_components</span></span>
-<span><span class="co">#&gt; nuisance.spline  nuisance          basis     spline                  grid            5</span></span>
-<span><span class="co">#&gt; signal.fpca        signal          basis       fpca                  grid            3</span></span>
-<span><span class="co">#&gt;                 first_component last_component         components domain_start domain_end</span></span>
-<span><span class="co">#&gt; nuisance.spline              B1             B5 B1, B2, B3, B4, B5         1100       2500</span></span>
-<span><span class="co">#&gt; signal.fpca                 PC1            PC3      PC1, PC2, PC3         1100       2500</span></span></code></pre></div>
+<span><span class="co">#&gt;                 predictor representation basis_type</span></span>
+<span><span class="co">#&gt; nuisance.spline  nuisance          basis     spline</span></span>
+<span><span class="co">#&gt; signal.fpca        signal          basis       fpca</span></span>
+<span><span class="co">#&gt;                 source_representation n_components first_component</span></span>
+<span><span class="co">#&gt; nuisance.spline                  grid            5              B1</span></span>
+<span><span class="co">#&gt; signal.fpca                      grid            3             PC1</span></span>
+<span><span class="co">#&gt;                 last_component         components domain_start</span></span>
+<span><span class="co">#&gt; nuisance.spline             B5 B1, B2, B3, B4, B5         1100</span></span>
+<span><span class="co">#&gt; signal.fpca                PC3      PC1, PC2, PC3         1100</span></span>
+<span><span class="co">#&gt;                 domain_end</span></span>
+<span><span class="co">#&gt; nuisance.spline       2500</span></span>
+<span><span class="co">#&gt; signal.fpca           2500</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="fda-aware-selectboost">FDA-aware SelectBoost<a class="anchor" aria-label="anchor" href="#fda-aware-selectboost"></a>
@@ -182,21 +196,26 @@
 <span><span class="co">#&gt;   groups: 4 </span></span>
 <span><span class="co">#&gt;   c0 values: 2</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="reference/selection_map.html">selection_map</a></span><span class="op">(</span><span class="va">fit_sb</span>, level <span class="op">=</span> <span class="st">"group"</span>, c0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">fit_sb</span><span class="op">$</span><span class="va">feature_selection</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   predictor group_id     group representation basis_type source_representation n_features</span></span>
-<span><span class="co">#&gt; 1    signal        1    signal          basis       fpca                  grid          3</span></span>
-<span><span class="co">#&gt; 2  nuisance        2  nuisance          basis     spline                  grid          5</span></span>
-<span><span class="co">#&gt; 3       age        3       age         scalar                           scalar          1</span></span>
-<span><span class="co">#&gt; 4 treatment        4 treatment         scalar                           scalar          1</span></span>
-<span><span class="co">#&gt;   start_position end_position start_argval end_argval domain_start domain_end       c0</span></span>
-<span><span class="co">#&gt; 1              1            3          PC1        PC3         1100       2500 c0 = 0.6</span></span>
-<span><span class="co">#&gt; 2              1            5           B1         B5         1100       2500 c0 = 0.6</span></span>
-<span><span class="co">#&gt; 3              1            1          age        age          age        age c0 = 0.6</span></span>
-<span><span class="co">#&gt; 4              1            1    treatment  treatment    treatment  treatment c0 = 0.6</span></span>
+<span><span class="co">#&gt;   predictor group_id     group representation basis_type</span></span>
+<span><span class="co">#&gt; 1    signal        1    signal          basis       fpca</span></span>
+<span><span class="co">#&gt; 2  nuisance        2  nuisance          basis     spline</span></span>
+<span><span class="co">#&gt; 3       age        3       age         scalar           </span></span>
+<span><span class="co">#&gt; 4 treatment        4 treatment         scalar           </span></span>
+<span><span class="co">#&gt;   source_representation n_features start_position end_position</span></span>
+<span><span class="co">#&gt; 1                  grid          3              1            3</span></span>
+<span><span class="co">#&gt; 2                  grid          5              1            5</span></span>
+<span><span class="co">#&gt; 3                scalar          1              1            1</span></span>
+<span><span class="co">#&gt; 4                scalar          1              1            1</span></span>
+<span><span class="co">#&gt;   start_argval end_argval domain_start domain_end       c0</span></span>
+<span><span class="co">#&gt; 1          PC1        PC3         1100       2500 c0 = 0.6</span></span>
+<span><span class="co">#&gt; 2           B1         B5         1100       2500 c0 = 0.6</span></span>
+<span><span class="co">#&gt; 3          age        age          age        age c0 = 0.6</span></span>
+<span><span class="co">#&gt; 4    treatment  treatment    treatment  treatment c0 = 0.6</span></span>
 <span><span class="co">#&gt;   mean_selection max_selection selected_features</span></span>
-<span><span class="co">#&gt; 1      0.6666667          1.00                 2</span></span>
-<span><span class="co">#&gt; 2      0.3000000          0.50                 4</span></span>
-<span><span class="co">#&gt; 3      0.7500000          0.75                 1</span></span>
-<span><span class="co">#&gt; 4      1.0000000          1.00                 1</span></span></code></pre></div>
+<span><span class="co">#&gt; 1           0.75          1.00                 3</span></span>
+<span><span class="co">#&gt; 2           0.45          0.75                 5</span></span>
+<span><span class="co">#&gt; 3           0.50          0.50                 1</span></span>
+<span><span class="co">#&gt; 4           1.00          1.00                 1</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="grouped-stability-selection">Grouped stability selection<a class="anchor" aria-label="anchor" href="#grouped-stability-selection"></a>
@@ -215,26 +234,31 @@
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_stab</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="reference/selection_map.html">selection_map</a></span><span class="op">(</span><span class="va">fit_stab</span>, level <span class="op">=</span> <span class="st">"group"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#&gt;   predictor group_id     group representation basis_type source_representation n_features</span></span>
-<span><span class="co">#&gt; 1    signal        1    signal          basis       fpca                  grid          3</span></span>
-<span><span class="co">#&gt; 2  nuisance        2  nuisance          basis     spline                  grid          5</span></span>
-<span><span class="co">#&gt; 3       age        3       age         scalar                           scalar          1</span></span>
-<span><span class="co">#&gt; 4 treatment        4 treatment         scalar                           scalar          1</span></span>
-<span><span class="co">#&gt;   start_position end_position start_argval end_argval domain_start domain_end</span></span>
-<span><span class="co">#&gt; 1              1            3          PC1        PC3         1100       2500</span></span>
-<span><span class="co">#&gt; 2              1            5           B1         B5         1100       2500</span></span>
-<span><span class="co">#&gt; 3              1            1          age        age          age        age</span></span>
-<span><span class="co">#&gt; 4              1            1    treatment  treatment    treatment  treatment</span></span>
-<span><span class="co">#&gt;   mean_feature_frequency max_feature_frequency selected_features group_frequency</span></span>
-<span><span class="co">#&gt; 1              0.4166667                 0.750                 2           0.750</span></span>
-<span><span class="co">#&gt; 2              0.0500000                 0.125                 0           0.125</span></span>
-<span><span class="co">#&gt; 3              0.0000000                 0.000                 0           0.000</span></span>
-<span><span class="co">#&gt; 4              0.2500000                 0.250                 0           0.250</span></span>
-<span><span class="co">#&gt;   group_selected</span></span>
-<span><span class="co">#&gt; 1           TRUE</span></span>
-<span><span class="co">#&gt; 2          FALSE</span></span>
-<span><span class="co">#&gt; 3          FALSE</span></span>
-<span><span class="co">#&gt; 4          FALSE</span></span></code></pre></div>
+<span><span class="co">#&gt;   predictor group_id     group representation basis_type</span></span>
+<span><span class="co">#&gt; 1    signal        1    signal          basis       fpca</span></span>
+<span><span class="co">#&gt; 2  nuisance        2  nuisance          basis     spline</span></span>
+<span><span class="co">#&gt; 3       age        3       age         scalar           </span></span>
+<span><span class="co">#&gt; 4 treatment        4 treatment         scalar           </span></span>
+<span><span class="co">#&gt;   source_representation n_features start_position end_position</span></span>
+<span><span class="co">#&gt; 1                  grid          3              1            3</span></span>
+<span><span class="co">#&gt; 2                  grid          5              1            5</span></span>
+<span><span class="co">#&gt; 3                scalar          1              1            1</span></span>
+<span><span class="co">#&gt; 4                scalar          1              1            1</span></span>
+<span><span class="co">#&gt;   start_argval end_argval domain_start domain_end</span></span>
+<span><span class="co">#&gt; 1          PC1        PC3         1100       2500</span></span>
+<span><span class="co">#&gt; 2           B1         B5         1100       2500</span></span>
+<span><span class="co">#&gt; 3          age        age          age        age</span></span>
+<span><span class="co">#&gt; 4    treatment  treatment    treatment  treatment</span></span>
+<span><span class="co">#&gt;   mean_feature_frequency max_feature_frequency selected_features</span></span>
+<span><span class="co">#&gt; 1              0.4166667                 0.750                 2</span></span>
+<span><span class="co">#&gt; 2              0.0500000                 0.125                 0</span></span>
+<span><span class="co">#&gt; 3              0.0000000                 0.000                 0</span></span>
+<span><span class="co">#&gt; 4              0.2500000                 0.250                 0</span></span>
+<span><span class="co">#&gt;   group_frequency group_selected</span></span>
+<span><span class="co">#&gt; 1           0.750           TRUE</span></span>
+<span><span class="co">#&gt; 2           0.125          FALSE</span></span>
+<span><span class="co">#&gt; 3           0.000          FALSE</span></span>
+<span><span class="co">#&gt; 4           0.250          FALSE</span></span></code></pre></div>
 <p>Interval summaries can be requested directly:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"glmnet"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -249,36 +273,341 @@
 <span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="reference/selection_map.html">selection_map</a></span><span class="op">(</span><span class="va">fit_interval</span>, level <span class="op">=</span> <span class="st">"group"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#&gt;   predictor group_id          group representation basis_type source_representation</span></span>
-<span><span class="co">#&gt; 1    signal        1    signal[1:3]          basis       fpca                  grid</span></span>
-<span><span class="co">#&gt; 2  nuisance        2  nuisance[1:4]          basis     spline                  grid</span></span>
-<span><span class="co">#&gt; 3  nuisance        3  nuisance[5:5]          basis     spline                  grid</span></span>
-<span><span class="co">#&gt; 4       age        4       age[1:1]         scalar                           scalar</span></span>
-<span><span class="co">#&gt; 5 treatment        5 treatment[1:1]         scalar                           scalar</span></span>
-<span><span class="co">#&gt;   n_features start_position end_position start_argval end_argval     domain_start</span></span>
-<span><span class="co">#&gt; 1          3              1            3          PC1        PC3             1100</span></span>
-<span><span class="co">#&gt; 2          4              1            4           B1         B4             1100</span></span>
-<span><span class="co">#&gt; 3          1              5            5           B5         B5 1817.94871794872</span></span>
-<span><span class="co">#&gt; 4          1              1            1          age        age              age</span></span>
-<span><span class="co">#&gt; 5          1              1            1    treatment  treatment        treatment</span></span>
-<span><span class="co">#&gt;         domain_end mean_feature_frequency max_feature_frequency selected_features</span></span>
-<span><span class="co">#&gt; 1             2500              0.4166667                 0.750                 2</span></span>
-<span><span class="co">#&gt; 2 2464.10256410256              0.0625000                 0.125                 0</span></span>
-<span><span class="co">#&gt; 3             2500              0.0000000                 0.000                 0</span></span>
-<span><span class="co">#&gt; 4              age              0.0000000                 0.000                 0</span></span>
-<span><span class="co">#&gt; 5        treatment              0.2500000                 0.250                 0</span></span>
-<span><span class="co">#&gt;   group_frequency group_selected interval_start interval_end interval_label</span></span>
-<span><span class="co">#&gt; 1           0.750           TRUE              1            3    signal[1:3]</span></span>
-<span><span class="co">#&gt; 2           0.125          FALSE              1            4  nuisance[1:4]</span></span>
-<span><span class="co">#&gt; 3           0.000          FALSE              5            5  nuisance[5:5]</span></span>
-<span><span class="co">#&gt; 4           0.000          FALSE              1            1       age[1:1]</span></span>
-<span><span class="co">#&gt; 5           0.250          FALSE              1            1 treatment[1:1]</span></span></code></pre></div>
+<span><span class="co">#&gt;   predictor group_id          group representation basis_type</span></span>
+<span><span class="co">#&gt; 1    signal        1    signal[1:3]          basis       fpca</span></span>
+<span><span class="co">#&gt; 2  nuisance        2  nuisance[1:4]          basis     spline</span></span>
+<span><span class="co">#&gt; 3  nuisance        3  nuisance[5:5]          basis     spline</span></span>
+<span><span class="co">#&gt; 4       age        4       age[1:1]         scalar           </span></span>
+<span><span class="co">#&gt; 5 treatment        5 treatment[1:1]         scalar           </span></span>
+<span><span class="co">#&gt;   source_representation n_features start_position end_position</span></span>
+<span><span class="co">#&gt; 1                  grid          3              1            3</span></span>
+<span><span class="co">#&gt; 2                  grid          4              1            4</span></span>
+<span><span class="co">#&gt; 3                  grid          1              5            5</span></span>
+<span><span class="co">#&gt; 4                scalar          1              1            1</span></span>
+<span><span class="co">#&gt; 5                scalar          1              1            1</span></span>
+<span><span class="co">#&gt;   start_argval end_argval     domain_start       domain_end</span></span>
+<span><span class="co">#&gt; 1          PC1        PC3             1100             2500</span></span>
+<span><span class="co">#&gt; 2           B1         B4             1100 2464.10256410256</span></span>
+<span><span class="co">#&gt; 3           B5         B5 1817.94871794872             2500</span></span>
+<span><span class="co">#&gt; 4          age        age              age              age</span></span>
+<span><span class="co">#&gt; 5    treatment  treatment        treatment        treatment</span></span>
+<span><span class="co">#&gt;   mean_feature_frequency max_feature_frequency selected_features</span></span>
+<span><span class="co">#&gt; 1              0.4166667                 0.750                 2</span></span>
+<span><span class="co">#&gt; 2              0.0625000                 0.125                 0</span></span>
+<span><span class="co">#&gt; 3              0.0000000                 0.000                 0</span></span>
+<span><span class="co">#&gt; 4              0.0000000                 0.000                 0</span></span>
+<span><span class="co">#&gt; 5              0.2500000                 0.250                 0</span></span>
+<span><span class="co">#&gt;   group_frequency group_selected interval_start interval_end</span></span>
+<span><span class="co">#&gt; 1           0.750           TRUE              1            3</span></span>
+<span><span class="co">#&gt; 2           0.125          FALSE              1            4</span></span>
+<span><span class="co">#&gt; 3           0.000          FALSE              5            5</span></span>
+<span><span class="co">#&gt; 4           0.000          FALSE              1            1</span></span>
+<span><span class="co">#&gt; 5           0.250          FALSE              1            1</span></span>
+<span><span class="co">#&gt;   interval_label</span></span>
+<span><span class="co">#&gt; 1    signal[1:3]</span></span>
+<span><span class="co">#&gt; 2  nuisance[1:4]</span></span>
+<span><span class="co">#&gt; 3  nuisance[5:5]</span></span>
+<span><span class="co">#&gt; 4       age[1:1]</span></span>
+<span><span class="co">#&gt; 5 treatment[1:1]</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="two-parameter-perturbation-surfaces">Two-parameter perturbation surfaces<a class="anchor" aria-label="anchor" href="#two-parameter-perturbation-surfaces"></a>
+</h2>
+<p>For focused benchmark workflows, <code><a href="reference/fit_perturbation_grid.html">fit_perturbation_grid()</a></code> combines subject-level subsampling with FDA-aware SelectBoost perturbations and returns ordinary data frames for downstream plotting or reporting.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">grid_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fit_perturbation_grid.html">fit_perturbation_grid</a></span><span class="op">(</span></span>
+<span>  <span class="va">design</span>,</span>
+<span>  q_grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.6</span>, <span class="fl">0.8</span><span class="op">)</span>,</span>
+<span>  c0_grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.7</span>, <span class="fl">0.4</span><span class="op">)</span>,</span>
+<span>  B <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  selectboost_B <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  selector <span class="op">=</span> <span class="st">"msgps"</span>,</span>
+<span>  association_method <span class="op">=</span> <span class="st">"hybrid"</span>,</span>
+<span>  bandwidth <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"feature"</span>, <span class="st">"group"</span><span class="op">)</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="reference/selection_surface.html">selection_surface</a></span><span class="op">(</span><span class="va">grid_fit</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                                 feature predictor group   level   q</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost     age       age   age feature 0.6</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost     age       age   age feature 0.6</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost     age       age   age feature 0.8</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost     age       age   age feature 0.8</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost       age       age   age   group 0.6</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost       age       age   age   group 0.6</span></span>
+<span><span class="co">#&gt;                                  c0 selection mean_selection</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost 0.4         1              1</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost 0.7         1              1</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost 0.4         0              0</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost 0.7         1              1</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost   0.4         1              1</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost   0.7         1              1</span></span>
+<span><span class="co">#&gt;                                 max_selection selected</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost             1     TRUE</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost             1     TRUE</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost             0    FALSE</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost             1     TRUE</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost               1     TRUE</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost               1     TRUE</span></span>
+<span><span class="co">#&gt;                                 representation basis_type</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost         scalar       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost         scalar       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost         scalar       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost         scalar       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost           scalar           </span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost           scalar           </span></span>
+<span><span class="co">#&gt;                                 source_representation</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost                scalar</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost                scalar</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost                scalar</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost                scalar</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost                  scalar</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost                  scalar</span></span>
+<span><span class="co">#&gt;                                 start_position end_position</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost              1            1</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost              1            1</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost              1            1</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost              1            1</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost                1            1</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost                1            1</span></span>
+<span><span class="co">#&gt;                                 start_argval end_argval</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost          age        age</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost          age        age</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost          age        age</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost          age        age</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost            age        age</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost            age        age</span></span>
+<span><span class="co">#&gt;                                 domain_start domain_end      method</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost          age        age selectboost</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost          age        age selectboost</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost          age        age selectboost</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost          age        age selectboost</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost            age        age selectboost</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost            age        age selectboost</span></span>
+<span><span class="co">#&gt;                                 block position argval   transform</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost   age        1    age standardize</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost   age        1    age standardize</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost   age        1    age standardize</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost   age        1    age standardize</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost    &lt;NA&gt;       NA   &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost    &lt;NA&gt;       NA   &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;                                 source_predictor</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost              age</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost              age</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost              age</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost              age</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost               &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost               &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;                                 source_position_start</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost                     1</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost                     1</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost                     1</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost                     1</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost                      NA</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost                      NA</span></span>
+<span><span class="co">#&gt;                                 source_position_end</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost                   1</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost                   1</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost                   1</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost                   1</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost                    NA</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost                    NA</span></span>
+<span><span class="co">#&gt;                                 source_argval_start</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost                 age</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost                 age</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost                 age</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost                 age</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost                  &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost                  &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;                                 source_argval_end component unit</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost               age      &lt;NA&gt; &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost               age      &lt;NA&gt; &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost               age      &lt;NA&gt; &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost               age      &lt;NA&gt; &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost                &lt;NA&gt;      &lt;NA&gt; &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost                &lt;NA&gt;      &lt;NA&gt; &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;                                 feature_index basis_component</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost             9            &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost             9            &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost             9            &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost             9            &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost              NA            &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost              NA            &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;                                 domain_label group_id n_features</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost          age        3         NA</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost          age        3         NA</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost          age        3         NA</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost          age        3         NA</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost           &lt;NA&gt;        3          1</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost           &lt;NA&gt;        3          1</span></span>
+<span><span class="co">#&gt;                                 selected_features replicate</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost                NA        NA</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost                NA        NA</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost                NA        NA</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost                NA        NA</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost                   1        NA</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost                   1        NA</span></span>
+<span><span class="co">#&gt;                                 association_method group_method</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost             hybrid    threshold</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost             hybrid    threshold</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost             hybrid    threshold</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost             hybrid    threshold</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost               hybrid    threshold</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost               hybrid    threshold</span></span>
+<span><span class="co">#&gt;                                 within_blocks bandwidth width</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost          TRUE         4    NA</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost          TRUE         4    NA</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost          TRUE         4    NA</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost          TRUE         4    NA</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost            TRUE         4    NA</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost            TRUE         4    NA</span></span>
+<span><span class="co">#&gt;                                 n_replicates</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost            1</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.7.selectboost            1</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost            1</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.7.selectboost            1</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost              1</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.7.selectboost              1</span></span>
+<span><span class="fu"><a href="reference/summarise_perturbation_grid.html">summarise_perturbation_grid</a></span><span class="op">(</span><span class="va">grid_fit</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                   level   q  c0 n_items n_selected mean_selection</span></span>
+<span><span class="co">#&gt; feature.0.6.0.4 feature 0.6 0.4      10          5      0.5000000</span></span>
+<span><span class="co">#&gt; feature.0.6.0.7 feature 0.6 0.7      10          5      0.5000000</span></span>
+<span><span class="co">#&gt; feature.0.8.0.4 feature 0.8 0.4      10          5      0.5000000</span></span>
+<span><span class="co">#&gt; feature.0.8.0.7 feature 0.8 0.7      10          5      0.5000000</span></span>
+<span><span class="co">#&gt; group.0.6.0.4     group 0.6 0.4       4          4      0.7166667</span></span>
+<span><span class="co">#&gt; group.0.6.0.7     group 0.6 0.7       4          4      0.7166667</span></span>
+<span><span class="co">#&gt; group.0.8.0.4     group 0.8 0.4       4          3      0.5166667</span></span>
+<span><span class="co">#&gt; group.0.8.0.7     group 0.8 0.7       4          4      0.7166667</span></span>
+<span><span class="co">#&gt;                 max_selection</span></span>
+<span><span class="co">#&gt; feature.0.6.0.4             1</span></span>
+<span><span class="co">#&gt; feature.0.6.0.7             1</span></span>
+<span><span class="co">#&gt; feature.0.8.0.4             1</span></span>
+<span><span class="co">#&gt; feature.0.8.0.7             1</span></span>
+<span><span class="co">#&gt; group.0.6.0.4               1</span></span>
+<span><span class="co">#&gt; group.0.6.0.7               1</span></span>
+<span><span class="co">#&gt; group.0.8.0.4               1</span></span>
+<span><span class="co">#&gt; group.0.8.0.7               1</span></span></code></pre></div>
+<p>The data layer is independent of plotting backends:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="reference/as_monotonicity_path_data.html">as_monotonicity_path_data</a></span><span class="op">(</span><span class="va">grid_fit</span>, axis <span class="op">=</span> <span class="st">"c0"</span>, level <span class="op">=</span> <span class="st">"feature"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                                                                                             id</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                         age</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                         age</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                         age</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                         age</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost nuisance_B1</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost nuisance_B1</span></span>
+<span><span class="co">#&gt;                                                                                      level</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                 feature</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                 feature</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                 feature</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                 feature</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost feature</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost feature</span></span>
+<span><span class="co">#&gt;                                                                                    axis</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                   c0</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                   c0</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                   c0</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                   c0</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost   c0</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost   c0</span></span>
+<span><span class="co">#&gt;                                                                                    axis_value</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                        0.4</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                        0.7</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                        0.4</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                        0.7</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost        0.4</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost        0.7</span></span>
+<span><span class="co">#&gt;                                                                                    value</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     1</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     1</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     0</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     1</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     0</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     0</span></span>
+<span><span class="co">#&gt;                                                                                    delta</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                    NA</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     0</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                    NA</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     1</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost    NA</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     0</span></span>
+<span><span class="co">#&gt;                                                                                    violation</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     FALSE</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     FALSE</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     FALSE</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                      TRUE</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     FALSE</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     FALSE</span></span>
+<span><span class="co">#&gt;                                                                                    violation_size</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                              0</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                              0</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                              0</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                              1</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost              0</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost              0</span></span>
+<span><span class="co">#&gt;                                                                                         method</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                 selectboost</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                 selectboost</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                 selectboost</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                 selectboost</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost selectboost</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost selectboost</span></span>
+<span><span class="co">#&gt;                                                                                    replicate</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                        NA</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                        NA</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                        NA</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                        NA</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost        NA</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost        NA</span></span>
+<span><span class="co">#&gt;                                                                                      q</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                 0.6</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                 0.6</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                 0.8</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                 0.8</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost 0.6</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost 0.6</span></span>
+<span><span class="co">#&gt;                                                                                     c0</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                 0.4</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                 0.7</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                 0.4</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                 0.7</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost 0.4</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost 0.7</span></span>
+<span><span class="fu"><a href="reference/summarise_monotonicity.html">summarise_monotonicity</a></span><span class="op">(</span><span class="va">grid_fit</span>, axis <span class="op">=</span> <span class="st">"c0"</span>, level <span class="op">=</span> <span class="st">"feature"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;              level axis n_paths n_monotone fraction_monotone</span></span>
+<span><span class="co">#&gt; feature.c0 feature   c0      20         18               0.9</span></span>
+<span><span class="co">#&gt;            mean_total_violation max_violation</span></span>
+<span><span class="co">#&gt; feature.c0                  0.1             1</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="reference/as_association_heatmap_data.html">as_association_heatmap_data</a></span><span class="op">(</span><span class="va">design</span>, method <span class="op">=</span> <span class="st">"hybrid"</span>, bandwidth <span class="op">=</span> <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;     feature_i  feature_j predictor_i predictor_j position_i</span></span>
+<span><span class="co">#&gt; 1  signal_PC1 signal_PC1      signal      signal          1</span></span>
+<span><span class="co">#&gt; 2  signal_PC2 signal_PC1      signal      signal          2</span></span>
+<span><span class="co">#&gt; 3  signal_PC3 signal_PC1      signal      signal          3</span></span>
+<span><span class="co">#&gt; 4 nuisance_B1 signal_PC1    nuisance      signal          1</span></span>
+<span><span class="co">#&gt; 5 nuisance_B2 signal_PC1    nuisance      signal          2</span></span>
+<span><span class="co">#&gt; 6 nuisance_B3 signal_PC1    nuisance      signal          3</span></span>
+<span><span class="co">#&gt;   position_j argval_i argval_j  association same_block</span></span>
+<span><span class="co">#&gt; 1          1      PC1      PC1 1.000000e+00       TRUE</span></span>
+<span><span class="co">#&gt; 2          1      PC2      PC1 1.412078e-16       TRUE</span></span>
+<span><span class="co">#&gt; 3          1      PC3      PC1 1.753792e-16       TRUE</span></span>
+<span><span class="co">#&gt; 4          1       B1      PC1 0.000000e+00      FALSE</span></span>
+<span><span class="co">#&gt; 5          1       B2      PC1 0.000000e+00      FALSE</span></span>
+<span><span class="co">#&gt; 6          1       B3      PC1 0.000000e+00      FALSE</span></span>
+<span><span class="co">#&gt;   within_bandwidth method</span></span>
+<span><span class="co">#&gt; 1             TRUE hybrid</span></span>
+<span><span class="co">#&gt; 2             TRUE hybrid</span></span>
+<span><span class="co">#&gt; 3             TRUE hybrid</span></span>
+<span><span class="co">#&gt; 4             TRUE hybrid</span></span>
+<span><span class="co">#&gt; 5             TRUE hybrid</span></span>
+<span><span class="co">#&gt; 6             TRUE hybrid</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="benchmarking-on-simulated-fda-designs">Benchmarking on simulated FDA designs<a class="anchor" aria-label="anchor" href="#benchmarking-on-simulated-fda-designs"></a>
 </h2>
 <p>The validation layer can be used to compare FDA-aware <code>SelectBoost</code> with a plain <code>SelectBoost</code> baseline on the same simulated design and mapped truth. When you pass <code>seed=</code>, the package uses a local seeded scope and does not leave the global RNG state changed after the call returns.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simulate_fda_scenario.html">simulate_fda_scenario</a></span><span class="op">(</span></span>
 <span>  n <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  grid_length <span class="op">=</span> <span class="fl">20</span>,</span>
@@ -295,23 +624,23 @@
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">bench</span><span class="op">$</span><span class="va">metrics</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     level n_universe n_truth n_selected tp fp fn tn precision recall specificity        f1</span></span>
-<span><span class="co">#&gt; 1 feature         42       9         35  9 26  0  7 0.2571429      1   0.2121212 0.4090909</span></span>
-<span><span class="co">#&gt; 2 feature         42       9         36  9 27  0  6 0.2500000      1   0.1818182 0.4000000</span></span>
-<span><span class="co">#&gt; 3   group          4       3          4  3  1  0  0 0.7500000      1   0.0000000 0.8571429</span></span>
-<span><span class="co">#&gt; 4   group          4       3          4  3  1  0  0 0.7500000      1   0.0000000 0.8571429</span></span>
-<span><span class="co">#&gt;     jaccard selection_rate       c0            method        scenario representation</span></span>
-<span><span class="co">#&gt; 1 0.2571429      0.8333333 c0 = 0.5       selectboost localized_dense           grid</span></span>
-<span><span class="co">#&gt; 2 0.2500000      0.8571429 c0 = 0.5 plain_selectboost localized_dense           grid</span></span>
-<span><span class="co">#&gt; 3 0.7500000      1.0000000 c0 = 0.5       selectboost localized_dense           grid</span></span>
-<span><span class="co">#&gt; 4 0.7500000      1.0000000 c0 = 0.5 plain_selectboost localized_dense           grid</span></span>
-<span><span class="co">#&gt;     family</span></span>
-<span><span class="co">#&gt; 1 gaussian</span></span>
-<span><span class="co">#&gt; 2 gaussian</span></span>
-<span><span class="co">#&gt; 3 gaussian</span></span>
-<span><span class="co">#&gt; 4 gaussian</span></span></code></pre></div>
+<span><span class="co">#&gt;     level n_universe n_truth n_selected tp fp fn tn precision</span></span>
+<span><span class="co">#&gt; 1 feature         42       9         35  9 26  0  7 0.2571429</span></span>
+<span><span class="co">#&gt; 2 feature         42       9         30  8 22  1 11 0.2666667</span></span>
+<span><span class="co">#&gt; 3   group          4       3          4  3  1  0  0 0.7500000</span></span>
+<span><span class="co">#&gt; 4   group          4       3          4  3  1  0  0 0.7500000</span></span>
+<span><span class="co">#&gt;      recall specificity        f1   jaccard selection_rate       c0</span></span>
+<span><span class="co">#&gt; 1 1.0000000   0.2121212 0.4090909 0.2571429      0.8333333 c0 = 0.5</span></span>
+<span><span class="co">#&gt; 2 0.8888889   0.3333333 0.4102564 0.2580645      0.7142857 c0 = 0.5</span></span>
+<span><span class="co">#&gt; 3 1.0000000   0.0000000 0.8571429 0.7500000      1.0000000 c0 = 0.5</span></span>
+<span><span class="co">#&gt; 4 1.0000000   0.0000000 0.8571429 0.7500000      1.0000000 c0 = 0.5</span></span>
+<span><span class="co">#&gt;              method        scenario representation   family</span></span>
+<span><span class="co">#&gt; 1       selectboost localized_dense           grid gaussian</span></span>
+<span><span class="co">#&gt; 2 plain_selectboost localized_dense           grid gaussian</span></span>
+<span><span class="co">#&gt; 3       selectboost localized_dense           grid gaussian</span></span>
+<span><span class="co">#&gt; 4 plain_selectboost localized_dense           grid gaussian</span></span></code></pre></div>
 <p>The package also ships a larger saved sensitivity study under <code>inst/extdata/benchmarks/</code>, generated by <code>tools/run_selectboost_sensitivity_study.R</code>. That script writes to an explicit <code>--output-dir=...</code> path when supplied, and otherwise defaults to a subdirectory of <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>, so it does not write into the package directory by default. The committed files under <code>inst/extdata/benchmarks/</code> are a saved copy of one benchmark run. The top-setting table keeps the FDA benchmark settings together with the mean <code>F1</code> score of both algorithms.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">benchmark_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"benchmarks"</span>, package <span class="op">=</span> <span class="st">"SelectBoost.FDA"</span><span class="op">)</span></span>
 <span><span class="va">top_settings</span> <span class="op">&lt;-</span> <span class="fu">utils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">benchmark_dir</span>, <span class="st">"selectboost_sensitivity_top_settings.csv"</span><span class="op">)</span>,</span>
@@ -336,18 +665,24 @@
 <span>  <span class="op">]</span>,</span>
 <span>  <span class="fl">5</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;            scenario confounding_strength active_region_scale local_correlation</span></span>
-<span><span class="co">#&gt; 1 confounded_blocks                  0.6                 0.5                 2</span></span>
-<span><span class="co">#&gt; 2 confounded_blocks                  1.0                 0.8                 2</span></span>
-<span><span class="co">#&gt; 3 confounded_blocks                  0.6                 0.8                 2</span></span>
-<span><span class="co">#&gt; 4   localized_dense                  0.6                 0.5                 2</span></span>
-<span><span class="co">#&gt; 5 confounded_blocks                  0.6                 0.5                 2</span></span>
-<span><span class="co">#&gt;   association_method bandwidth selectboost_f1_mean plain_selectboost_f1_mean delta_mean</span></span>
-<span><span class="co">#&gt; 1           interval         8           0.5362319                 0.4087266 0.12750533</span></span>
-<span><span class="co">#&gt; 2             hybrid         4           0.5885135                 0.4826750 0.10583853</span></span>
-<span><span class="co">#&gt; 3             hybrid         4           0.5833671                 0.4944862 0.08888092</span></span>
-<span><span class="co">#&gt; 4       neighborhood         4           0.4972542                 0.4144859 0.08276831</span></span>
-<span><span class="co">#&gt; 5             hybrid         4           0.5429293                 0.4657088 0.07722048</span></span>
+<span><span class="co">#&gt;            scenario confounding_strength active_region_scale</span></span>
+<span><span class="co">#&gt; 1 confounded_blocks                  0.6                 0.5</span></span>
+<span><span class="co">#&gt; 2 confounded_blocks                  1.0                 0.8</span></span>
+<span><span class="co">#&gt; 3 confounded_blocks                  0.6                 0.8</span></span>
+<span><span class="co">#&gt; 4   localized_dense                  0.6                 0.5</span></span>
+<span><span class="co">#&gt; 5 confounded_blocks                  0.6                 0.5</span></span>
+<span><span class="co">#&gt;   local_correlation association_method bandwidth</span></span>
+<span><span class="co">#&gt; 1                 2           interval         8</span></span>
+<span><span class="co">#&gt; 2                 2             hybrid         4</span></span>
+<span><span class="co">#&gt; 3                 2             hybrid         4</span></span>
+<span><span class="co">#&gt; 4                 2       neighborhood         4</span></span>
+<span><span class="co">#&gt; 5                 2             hybrid         4</span></span>
+<span><span class="co">#&gt;   selectboost_f1_mean plain_selectboost_f1_mean delta_mean</span></span>
+<span><span class="co">#&gt; 1           0.5362319                 0.4087266 0.12750533</span></span>
+<span><span class="co">#&gt; 2           0.5885135                 0.4826750 0.10583853</span></span>
+<span><span class="co">#&gt; 3           0.5833671                 0.4944862 0.08888092</span></span>
+<span><span class="co">#&gt; 4           0.4972542                 0.4144859 0.08276831</span></span>
+<span><span class="co">#&gt; 5           0.5429293                 0.4657088 0.07722048</span></span>
 <span><span class="co">#&gt;    win_rate</span></span>
 <span><span class="co">#&gt; 1 1.0000000</span></span>
 <span><span class="co">#&gt; 2 1.0000000</span></span>
@@ -355,6 +690,7 @@
 <span><span class="co">#&gt; 4 0.6666667</span></span>
 <span><span class="co">#&gt; 5 0.6666667</span></span></code></pre></div>
 <p>In the shipped benchmark, the strongest gains appear in the high-correlation, narrow-region settings. For example, in the <code>confounded_blocks</code> scenario with <code>active_region_scale = 0.5</code>, <code>local_correlation = 2</code>, and interval grouping at <code>bandwidth = 8</code>, the saved mean <code>F1</code> values are approximately <code>0.536</code> for FDA-aware <code>SelectBoost</code> versus <code>0.409</code> for plain <code>SelectBoost</code>.</p>
+<p>The focused benchmark driver is available at <code>tools/run_focused_benchmark.R</code>. It writes to <code>--output-dir=...</code> when provided and otherwise uses <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="further-documentation">Further documentation<a class="anchor" aria-label="anchor" href="#further-documentation"></a>
@@ -367,6 +703,10 @@
 <li>basis and FPCA workflows</li>
 <li>methods, calibration, and formula interfaces</li>
 <li>simulation and benchmark workflows</li>
+<li>perturbation grids</li>
+<li>monotonicity and precision-recall paths</li>
+<li>association diagnostics</li>
+<li>focused benchmark workflow</li>
 </ul>
 </div>
 <div class="section level2">
@@ -383,6 +723,7 @@
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=SelectBoost.FDA" class="external-link">View on CRAN</a></li>
 <li><a href="https://github.com/fbertran/SelectBoost.FDA/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/fbertran/SelectBoost.FDA/issues" class="external-link">Report a bug</a></li>
 </ul>

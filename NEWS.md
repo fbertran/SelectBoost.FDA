@@ -1,3 +1,26 @@
+# SelectBoost.FDA 0.6.0
+
+- Added a focused benchmarking and validation layer.
+- Added `fit_perturbation_grid()`, `selection_surface()`,
+  `selected_surface()`, and `summarise_perturbation_grid()` for
+  two-parameter selection surfaces indexed by subject subsampling rate `q` and
+  SelectBoost perturbation strength `c0`.
+- Added renderer-neutral extractors for selection surfaces, monotonicity paths,
+  precision-recall paths, association heatmaps, interval maps, and benchmark
+  summaries.
+- Added monotonicity diagnostics and post-processing helpers:
+  `check_selection_monotonicity()`, `enforce_monotone_selection()`, and
+  `summarise_monotonicity()`.
+- Added precision-recall helpers: `precision_recall_curve_fda()`,
+  `best_threshold_fda()`, and `summarise_precision_recall_fda()`.
+- Added association diagnostics with `diagnose_functional_association()`,
+  `summarise_association_structure()`, and `compare_association_methods()`.
+- Added report extraction helpers and a CRAN-safe focused benchmark
+  driver at `tools/run_focused_benchmark.R`; the driver writes only to
+  `--output-dir` or to `tempdir()` by default.
+- Added vignettes for perturbation grids, monotonicity/precision-recall paths,
+  association diagnostics, and the focused benchmark workflow.
+
 # SelectBoost.FDA 0.5.1
 
 - Localized RNG handling in exported simulation and stability-selection

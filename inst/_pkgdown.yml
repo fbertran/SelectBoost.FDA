@@ -34,11 +34,16 @@ articles:
   - title: End-to-End Workflows
     navbar: End-to-End Workflows
     contents:
+      - workflow-guide
       - discretized-curves
-      - selectboost-spectra
       - basis-fpca-workflows
+      - selectboost-spectra
       - methods-and-formulas
+      - association-diagnostics
+      - perturbation-grid
+      - monotonicity-and-pr-paths
       - simulation-and-benchmarks
+      - focused-benchmark-workflow
 
 footer:
   structure:

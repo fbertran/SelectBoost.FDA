@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SelectBoost.FDA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,11 +22,16 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>End-to-End Workflows</h6></li>
+    <li><a class="dropdown-item" href="../articles/workflow-guide.html">Workflow Guide</a></li>
     <li><a class="dropdown-item" href="../articles/discretized-curves.html">Discretized Curves and Grouped Stability Selection</a></li>
-    <li><a class="dropdown-item" href="../articles/selectboost-spectra.html">SelectBoost for Dense Spectra</a></li>
     <li><a class="dropdown-item" href="../articles/basis-fpca-workflows.html">Basis and FPCA Workflows</a></li>
+    <li><a class="dropdown-item" href="../articles/selectboost-spectra.html">SelectBoost for Dense Spectra</a></li>
     <li><a class="dropdown-item" href="../articles/methods-and-formulas.html">Methods, Calibration, and Formula Workflows</a></li>
+    <li><a class="dropdown-item" href="../articles/association-diagnostics.html">Association Diagnostics for Functional Predictors</a></li>
+    <li><a class="dropdown-item" href="../articles/perturbation-grid.html">Perturbation Grids for FDA Selection</a></li>
+    <li><a class="dropdown-item" href="../articles/monotonicity-and-pr-paths.html">Monotonicity and Precision-Recall Paths</a></li>
     <li><a class="dropdown-item" href="../articles/simulation-and-benchmarks.html">Simulation and Benchmark Workflows</a></li>
+    <li><a class="dropdown-item" href="../articles/focused-benchmark-workflow.html">Focused Benchmark Workflow</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -62,6 +67,27 @@
 
         <dt>
 
+          <code><a href="as_association_heatmap_data.html">as_association_heatmap_data()</a></code>
+
+        </dt>
+        <dd>Extract Association Heatmap Data</dd>
+
+        <dt>
+
+          <code><a href="as_benchmark_summary_data.html">as_benchmark_summary_data()</a></code>
+
+        </dt>
+        <dd>Extract Benchmark Summary Data</dd>
+
+        <dt>
+
+          <code><a href="as_functional_interval_map_data.html">as_functional_interval_map_data()</a></code>
+
+        </dt>
+        <dd>Extract Functional Interval Map Data</dd>
+
+        <dt>
+
           <code><a href="as_functional_matrix.html">as_functional_matrix()</a></code>
 
         </dt>
@@ -69,10 +95,38 @@
 
         <dt>
 
+          <code><a href="as_monotonicity_path_data.html">as_monotonicity_path_data()</a></code>
+
+        </dt>
+        <dd>Extract Monotonicity Path Data</dd>
+
+        <dt>
+
+          <code><a href="as_precision_recall_path_data.html">as_precision_recall_path_data()</a></code>
+
+        </dt>
+        <dd>Extract Precision-Recall Path Data</dd>
+
+        <dt>
+
+          <code><a href="as_selection_surface_data.html">as_selection_surface_data()</a></code>
+
+        </dt>
+        <dd>Extract Selection Surface Data</dd>
+
+        <dt>
+
           <code><a href="benchmark_selection_methods.html">benchmark_selection_methods()</a></code>
 
         </dt>
         <dd>Benchmark FDA Selection Methods on Shared Ground Truth</dd>
+
+        <dt>
+
+          <code><a href="best_threshold_fda.html">best_threshold_fda()</a></code>
+
+        </dt>
+        <dd>Choose the Best FDA Selection Threshold</dd>
 
         <dt>
 
@@ -97,10 +151,38 @@
 
         <dt>
 
+          <code><a href="check_selection_monotonicity.html">check_selection_monotonicity()</a></code>
+
+        </dt>
+        <dd>Check Selection-Path Monotonicity</dd>
+
+        <dt>
+
+          <code><a href="compare_association_methods.html">compare_association_methods()</a></code>
+
+        </dt>
+        <dd>Compare Functional Association Methods</dd>
+
+        <dt>
+
           <code><a href="compare_selection_methods.html">compare_selection_methods()</a></code>
 
         </dt>
         <dd>Compare FDA Selection Methods</dd>
+
+        <dt>
+
+          <code><a href="diagnose_functional_association.html">diagnose_functional_association()</a></code>
+
+        </dt>
+        <dd>Diagnose Functional Association Structures</dd>
+
+        <dt>
+
+          <code><a href="enforce_monotone_selection.html">enforce_monotone_selection()</a></code>
+
+        </dt>
+        <dd>Enforce Monotone Selection Paths</dd>
 
         <dt>
 
@@ -188,6 +270,13 @@
 
         <dt>
 
+          <code><a href="fit_perturbation_grid.html">fit_perturbation_grid()</a></code>
+
+        </dt>
+        <dd>Fit a Two-Parameter FDA Perturbation Grid</dd>
+
+        <dt>
+
           <code><a href="fit_selectboost.html">fit_selectboost()</a></code>
 
         </dt>
@@ -272,6 +361,41 @@
 
         <dt>
 
+          <code><a href="precision_recall_curve_fda.html">precision_recall_curve_fda()</a></code>
+
+        </dt>
+        <dd>Compute FDA Precision-Recall Curves</dd>
+
+        <dt>
+
+          <code><a href="report_benchmark_table.html">report_benchmark_table()</a></code>
+
+        </dt>
+        <dd>Report Benchmark Table</dd>
+
+        <dt>
+
+          <code><a href="report_formula_blocks.html">report_formula_blocks()</a></code>
+
+        </dt>
+        <dd>Report Formula Blocks</dd>
+
+        <dt>
+
+          <code><a href="report_method_table.html">report_method_table()</a></code>
+
+        </dt>
+        <dd>Report Method Table</dd>
+
+        <dt>
+
+          <code><a href="report_summary_table.html">report_summary_table()</a></code>
+
+        </dt>
+        <dd>Report Summary Table</dd>
+
+        <dt>
+
           <code><a href="run_selectboost_sensitivity_study.html">run_selectboost_sensitivity_study()</a></code>
 
         </dt>
@@ -300,10 +424,24 @@
 
         <dt>
 
+          <code><a href="selected_surface.html">selected_surface()</a></code>
+
+        </dt>
+        <dd>Extract Selected Surface Rows</dd>
+
+        <dt>
+
           <code><a href="selection_map.html">selection_map()</a></code>
 
         </dt>
         <dd>Feature-Level Selection Map</dd>
+
+        <dt>
+
+          <code><a href="selection_surface.html">selection_surface()</a></code>
+
+        </dt>
+        <dd>Extract a Selection Surface</dd>
 
         <dt>
 
@@ -335,6 +473,13 @@
 
         <dt>
 
+          <code><a href="summarise_association_structure.html">summarise_association_structure()</a></code>
+
+        </dt>
+        <dd>Summarize a Functional Association Matrix</dd>
+
+        <dt>
+
           <code><a href="summarise_benchmark_advantage.html">summarise_benchmark_advantage()</a></code>
 
         </dt>
@@ -346,6 +491,34 @@
 
         </dt>
         <dd>Summarize Benchmark Performance by Method</dd>
+
+        <dt>
+
+          <code><a href="summarise_monotonicity.html">summarise_monotonicity()</a></code>
+
+        </dt>
+        <dd>Summarize Monotonicity Diagnostics</dd>
+
+        <dt>
+
+          <code><a href="summarise_perturbation_grid.html">summarise_perturbation_grid()</a></code>
+
+        </dt>
+        <dd>Summarize Perturbation-Grid Selection Surfaces</dd>
+
+        <dt>
+
+          <code><a href="summarise_precision_recall_fda.html">summarise_precision_recall_fda()</a></code>
+
+        </dt>
+        <dd>Summarize FDA Precision-Recall Paths</dd>
+
+        <dt>
+
+          <code><a href="summary.fda_perturbation_grid.html">summary(<i>&lt;fda_perturbation_grid&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Summarize a Perturbation Grid</dd>
       </dl></div>
   </main></div>
 

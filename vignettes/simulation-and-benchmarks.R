@@ -1,0 +1,158 @@
+## ----include = FALSE----------------------------------------------------------
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+has_glmnet <- requireNamespace("glmnet", quietly = TRUE)
+
+## -----------------------------------------------------------------------------
+library(SelectBoost.FDA)
+
+sim_grid <- simulate_fda_scenario(
+  n = 60,
+  grid_length = 30,
+  scenario = "localized_dense",
+  representation = "grid",
+  seed = 1
+)
+
+sim_grid
+head(selection_map(sim_grid$design))
+sim_grid$truth$active_predictors
+
+## ----eval = has_glmnet--------------------------------------------------------
+bench <- benchmark_selection_methods(
+  sim_grid,
+  methods = c("stability", "interval", "selectboost", "plain_selectboost"),
+  levels = c("feature", "group"),
+  stability_args = list(selector = "lasso", B = 8, cutoff = 0.5, seed = 2),
+  interval_args = list(selector = "lasso", width = 5, B = 8, cutoff = 0.5, seed = 3),
+  selectboost_args = list(selector = "lasso", B = 4, steps.seq = c(0.7, 0.4), c0lim = FALSE),
+  plain_selectboost_args = list(selector = "lasso", B = 4, steps.seq = c(0.7, 0.4), c0lim = FALSE)
+)
+
+bench
+bench$metrics
+head(selection_map(bench, level = "group"))
+summarise_benchmark_performance(bench, level = "feature", metric = "f1")
+summarise_benchmark_advantage(
+  bench,
+  target = "selectboost",
+  reference = c("plain_selectboost", "stability"),
+  level = "feature",
+  metric = "f1"
+)
+
+## ----eval = has_glmnet--------------------------------------------------------
+study_dense <- run_simulation_study(
+  n_rep = 2,
+  simulate_args = list(
+    n = 50,
+    grid_length = 28,
+    scenario = "localized_dense",
+    representation = "basis"
+  ),
+  benchmark_args = list(
+    methods = c("stability", "selectboost", "plain_selectboost"),
+    levels = c("feature", "group", "basis"),
+    stability_args = list(selector = "lasso", B = 6, cutoff = 0.5, seed = 4),
+    selectboost_args = list(selector = "lasso", B = 4, steps.seq = c(0.7, 0.4), c0lim = FALSE),
+    plain_selectboost_args = list(selector = "lasso", B = 4, steps.seq = c(0.7, 0.4), c0lim = FALSE)
+  ),
+  seed = 10
+)
+
+study_smooth <- run_simulation_study(
+  n_rep = 2,
+  simulate_args = list(
+    n = 50,
+    grid_length = 28,
+    scenario = "distributed_smooth",
+    representation = "basis"
+  ),
+  benchmark_args = list(
+    methods = c("stability", "selectboost", "plain_selectboost"),
+    levels = c("feature", "group", "basis"),
+    stability_args = list(selector = "lasso", B = 6, cutoff = 0.5, seed = 14),
+    selectboost_args = list(selector = "lasso", B = 4, steps.seq = c(0.7, 0.4), c0lim = FALSE),
+    plain_selectboost_args = list(selector = "lasso", B = 4, steps.seq = c(0.7, 0.4), c0lim = FALSE)
+  ),
+  seed = 20
+)
+
+summarise_benchmark_advantage(
+  study_dense,
+  target = "selectboost",
+  reference = c("plain_selectboost", "stability"),
+  level = "feature",
+  metric = "f1"
+)
+
+summarise_benchmark_advantage(
+  study_smooth,
+  target = "selectboost",
+  reference = c("plain_selectboost", "stability"),
+  level = "feature",
+  metric = "f1"
+)
+
+## ----eval = has_glmnet--------------------------------------------------------
+sensitivity <- run_selectboost_sensitivity_study(
+  n_rep = 1,
+  simulate_grid = data.frame(
+    scenario = c("localized_dense", "confounded_blocks"),
+    confounding_strength = c(0.4, 0.9),
+    active_region_scale = c(0.8, 0.7),
+    local_correlation = c(1, 2),
+    stringsAsFactors = FALSE
+  ),
+  selectboost_grid = data.frame(
+    association_method = c("correlation", "hybrid", "interval"),
+    bandwidth = c(NA, 4, 4),
+    stringsAsFactors = FALSE
+  ),
+  simulate_args = list(n = 50, grid_length = 28, representation = "grid"),
+  benchmark_args = list(
+    methods = c("stability", "selectboost", "plain_selectboost"),
+    levels = c("feature", "group"),
+    stability_args = list(selector = "lasso", B = 6, cutoff = 0.5, seed = 40),
+    selectboost_args = list(selector = "lasso", B = 4, steps.seq = c(0.7, 0.4), c0lim = FALSE),
+    plain_selectboost_args = list(selector = "lasso", B = 4, steps.seq = c(0.7, 0.4), c0lim = FALSE)
+  ),
+  seed = 50
+)
+
+summarise_benchmark_advantage(
+  sensitivity,
+  target = "selectboost",
+  reference = "plain_selectboost",
+  level = "feature",
+  metric = "f1"
+)
+
+## -----------------------------------------------------------------------------
+benchmark_dir <- system.file("extdata", "benchmarks", package = "SelectBoost.FDA")
+top_feature_settings <- utils::read.csv(
+  file.path(benchmark_dir, "selectboost_sensitivity_top_settings.csv"),
+  stringsAsFactors = FALSE
+)
+
+utils::head(
+  top_feature_settings[
+    ,
+    c(
+      "scenario",
+      "confounding_strength",
+      "active_region_scale",
+      "local_correlation",
+      "association_method",
+      "bandwidth",
+      "selectboost_f1_mean",
+      "plain_selectboost_f1_mean",
+      "delta_mean",
+      "win_rate"
+    )
+  ],
+  10
+)
+

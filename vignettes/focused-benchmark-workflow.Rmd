@@ -1,0 +1,70 @@
+---
+title: "Focused Benchmark Workflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Focused Benchmark Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+The focused benchmark workflow is designed to demonstrate where FDA-aware
+SelectBoost improves on plain SelectBoost for functional predictors: localized
+dense signals, confounded blocks, high local correlation, and narrow active
+regions.
+
+The driver script writes only to an explicit `--output-dir` or, when omitted,
+to `tempdir()`.
+
+```{r, eval = FALSE}
+system2(
+  file.path(R.home("bin"), "Rscript"),
+  c(
+    "tools/run_focused_benchmark.R",
+    "--quick",
+    "--n-replicates=1",
+    "--seed=20260616",
+    paste0("--output-dir=", file.path(tempdir(), "selectboost_fda_focused_benchmark"))
+  )
+)
+```
+
+The package also exposes table extractors for report material.
+
+```{r}
+library(SelectBoost.FDA)
+
+report_summary_table()
+report_method_table()
+report_formula_blocks()[c("selection_surface", "precision_recall")]
+```
+
+Saved sensitivity-study artifacts shipped with the package can be turned into a
+compact benchmark table:
+
+```{r}
+report_benchmark_table(top_n = 5)
+```
+
+For new benchmark objects, use the renderer-neutral summary extractor:
+
+```{r}
+metrics <- data.frame(
+  scenario = "localized_dense",
+  representation = "grid",
+  family = "gaussian",
+  method = c("selectboost", "plain_selectboost"),
+  level = "feature",
+  precision = c(0.8, 0.6),
+  recall = c(0.7, 0.6),
+  f1 = c(0.746, 0.6),
+  jaccard = c(0.59, 0.43),
+  selection_rate = c(0.2, 0.3),
+  stringsAsFactors = FALSE
+)
+
+as_benchmark_summary_data(metrics)
+```

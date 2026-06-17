@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SelectBoost.FDA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,11 +22,16 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>End-to-End Workflows</h6></li>
+    <li><a class="dropdown-item" href="../articles/workflow-guide.html">Workflow Guide</a></li>
     <li><a class="dropdown-item" href="../articles/discretized-curves.html">Discretized Curves and Grouped Stability Selection</a></li>
-    <li><a class="dropdown-item" href="../articles/selectboost-spectra.html">SelectBoost for Dense Spectra</a></li>
     <li><a class="dropdown-item" href="../articles/basis-fpca-workflows.html">Basis and FPCA Workflows</a></li>
+    <li><a class="dropdown-item" href="../articles/selectboost-spectra.html">SelectBoost for Dense Spectra</a></li>
     <li><a class="dropdown-item" href="../articles/methods-and-formulas.html">Methods, Calibration, and Formula Workflows</a></li>
+    <li><a class="dropdown-item" href="../articles/association-diagnostics.html">Association Diagnostics for Functional Predictors</a></li>
+    <li><a class="dropdown-item" href="../articles/perturbation-grid.html">Perturbation Grids for FDA Selection</a></li>
+    <li><a class="dropdown-item" href="../articles/monotonicity-and-pr-paths.html">Monotonicity and Precision-Recall Paths</a></li>
     <li><a class="dropdown-item" href="../articles/simulation-and-benchmarks.html">Simulation and Benchmark Workflows</a></li>
+    <li><a class="dropdown-item" href="../articles/focused-benchmark-workflow.html">Focused Benchmark Workflow</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -45,13 +50,24 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.6.0" id="selectboostfda-060">SelectBoost.FDA 0.6.0<a class="anchor" aria-label="anchor" href="#selectboostfda-060"></a></h2>
+<ul><li>Added a focused benchmarking and validation layer.</li>
+<li>Added <code><a href="../reference/fit_perturbation_grid.html">fit_perturbation_grid()</a></code>, <code><a href="../reference/selection_surface.html">selection_surface()</a></code>, <code><a href="../reference/selected_surface.html">selected_surface()</a></code>, and <code><a href="../reference/summarise_perturbation_grid.html">summarise_perturbation_grid()</a></code> for two-parameter selection surfaces indexed by subject subsampling rate <code>q</code> and SelectBoost perturbation strength <code>c0</code>.</li>
+<li>Added renderer-neutral extractors for selection surfaces, monotonicity paths, precision-recall paths, association heatmaps, interval maps, and benchmark summaries.</li>
+<li>Added monotonicity diagnostics and post-processing helpers: <code><a href="../reference/check_selection_monotonicity.html">check_selection_monotonicity()</a></code>, <code><a href="../reference/enforce_monotone_selection.html">enforce_monotone_selection()</a></code>, and <code><a href="../reference/summarise_monotonicity.html">summarise_monotonicity()</a></code>.</li>
+<li>Added precision-recall helpers: <code><a href="../reference/precision_recall_curve_fda.html">precision_recall_curve_fda()</a></code>, <code><a href="../reference/best_threshold_fda.html">best_threshold_fda()</a></code>, and <code><a href="../reference/summarise_precision_recall_fda.html">summarise_precision_recall_fda()</a></code>.</li>
+<li>Added association diagnostics with <code><a href="../reference/diagnose_functional_association.html">diagnose_functional_association()</a></code>, <code><a href="../reference/summarise_association_structure.html">summarise_association_structure()</a></code>, and <code><a href="../reference/compare_association_methods.html">compare_association_methods()</a></code>.</li>
+<li>Added report extraction helpers and a CRAN-safe focused benchmark driver at <code>tools/run_focused_benchmark.R</code>; the driver writes only to <code>--output-dir</code> or to <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code> by default.</li>
+<li>Added vignettes for perturbation grids, monotonicity/precision-recall paths, association diagnostics, and the focused benchmark workflow.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.5.1" id="selectboostfda-051">SelectBoost.FDA 0.5.1<a class="anchor" aria-label="anchor" href="#selectboostfda-051"></a></h2>
 <ul><li>Localized RNG handling in exported simulation and stability-selection functions so <code>seed=</code> no longer leaves the caller’s RNG state modified.</li>
 <li>Reworked the benchmark generation script so it writes to an explicit <code>--output-dir=...</code> path when supplied and otherwise defaults to <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>, rather than writing into the package tree by default.</li>
 <li>Updated tests and top-level documentation to match the revised RNG and benchmark-output behavior.</li>
 </ul></div>
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.5.0" id="selectboostfda-050">SelectBoost.FDA 0.5.0<a class="anchor" aria-label="anchor" href="#selectboostfda-050"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.5.0" id="selectboostfda-050">SelectBoost.FDA 0.5.0<a class="anchor" aria-label="anchor" href="#selectboostfda-050"></a></h2><p class="text-muted">CRAN release: 2026-04-10</p>
 <ul><li>Added pkgdown website and a package-style README.</li>
 <li>Added targeted FDA benchmark sensitivity utilities with <code><a href="../reference/run_selectboost_sensitivity_study.html">run_selectboost_sensitivity_study()</a></code>.</li>
 <li>Added simulation controls for <code>confounding_strength</code>, <code>active_region_scale</code>, and <code>local_correlation</code> so benchmarks can stress the settings where FDA-aware grouping is expected to help.</li>

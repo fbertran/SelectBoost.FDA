@@ -77,17 +77,17 @@ if (requireNamespace("glmnet", quietly = TRUE)) {
 #> signal.5 <NA>             5            <NA>  0.266666666666667
 #> signal.6 <NA>             6            <NA>  0.333333333333333
 #>          feature_frequency selected group_id  group group_frequency
-#> signal.1              0.00    FALSE        1 signal            0.75
-#> signal.2              0.00    FALSE        1 signal            0.75
-#> signal.3              0.75     TRUE        1 signal            0.75
-#> signal.4              0.25    FALSE        1 signal            0.75
-#> signal.5              0.00    FALSE        1 signal            0.75
-#> signal.6              0.25    FALSE        1 signal            0.75
+#> signal.1              0.00    FALSE        1 signal            0.25
+#> signal.2              0.25    FALSE        1 signal            0.25
+#> signal.3              0.00    FALSE        1 signal            0.25
+#> signal.4              0.00    FALSE        1 signal            0.25
+#> signal.5              0.00    FALSE        1 signal            0.25
+#> signal.6              0.25    FALSE        1 signal            0.25
 #>          group_selected
-#> signal.1           TRUE
-#> signal.2           TRUE
-#> signal.3           TRUE
-#> signal.4           TRUE
-#> signal.5           TRUE
-#> signal.6           TRUE
+#> signal.1          FALSE
+#> signal.2          FALSE
+#> signal.3          FALSE
+#> signal.4          FALSE
+#> signal.5          FALSE
+#> signal.6          FALSE
 ```

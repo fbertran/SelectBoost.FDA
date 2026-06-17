@@ -130,13 +130,13 @@ summarise_benchmark_advantage(
 #>                                                                                             n_rep
 #> confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1     1
 #>                                                                                             target_value_mean
-#> confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1         0.4117647
+#> confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1         0.2666667
 #>                                                                                             reference_value_mean
-#> confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                  0.4
+#> confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1            0.4242424
 #>                                                                                             delta_mean
-#> confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1 0.01176471
+#> confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1 -0.1575758
 #>                                                                                             delta_sd
 #> confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1        0
 #>                                                                                             win_rate
-#> confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1        1
+#> confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1        0
 ```

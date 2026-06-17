@@ -1,4 +1,4 @@
-# SelectBoost.FDA ![](reference/figures/logo_selectboost_FDA.png)
+# SelectBoost.FDA ![SelectBoost.FDA logo](reference/figures/logo_selectboost_FDA.png)
 
 ## Frédéric Bertrand
 
@@ -24,6 +24,13 @@ ordinary variable selection unstable.
 - FDA-aware `SelectBoost` wrappers plus a plain `SelectBoost` baseline.
 - Simulation, benchmark, and evaluation helpers with mapped ground
   truth.
+- Two-parameter perturbation grids over subsampling rate `q` and
+  SelectBoost strength `c0`.
+- Renderer-neutral extraction functions for selection surfaces,
+  monotonicity paths, precision-recall paths, association heatmaps,
+  interval maps, and benchmark summaries.
+- Association diagnostics and report table helpers for scientific
+  reporting material.
 - Shipped sensitivity-study benchmark summaries for direct mean `F1`
   comparisons between
   [`selectboost_fda()`](https://fbertran.github.io/SelectBoost.FDA/reference/selectboost_fda.md)
@@ -97,12 +104,18 @@ summary(design)
 #>        age         scalar          1
 #>  treatment         scalar          1
 head(selection_map(design, level = "basis"))
-#>                 predictor representation basis_type source_representation n_components
-#> nuisance.spline  nuisance          basis     spline                  grid            5
-#> signal.fpca        signal          basis       fpca                  grid            3
-#>                 first_component last_component         components domain_start domain_end
-#> nuisance.spline              B1             B5 B1, B2, B3, B4, B5         1100       2500
-#> signal.fpca                 PC1            PC3      PC1, PC2, PC3         1100       2500
+#>                 predictor representation basis_type
+#> nuisance.spline  nuisance          basis     spline
+#> signal.fpca        signal          basis       fpca
+#>                 source_representation n_components first_component
+#> nuisance.spline                  grid            5              B1
+#> signal.fpca                      grid            3             PC1
+#>                 last_component         components domain_start
+#> nuisance.spline             B5 B1, B2, B3, B4, B5         1100
+#> signal.fpca                PC3      PC1, PC2, PC3         1100
+#>                 domain_end
+#> nuisance.spline       2500
+#> signal.fpca           2500
 ```
 
 ## FDA-aware SelectBoost
@@ -128,21 +141,26 @@ summary(fit_sb)
 #>   groups: 4 
 #>   c0 values: 2
 head(selection_map(fit_sb, level = "group", c0 = colnames(fit_sb$feature_selection)[1]))
-#>   predictor group_id     group representation basis_type source_representation n_features
-#> 1    signal        1    signal          basis       fpca                  grid          3
-#> 2  nuisance        2  nuisance          basis     spline                  grid          5
-#> 3       age        3       age         scalar                           scalar          1
-#> 4 treatment        4 treatment         scalar                           scalar          1
-#>   start_position end_position start_argval end_argval domain_start domain_end       c0
-#> 1              1            3          PC1        PC3         1100       2500 c0 = 0.6
-#> 2              1            5           B1         B5         1100       2500 c0 = 0.6
-#> 3              1            1          age        age          age        age c0 = 0.6
-#> 4              1            1    treatment  treatment    treatment  treatment c0 = 0.6
+#>   predictor group_id     group representation basis_type
+#> 1    signal        1    signal          basis       fpca
+#> 2  nuisance        2  nuisance          basis     spline
+#> 3       age        3       age         scalar           
+#> 4 treatment        4 treatment         scalar           
+#>   source_representation n_features start_position end_position
+#> 1                  grid          3              1            3
+#> 2                  grid          5              1            5
+#> 3                scalar          1              1            1
+#> 4                scalar          1              1            1
+#>   start_argval end_argval domain_start domain_end       c0
+#> 1          PC1        PC3         1100       2500 c0 = 0.6
+#> 2           B1         B5         1100       2500 c0 = 0.6
+#> 3          age        age          age        age c0 = 0.6
+#> 4    treatment  treatment    treatment  treatment c0 = 0.6
 #>   mean_selection max_selection selected_features
-#> 1      0.6666667          1.00                 2
-#> 2      0.3000000          0.50                 4
-#> 3      0.7500000          0.75                 1
-#> 4      1.0000000          1.00                 1
+#> 1           0.75          1.00                 3
+#> 2           0.45          0.75                 5
+#> 3           0.50          0.50                 1
+#> 4           1.00          1.00                 1
 ```
 
 ## Grouped stability selection
@@ -163,26 +181,31 @@ if (requireNamespace("glmnet", quietly = TRUE)) {
   summary(fit_stab)
   head(selection_map(fit_stab, level = "group"))
 }
-#>   predictor group_id     group representation basis_type source_representation n_features
-#> 1    signal        1    signal          basis       fpca                  grid          3
-#> 2  nuisance        2  nuisance          basis     spline                  grid          5
-#> 3       age        3       age         scalar                           scalar          1
-#> 4 treatment        4 treatment         scalar                           scalar          1
-#>   start_position end_position start_argval end_argval domain_start domain_end
-#> 1              1            3          PC1        PC3         1100       2500
-#> 2              1            5           B1         B5         1100       2500
-#> 3              1            1          age        age          age        age
-#> 4              1            1    treatment  treatment    treatment  treatment
-#>   mean_feature_frequency max_feature_frequency selected_features group_frequency
-#> 1              0.4166667                 0.750                 2           0.750
-#> 2              0.0500000                 0.125                 0           0.125
-#> 3              0.0000000                 0.000                 0           0.000
-#> 4              0.2500000                 0.250                 0           0.250
-#>   group_selected
-#> 1           TRUE
-#> 2          FALSE
-#> 3          FALSE
-#> 4          FALSE
+#>   predictor group_id     group representation basis_type
+#> 1    signal        1    signal          basis       fpca
+#> 2  nuisance        2  nuisance          basis     spline
+#> 3       age        3       age         scalar           
+#> 4 treatment        4 treatment         scalar           
+#>   source_representation n_features start_position end_position
+#> 1                  grid          3              1            3
+#> 2                  grid          5              1            5
+#> 3                scalar          1              1            1
+#> 4                scalar          1              1            1
+#>   start_argval end_argval domain_start domain_end
+#> 1          PC1        PC3         1100       2500
+#> 2           B1         B5         1100       2500
+#> 3          age        age          age        age
+#> 4    treatment  treatment    treatment  treatment
+#>   mean_feature_frequency max_feature_frequency selected_features
+#> 1              0.4166667                 0.750                 2
+#> 2              0.0500000                 0.125                 0
+#> 3              0.0000000                 0.000                 0
+#> 4              0.2500000                 0.250                 0
+#>   group_frequency group_selected
+#> 1           0.750           TRUE
+#> 2           0.125          FALSE
+#> 3           0.000          FALSE
+#> 4           0.250          FALSE
 ```
 
 Interval summaries can be requested directly:
@@ -200,30 +223,343 @@ if (requireNamespace("glmnet", quietly = TRUE)) {
 
   head(selection_map(fit_interval, level = "group"))
 }
-#>   predictor group_id          group representation basis_type source_representation
-#> 1    signal        1    signal[1:3]          basis       fpca                  grid
-#> 2  nuisance        2  nuisance[1:4]          basis     spline                  grid
-#> 3  nuisance        3  nuisance[5:5]          basis     spline                  grid
-#> 4       age        4       age[1:1]         scalar                           scalar
-#> 5 treatment        5 treatment[1:1]         scalar                           scalar
-#>   n_features start_position end_position start_argval end_argval     domain_start
-#> 1          3              1            3          PC1        PC3             1100
-#> 2          4              1            4           B1         B4             1100
-#> 3          1              5            5           B5         B5 1817.94871794872
-#> 4          1              1            1          age        age              age
-#> 5          1              1            1    treatment  treatment        treatment
-#>         domain_end mean_feature_frequency max_feature_frequency selected_features
-#> 1             2500              0.4166667                 0.750                 2
-#> 2 2464.10256410256              0.0625000                 0.125                 0
-#> 3             2500              0.0000000                 0.000                 0
-#> 4              age              0.0000000                 0.000                 0
-#> 5        treatment              0.2500000                 0.250                 0
-#>   group_frequency group_selected interval_start interval_end interval_label
-#> 1           0.750           TRUE              1            3    signal[1:3]
-#> 2           0.125          FALSE              1            4  nuisance[1:4]
-#> 3           0.000          FALSE              5            5  nuisance[5:5]
-#> 4           0.000          FALSE              1            1       age[1:1]
-#> 5           0.250          FALSE              1            1 treatment[1:1]
+#>   predictor group_id          group representation basis_type
+#> 1    signal        1    signal[1:3]          basis       fpca
+#> 2  nuisance        2  nuisance[1:4]          basis     spline
+#> 3  nuisance        3  nuisance[5:5]          basis     spline
+#> 4       age        4       age[1:1]         scalar           
+#> 5 treatment        5 treatment[1:1]         scalar           
+#>   source_representation n_features start_position end_position
+#> 1                  grid          3              1            3
+#> 2                  grid          4              1            4
+#> 3                  grid          1              5            5
+#> 4                scalar          1              1            1
+#> 5                scalar          1              1            1
+#>   start_argval end_argval     domain_start       domain_end
+#> 1          PC1        PC3             1100             2500
+#> 2           B1         B4             1100 2464.10256410256
+#> 3           B5         B5 1817.94871794872             2500
+#> 4          age        age              age              age
+#> 5    treatment  treatment        treatment        treatment
+#>   mean_feature_frequency max_feature_frequency selected_features
+#> 1              0.4166667                 0.750                 2
+#> 2              0.0625000                 0.125                 0
+#> 3              0.0000000                 0.000                 0
+#> 4              0.0000000                 0.000                 0
+#> 5              0.2500000                 0.250                 0
+#>   group_frequency group_selected interval_start interval_end
+#> 1           0.750           TRUE              1            3
+#> 2           0.125          FALSE              1            4
+#> 3           0.000          FALSE              5            5
+#> 4           0.000          FALSE              1            1
+#> 5           0.250          FALSE              1            1
+#>   interval_label
+#> 1    signal[1:3]
+#> 2  nuisance[1:4]
+#> 3  nuisance[5:5]
+#> 4       age[1:1]
+#> 5 treatment[1:1]
+```
+
+## Two-parameter perturbation surfaces
+
+For focused benchmark workflows,
+[`fit_perturbation_grid()`](https://fbertran.github.io/SelectBoost.FDA/reference/fit_perturbation_grid.md)
+combines subject-level subsampling with FDA-aware SelectBoost
+perturbations and returns ordinary data frames for downstream plotting
+or reporting.
+
+``` r
+grid_fit <- fit_perturbation_grid(
+  design,
+  q_grid = c(0.6, 0.8),
+  c0_grid = c(0.7, 0.4),
+  B = 1,
+  selectboost_B = 1,
+  selector = "msgps",
+  association_method = "hybrid",
+  bandwidth = 4,
+  levels = c("feature", "group"),
+  seed = 2
+)
+
+head(selection_surface(grid_fit))
+#>                                 feature predictor group   level   q
+#> age.feature.0.6.0.4.selectboost     age       age   age feature 0.6
+#> age.feature.0.6.0.7.selectboost     age       age   age feature 0.6
+#> age.feature.0.8.0.4.selectboost     age       age   age feature 0.8
+#> age.feature.0.8.0.7.selectboost     age       age   age feature 0.8
+#> age.group.0.6.0.4.selectboost       age       age   age   group 0.6
+#> age.group.0.6.0.7.selectboost       age       age   age   group 0.6
+#>                                  c0 selection mean_selection
+#> age.feature.0.6.0.4.selectboost 0.4         1              1
+#> age.feature.0.6.0.7.selectboost 0.7         1              1
+#> age.feature.0.8.0.4.selectboost 0.4         0              0
+#> age.feature.0.8.0.7.selectboost 0.7         1              1
+#> age.group.0.6.0.4.selectboost   0.4         1              1
+#> age.group.0.6.0.7.selectboost   0.7         1              1
+#>                                 max_selection selected
+#> age.feature.0.6.0.4.selectboost             1     TRUE
+#> age.feature.0.6.0.7.selectboost             1     TRUE
+#> age.feature.0.8.0.4.selectboost             0    FALSE
+#> age.feature.0.8.0.7.selectboost             1     TRUE
+#> age.group.0.6.0.4.selectboost               1     TRUE
+#> age.group.0.6.0.7.selectboost               1     TRUE
+#>                                 representation basis_type
+#> age.feature.0.6.0.4.selectboost         scalar       <NA>
+#> age.feature.0.6.0.7.selectboost         scalar       <NA>
+#> age.feature.0.8.0.4.selectboost         scalar       <NA>
+#> age.feature.0.8.0.7.selectboost         scalar       <NA>
+#> age.group.0.6.0.4.selectboost           scalar           
+#> age.group.0.6.0.7.selectboost           scalar           
+#>                                 source_representation
+#> age.feature.0.6.0.4.selectboost                scalar
+#> age.feature.0.6.0.7.selectboost                scalar
+#> age.feature.0.8.0.4.selectboost                scalar
+#> age.feature.0.8.0.7.selectboost                scalar
+#> age.group.0.6.0.4.selectboost                  scalar
+#> age.group.0.6.0.7.selectboost                  scalar
+#>                                 start_position end_position
+#> age.feature.0.6.0.4.selectboost              1            1
+#> age.feature.0.6.0.7.selectboost              1            1
+#> age.feature.0.8.0.4.selectboost              1            1
+#> age.feature.0.8.0.7.selectboost              1            1
+#> age.group.0.6.0.4.selectboost                1            1
+#> age.group.0.6.0.7.selectboost                1            1
+#>                                 start_argval end_argval
+#> age.feature.0.6.0.4.selectboost          age        age
+#> age.feature.0.6.0.7.selectboost          age        age
+#> age.feature.0.8.0.4.selectboost          age        age
+#> age.feature.0.8.0.7.selectboost          age        age
+#> age.group.0.6.0.4.selectboost            age        age
+#> age.group.0.6.0.7.selectboost            age        age
+#>                                 domain_start domain_end      method
+#> age.feature.0.6.0.4.selectboost          age        age selectboost
+#> age.feature.0.6.0.7.selectboost          age        age selectboost
+#> age.feature.0.8.0.4.selectboost          age        age selectboost
+#> age.feature.0.8.0.7.selectboost          age        age selectboost
+#> age.group.0.6.0.4.selectboost            age        age selectboost
+#> age.group.0.6.0.7.selectboost            age        age selectboost
+#>                                 block position argval   transform
+#> age.feature.0.6.0.4.selectboost   age        1    age standardize
+#> age.feature.0.6.0.7.selectboost   age        1    age standardize
+#> age.feature.0.8.0.4.selectboost   age        1    age standardize
+#> age.feature.0.8.0.7.selectboost   age        1    age standardize
+#> age.group.0.6.0.4.selectboost    <NA>       NA   <NA>        <NA>
+#> age.group.0.6.0.7.selectboost    <NA>       NA   <NA>        <NA>
+#>                                 source_predictor
+#> age.feature.0.6.0.4.selectboost              age
+#> age.feature.0.6.0.7.selectboost              age
+#> age.feature.0.8.0.4.selectboost              age
+#> age.feature.0.8.0.7.selectboost              age
+#> age.group.0.6.0.4.selectboost               <NA>
+#> age.group.0.6.0.7.selectboost               <NA>
+#>                                 source_position_start
+#> age.feature.0.6.0.4.selectboost                     1
+#> age.feature.0.6.0.7.selectboost                     1
+#> age.feature.0.8.0.4.selectboost                     1
+#> age.feature.0.8.0.7.selectboost                     1
+#> age.group.0.6.0.4.selectboost                      NA
+#> age.group.0.6.0.7.selectboost                      NA
+#>                                 source_position_end
+#> age.feature.0.6.0.4.selectboost                   1
+#> age.feature.0.6.0.7.selectboost                   1
+#> age.feature.0.8.0.4.selectboost                   1
+#> age.feature.0.8.0.7.selectboost                   1
+#> age.group.0.6.0.4.selectboost                    NA
+#> age.group.0.6.0.7.selectboost                    NA
+#>                                 source_argval_start
+#> age.feature.0.6.0.4.selectboost                 age
+#> age.feature.0.6.0.7.selectboost                 age
+#> age.feature.0.8.0.4.selectboost                 age
+#> age.feature.0.8.0.7.selectboost                 age
+#> age.group.0.6.0.4.selectboost                  <NA>
+#> age.group.0.6.0.7.selectboost                  <NA>
+#>                                 source_argval_end component unit
+#> age.feature.0.6.0.4.selectboost               age      <NA> <NA>
+#> age.feature.0.6.0.7.selectboost               age      <NA> <NA>
+#> age.feature.0.8.0.4.selectboost               age      <NA> <NA>
+#> age.feature.0.8.0.7.selectboost               age      <NA> <NA>
+#> age.group.0.6.0.4.selectboost                <NA>      <NA> <NA>
+#> age.group.0.6.0.7.selectboost                <NA>      <NA> <NA>
+#>                                 feature_index basis_component
+#> age.feature.0.6.0.4.selectboost             9            <NA>
+#> age.feature.0.6.0.7.selectboost             9            <NA>
+#> age.feature.0.8.0.4.selectboost             9            <NA>
+#> age.feature.0.8.0.7.selectboost             9            <NA>
+#> age.group.0.6.0.4.selectboost              NA            <NA>
+#> age.group.0.6.0.7.selectboost              NA            <NA>
+#>                                 domain_label group_id n_features
+#> age.feature.0.6.0.4.selectboost          age        3         NA
+#> age.feature.0.6.0.7.selectboost          age        3         NA
+#> age.feature.0.8.0.4.selectboost          age        3         NA
+#> age.feature.0.8.0.7.selectboost          age        3         NA
+#> age.group.0.6.0.4.selectboost           <NA>        3          1
+#> age.group.0.6.0.7.selectboost           <NA>        3          1
+#>                                 selected_features replicate
+#> age.feature.0.6.0.4.selectboost                NA        NA
+#> age.feature.0.6.0.7.selectboost                NA        NA
+#> age.feature.0.8.0.4.selectboost                NA        NA
+#> age.feature.0.8.0.7.selectboost                NA        NA
+#> age.group.0.6.0.4.selectboost                   1        NA
+#> age.group.0.6.0.7.selectboost                   1        NA
+#>                                 association_method group_method
+#> age.feature.0.6.0.4.selectboost             hybrid    threshold
+#> age.feature.0.6.0.7.selectboost             hybrid    threshold
+#> age.feature.0.8.0.4.selectboost             hybrid    threshold
+#> age.feature.0.8.0.7.selectboost             hybrid    threshold
+#> age.group.0.6.0.4.selectboost               hybrid    threshold
+#> age.group.0.6.0.7.selectboost               hybrid    threshold
+#>                                 within_blocks bandwidth width
+#> age.feature.0.6.0.4.selectboost          TRUE         4    NA
+#> age.feature.0.6.0.7.selectboost          TRUE         4    NA
+#> age.feature.0.8.0.4.selectboost          TRUE         4    NA
+#> age.feature.0.8.0.7.selectboost          TRUE         4    NA
+#> age.group.0.6.0.4.selectboost            TRUE         4    NA
+#> age.group.0.6.0.7.selectboost            TRUE         4    NA
+#>                                 n_replicates
+#> age.feature.0.6.0.4.selectboost            1
+#> age.feature.0.6.0.7.selectboost            1
+#> age.feature.0.8.0.4.selectboost            1
+#> age.feature.0.8.0.7.selectboost            1
+#> age.group.0.6.0.4.selectboost              1
+#> age.group.0.6.0.7.selectboost              1
+summarise_perturbation_grid(grid_fit)
+#>                   level   q  c0 n_items n_selected mean_selection
+#> feature.0.6.0.4 feature 0.6 0.4      10          5      0.5000000
+#> feature.0.6.0.7 feature 0.6 0.7      10          5      0.5000000
+#> feature.0.8.0.4 feature 0.8 0.4      10          5      0.5000000
+#> feature.0.8.0.7 feature 0.8 0.7      10          5      0.5000000
+#> group.0.6.0.4     group 0.6 0.4       4          4      0.7166667
+#> group.0.6.0.7     group 0.6 0.7       4          4      0.7166667
+#> group.0.8.0.4     group 0.8 0.4       4          3      0.5166667
+#> group.0.8.0.7     group 0.8 0.7       4          4      0.7166667
+#>                 max_selection
+#> feature.0.6.0.4             1
+#> feature.0.6.0.7             1
+#> feature.0.8.0.4             1
+#> feature.0.8.0.7             1
+#> group.0.6.0.4               1
+#> group.0.6.0.7               1
+#> group.0.8.0.4               1
+#> group.0.8.0.7               1
+```
+
+The data layer is independent of plotting backends:
+
+``` r
+head(as_monotonicity_path_data(grid_fit, axis = "c0", level = "feature"))
+#>                                                                                             id
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                         age
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                         age
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                         age
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                         age
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost nuisance_B1
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost nuisance_B1
+#>                                                                                      level
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                 feature
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                 feature
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                 feature
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                 feature
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost feature
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost feature
+#>                                                                                    axis
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                   c0
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                   c0
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                   c0
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                   c0
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost   c0
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost   c0
+#>                                                                                    axis_value
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                        0.4
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                        0.7
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                        0.4
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                        0.7
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost        0.4
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost        0.7
+#>                                                                                    value
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     1
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     1
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     0
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     1
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     0
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     0
+#>                                                                                    delta
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                    NA
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     0
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                    NA
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     1
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost    NA
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     0
+#>                                                                                    violation
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     FALSE
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     FALSE
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     FALSE
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                      TRUE
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     FALSE
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     FALSE
+#>                                                                                    violation_size
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                              0
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                              0
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                              0
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                              1
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost              0
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost              0
+#>                                                                                         method
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                 selectboost
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                 selectboost
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                 selectboost
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                 selectboost
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost selectboost
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost selectboost
+#>                                                                                    replicate
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                        NA
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                        NA
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                        NA
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                        NA
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost        NA
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost        NA
+#>                                                                                      q
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                 0.6
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                 0.6
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                 0.8
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                 0.8
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost 0.6
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost 0.6
+#>                                                                                     c0
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                 0.4
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                 0.7
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                 0.4
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                 0.7
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost 0.4
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost 0.7
+summarise_monotonicity(grid_fit, axis = "c0", level = "feature")
+#>              level axis n_paths n_monotone fraction_monotone
+#> feature.c0 feature   c0      20         18               0.9
+#>            mean_total_violation max_violation
+#> feature.c0                  0.1             1
+head(as_association_heatmap_data(design, method = "hybrid", bandwidth = 4))
+#>     feature_i  feature_j predictor_i predictor_j position_i
+#> 1  signal_PC1 signal_PC1      signal      signal          1
+#> 2  signal_PC2 signal_PC1      signal      signal          2
+#> 3  signal_PC3 signal_PC1      signal      signal          3
+#> 4 nuisance_B1 signal_PC1    nuisance      signal          1
+#> 5 nuisance_B2 signal_PC1    nuisance      signal          2
+#> 6 nuisance_B3 signal_PC1    nuisance      signal          3
+#>   position_j argval_i argval_j  association same_block
+#> 1          1      PC1      PC1 1.000000e+00       TRUE
+#> 2          1      PC2      PC1 1.412078e-16       TRUE
+#> 3          1      PC3      PC1 1.753792e-16       TRUE
+#> 4          1       B1      PC1 0.000000e+00      FALSE
+#> 5          1       B2      PC1 0.000000e+00      FALSE
+#> 6          1       B3      PC1 0.000000e+00      FALSE
+#>   within_bandwidth method
+#> 1             TRUE hybrid
+#> 2             TRUE hybrid
+#> 3             TRUE hybrid
+#> 4             TRUE hybrid
+#> 5             TRUE hybrid
+#> 6             TRUE hybrid
 ```
 
 ## Benchmarking on simulated FDA designs
@@ -250,21 +586,21 @@ bench <- benchmark_selection_methods(
 )
 
 head(bench$metrics)
-#>     level n_universe n_truth n_selected tp fp fn tn precision recall specificity        f1
-#> 1 feature         42       9         35  9 26  0  7 0.2571429      1   0.2121212 0.4090909
-#> 2 feature         42       9         36  9 27  0  6 0.2500000      1   0.1818182 0.4000000
-#> 3   group          4       3          4  3  1  0  0 0.7500000      1   0.0000000 0.8571429
-#> 4   group          4       3          4  3  1  0  0 0.7500000      1   0.0000000 0.8571429
-#>     jaccard selection_rate       c0            method        scenario representation
-#> 1 0.2571429      0.8333333 c0 = 0.5       selectboost localized_dense           grid
-#> 2 0.2500000      0.8571429 c0 = 0.5 plain_selectboost localized_dense           grid
-#> 3 0.7500000      1.0000000 c0 = 0.5       selectboost localized_dense           grid
-#> 4 0.7500000      1.0000000 c0 = 0.5 plain_selectboost localized_dense           grid
-#>     family
-#> 1 gaussian
-#> 2 gaussian
-#> 3 gaussian
-#> 4 gaussian
+#>     level n_universe n_truth n_selected tp fp fn tn precision
+#> 1 feature         42       9         35  9 26  0  7 0.2571429
+#> 2 feature         42       9         30  8 22  1 11 0.2666667
+#> 3   group          4       3          4  3  1  0  0 0.7500000
+#> 4   group          4       3          4  3  1  0  0 0.7500000
+#>      recall specificity        f1   jaccard selection_rate       c0
+#> 1 1.0000000   0.2121212 0.4090909 0.2571429      0.8333333 c0 = 0.5
+#> 2 0.8888889   0.3333333 0.4102564 0.2580645      0.7142857 c0 = 0.5
+#> 3 1.0000000   0.0000000 0.8571429 0.7500000      1.0000000 c0 = 0.5
+#> 4 1.0000000   0.0000000 0.8571429 0.7500000      1.0000000 c0 = 0.5
+#>              method        scenario representation   family
+#> 1       selectboost localized_dense           grid gaussian
+#> 2 plain_selectboost localized_dense           grid gaussian
+#> 3       selectboost localized_dense           grid gaussian
+#> 4 plain_selectboost localized_dense           grid gaussian
 ```
 
 The package also ships a larger saved sensitivity study under
@@ -303,18 +639,24 @@ utils::head(
   ],
   5
 )
-#>            scenario confounding_strength active_region_scale local_correlation
-#> 1 confounded_blocks                  0.6                 0.5                 2
-#> 2 confounded_blocks                  1.0                 0.8                 2
-#> 3 confounded_blocks                  0.6                 0.8                 2
-#> 4   localized_dense                  0.6                 0.5                 2
-#> 5 confounded_blocks                  0.6                 0.5                 2
-#>   association_method bandwidth selectboost_f1_mean plain_selectboost_f1_mean delta_mean
-#> 1           interval         8           0.5362319                 0.4087266 0.12750533
-#> 2             hybrid         4           0.5885135                 0.4826750 0.10583853
-#> 3             hybrid         4           0.5833671                 0.4944862 0.08888092
-#> 4       neighborhood         4           0.4972542                 0.4144859 0.08276831
-#> 5             hybrid         4           0.5429293                 0.4657088 0.07722048
+#>            scenario confounding_strength active_region_scale
+#> 1 confounded_blocks                  0.6                 0.5
+#> 2 confounded_blocks                  1.0                 0.8
+#> 3 confounded_blocks                  0.6                 0.8
+#> 4   localized_dense                  0.6                 0.5
+#> 5 confounded_blocks                  0.6                 0.5
+#>   local_correlation association_method bandwidth
+#> 1                 2           interval         8
+#> 2                 2             hybrid         4
+#> 3                 2             hybrid         4
+#> 4                 2       neighborhood         4
+#> 5                 2             hybrid         4
+#>   selectboost_f1_mean plain_selectboost_f1_mean delta_mean
+#> 1           0.5362319                 0.4087266 0.12750533
+#> 2           0.5885135                 0.4826750 0.10583853
+#> 3           0.5833671                 0.4944862 0.08888092
+#> 4           0.4972542                 0.4144859 0.08276831
+#> 5           0.5429293                 0.4657088 0.07722048
 #>    win_rate
 #> 1 1.0000000
 #> 2 1.0000000
@@ -330,6 +672,11 @@ high-correlation, narrow-region settings. For example, in the
 saved mean `F1` values are approximately `0.536` for FDA-aware
 `SelectBoost` versus `0.409` for plain `SelectBoost`.
 
+The focused benchmark driver is available at
+`tools/run_focused_benchmark.R`. It writes to `--output-dir=...` when
+provided and otherwise uses
+[`tempdir()`](https://rdrr.io/r/base/tempfile.html).
+
 ## Further documentation
 
 The package vignettes cover the main workflow families:
@@ -339,6 +686,10 @@ The package vignettes cover the main workflow families:
 - basis and FPCA workflows
 - methods, calibration, and formula interfaces
 - simulation and benchmark workflows
+- perturbation grids
+- monotonicity and precision-recall paths
+- association diagnostics
+- focused benchmark workflow
 
 ## References
 
@@ -357,18 +708,40 @@ The package vignettes cover the main workflow families:
 
 - [`apply_fda_preprocessor()`](https://fbertran.github.io/SelectBoost.FDA/reference/apply_fda_preprocessor.md)
   : Apply an FDA Preprocessor
+- [`as_association_heatmap_data()`](https://fbertran.github.io/SelectBoost.FDA/reference/as_association_heatmap_data.md)
+  : Extract Association Heatmap Data
+- [`as_benchmark_summary_data()`](https://fbertran.github.io/SelectBoost.FDA/reference/as_benchmark_summary_data.md)
+  : Extract Benchmark Summary Data
+- [`as_functional_interval_map_data()`](https://fbertran.github.io/SelectBoost.FDA/reference/as_functional_interval_map_data.md)
+  : Extract Functional Interval Map Data
 - [`as_functional_matrix()`](https://fbertran.github.io/SelectBoost.FDA/reference/as_functional_matrix.md)
   : Flatten Functional Predictors Into a Matrix
+- [`as_monotonicity_path_data()`](https://fbertran.github.io/SelectBoost.FDA/reference/as_monotonicity_path_data.md)
+  : Extract Monotonicity Path Data
+- [`as_precision_recall_path_data()`](https://fbertran.github.io/SelectBoost.FDA/reference/as_precision_recall_path_data.md)
+  : Extract Precision-Recall Path Data
+- [`as_selection_surface_data()`](https://fbertran.github.io/SelectBoost.FDA/reference/as_selection_surface_data.md)
+  : Extract Selection Surface Data
 - [`benchmark_selection_methods()`](https://fbertran.github.io/SelectBoost.FDA/reference/benchmark_selection_methods.md)
   : Benchmark FDA Selection Methods on Shared Ground Truth
+- [`best_threshold_fda()`](https://fbertran.github.io/SelectBoost.FDA/reference/best_threshold_fda.md)
+  : Choose the Best FDA Selection Threshold
 - [`calibrate_interval_width()`](https://fbertran.github.io/SelectBoost.FDA/reference/calibrate_interval_width.md)
   : Calibrate Interval Widths
 - [`calibrate_selectboost()`](https://fbertran.github.io/SelectBoost.FDA/reference/calibrate_selectboost.md)
   : Calibrate SelectBoost c0 Values
 - [`calibrate_stability_selection()`](https://fbertran.github.io/SelectBoost.FDA/reference/calibrate_stability_selection.md)
   : Calibrate Stability-Selection Parameters
+- [`check_selection_monotonicity()`](https://fbertran.github.io/SelectBoost.FDA/reference/check_selection_monotonicity.md)
+  : Check Selection-Path Monotonicity
+- [`compare_association_methods()`](https://fbertran.github.io/SelectBoost.FDA/reference/compare_association_methods.md)
+  : Compare Functional Association Methods
 - [`compare_selection_methods()`](https://fbertran.github.io/SelectBoost.FDA/reference/compare_selection_methods.md)
   : Compare FDA Selection Methods
+- [`diagnose_functional_association()`](https://fbertran.github.io/SelectBoost.FDA/reference/diagnose_functional_association.md)
+  : Diagnose Functional Association Structures
+- [`enforce_monotone_selection()`](https://fbertran.github.io/SelectBoost.FDA/reference/enforce_monotone_selection.md)
+  : Enforce Monotone Selection Paths
 - [`evaluate_selection()`](https://fbertran.github.io/SelectBoost.FDA/reference/evaluate_selection.md)
   : Evaluate Selection Recovery Against Ground Truth
 - [`fda_basis()`](https://fbertran.github.io/SelectBoost.FDA/reference/fda_basis.md)
@@ -393,6 +766,8 @@ The package vignettes cover the main workflow families:
   : Stability Selection for FDboost Fits
 - [`fit_fda_preprocessor()`](https://fbertran.github.io/SelectBoost.FDA/reference/fit_fda_preprocessor.md)
   : Fit an FDA Preprocessor
+- [`fit_perturbation_grid()`](https://fbertran.github.io/SelectBoost.FDA/reference/fit_perturbation_grid.md)
+  : Fit a Two-Parameter FDA Perturbation Grid
 - [`fit_selectboost()`](https://fbertran.github.io/SelectBoost.FDA/reference/fit_selectboost.md)
   : Fit SelectBoost from an FDA Design
 - [`fit_selectboost_formula()`](https://fbertran.github.io/SelectBoost.FDA/reference/fit_selectboost_formula.md)
@@ -418,6 +793,16 @@ The package vignettes cover the main workflow families:
 - [`plot(`*`<fda_stability_selection>`*`)`](https://fbertran.github.io/SelectBoost.FDA/reference/plot.fda_selection.md)
   [`plot(`*`<selectboost_fda_result>`*`)`](https://fbertran.github.io/SelectBoost.FDA/reference/plot.fda_selection.md)
   : Plot FDA Selection Results
+- [`precision_recall_curve_fda()`](https://fbertran.github.io/SelectBoost.FDA/reference/precision_recall_curve_fda.md)
+  : Compute FDA Precision-Recall Curves
+- [`report_benchmark_table()`](https://fbertran.github.io/SelectBoost.FDA/reference/report_benchmark_table.md)
+  : Report Benchmark Table
+- [`report_formula_blocks()`](https://fbertran.github.io/SelectBoost.FDA/reference/report_formula_blocks.md)
+  : Report Formula Blocks
+- [`report_method_table()`](https://fbertran.github.io/SelectBoost.FDA/reference/report_method_table.md)
+  : Report Method Table
+- [`report_summary_table()`](https://fbertran.github.io/SelectBoost.FDA/reference/report_summary_table.md)
+  : Report Summary Table
 - [`run_selectboost_sensitivity_study()`](https://fbertran.github.io/SelectBoost.FDA/reference/run_selectboost_sensitivity_study.md)
   : Run a Targeted Sensitivity Study for FDA-SelectBoost
 - [`run_simulation_study()`](https://fbertran.github.io/SelectBoost.FDA/reference/run_simulation_study.md)
@@ -426,8 +811,12 @@ The package vignettes cover the main workflow families:
   : FDA-Oriented SelectBoost Wrapper
 - [`selected()`](https://fbertran.github.io/SelectBoost.FDA/reference/selected.md)
   : Extract Selected Features or Groups
+- [`selected_surface()`](https://fbertran.github.io/SelectBoost.FDA/reference/selected_surface.md)
+  : Extract Selected Surface Rows
 - [`selection_map()`](https://fbertran.github.io/SelectBoost.FDA/reference/selection_map.md)
   : Feature-Level Selection Map
+- [`selection_surface()`](https://fbertran.github.io/SelectBoost.FDA/reference/selection_surface.md)
+  : Extract a Selection Surface
 - [`simulate_fda_scenario()`](https://fbertran.github.io/SelectBoost.FDA/reference/simulate_fda_scenario.md)
   : Simulate an FDA Benchmark Scenario
 - [`spectra_example`](https://fbertran.github.io/SelectBoost.FDA/reference/spectra_example.md)
@@ -436,22 +825,42 @@ The package vignettes cover the main workflow families:
   : Grouped Stability Selection for Functional Predictors
 - [`suggest_c0_grid()`](https://fbertran.github.io/SelectBoost.FDA/reference/suggest_c0_grid.md)
   : Suggest a c0 Grid for FDA-SelectBoost
+- [`summarise_association_structure()`](https://fbertran.github.io/SelectBoost.FDA/reference/summarise_association_structure.md)
+  : Summarize a Functional Association Matrix
 - [`summarise_benchmark_advantage()`](https://fbertran.github.io/SelectBoost.FDA/reference/summarise_benchmark_advantage.md)
   : Summarize the Advantage of FDA-SelectBoost Over Baselines
 - [`summarise_benchmark_performance()`](https://fbertran.github.io/SelectBoost.FDA/reference/summarise_benchmark_performance.md)
   : Summarize Benchmark Performance by Method
+- [`summarise_monotonicity()`](https://fbertran.github.io/SelectBoost.FDA/reference/summarise_monotonicity.md)
+  : Summarize Monotonicity Diagnostics
+- [`summarise_perturbation_grid()`](https://fbertran.github.io/SelectBoost.FDA/reference/summarise_perturbation_grid.md)
+  : Summarize Perturbation-Grid Selection Surfaces
+- [`summarise_precision_recall_fda()`](https://fbertran.github.io/SelectBoost.FDA/reference/summarise_precision_recall_fda.md)
+  : Summarize FDA Precision-Recall Paths
+- [`summary(`*`<fda_perturbation_grid>`*`)`](https://fbertran.github.io/SelectBoost.FDA/reference/summary.fda_perturbation_grid.md)
+  : Summarize a Perturbation Grid
 
 # Articles
 
 ### End-to-End Workflows
 
+- [Workflow
+  Guide](https://fbertran.github.io/SelectBoost.FDA/articles/workflow-guide.md):
 - [Discretized Curves and Grouped Stability
   Selection](https://fbertran.github.io/SelectBoost.FDA/articles/discretized-curves.md):
-- [SelectBoost for Dense
-  Spectra](https://fbertran.github.io/SelectBoost.FDA/articles/selectboost-spectra.md):
 - [Basis and FPCA
   Workflows](https://fbertran.github.io/SelectBoost.FDA/articles/basis-fpca-workflows.md):
+- [SelectBoost for Dense
+  Spectra](https://fbertran.github.io/SelectBoost.FDA/articles/selectboost-spectra.md):
 - [Methods, Calibration, and Formula
   Workflows](https://fbertran.github.io/SelectBoost.FDA/articles/methods-and-formulas.md):
+- [Association Diagnostics for Functional
+  Predictors](https://fbertran.github.io/SelectBoost.FDA/articles/association-diagnostics.md):
+- [Perturbation Grids for FDA
+  Selection](https://fbertran.github.io/SelectBoost.FDA/articles/perturbation-grid.md):
+- [Monotonicity and Precision-Recall
+  Paths](https://fbertran.github.io/SelectBoost.FDA/articles/monotonicity-and-pr-paths.md):
 - [Simulation and Benchmark
   Workflows](https://fbertran.github.io/SelectBoost.FDA/articles/simulation-and-benchmarks.md):
+- [Focused Benchmark
+  Workflow](https://fbertran.github.io/SelectBoost.FDA/articles/focused-benchmark-workflow.md):

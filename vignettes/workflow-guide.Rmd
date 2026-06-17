@@ -1,0 +1,80 @@
+---
+title: "Workflow Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Workflow Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+`SelectBoost.FDA` now covers several distinct FDA workflows: raw-grid designs,
+basis and FPCA preprocessing, grouped stability selection, FDA-aware
+`SelectBoost`, perturbation surfaces, diagnostics, and benchmarking. This
+vignette is the entry point for the rest of the documentation.
+
+## Start here
+
+If you are new to the package, use the vignettes in this order.
+
+1. [Discretized Curves and Grouped Stability Selection](discretized-curves.html)
+   starts from raw functional curves and builds the main `fda_design` object.
+2. [Basis and FPCA Workflows](basis-fpca-workflows.html) shows how to fit and
+   reuse spline-basis or FPCA preprocessing.
+3. [SelectBoost for Dense Spectra](selectboost-spectra.html) focuses on the
+   dense, highly correlated setting where FDA-aware `SelectBoost` is most
+   useful.
+4. [Methods, Calibration, and Formula Workflows](methods-and-formulas.html)
+   covers the broader modeling API: selector backends, formulas, and
+   calibration helpers.
+
+## Diagnostics and Validation
+
+Once the core workflow is clear, the next vignettes explain how to inspect and
+compare results.
+
+1. [Association Diagnostics for Functional Predictors](association-diagnostics.html)
+   explains correlation, neighborhood, hybrid, and interval association
+   structures.
+2. [Perturbation Grids for FDA Selection](perturbation-grid.html) introduces
+   the two-parameter selection surface indexed by `q` and `c0`.
+3. [Monotonicity and Precision-Recall Paths](monotonicity-and-pr-paths.html)
+   shows how to summarize those surfaces without relying on a plotting
+   backend.
+
+## Benchmark Material
+
+The last two vignettes are benchmark-oriented.
+
+1. [Simulation and Benchmark Workflows](simulation-and-benchmarks.html)
+   covers the general simulation engine and method-comparison utilities.
+2. [Focused Benchmark Workflow](focused-benchmark-workflow.html) focuses on the
+   saved benchmark tables and the dedicated benchmark driver.
+
+## Minimal Orientation Example
+
+The package entry point is still the FDA-native design object.
+
+```{r}
+library(SelectBoost.FDA)
+
+sim <- simulate_fda_scenario(
+  n = 18,
+  grid_length = 10,
+  include_scalar = FALSE,
+  seed = 1
+)
+
+sim$design
+head(selection_map(sim$design))
+```
+
+From that point, the package branches into grouped stability selection,
+FDA-aware `SelectBoost`, or benchmark workflows depending on the question you
+want to answer.

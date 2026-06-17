@@ -1,0 +1,60 @@
+---
+title: "Perturbation Grids for FDA Selection"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Perturbation Grids for FDA Selection}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+`fit_perturbation_grid()` estimates the two-parameter selection surface
+indexed by a subject subsampling rate `q` and a SelectBoost perturbation
+strength `c0`.
+
+```{r}
+library(SelectBoost.FDA)
+
+sim <- simulate_fda_scenario(
+  n = 18,
+  grid_length = 10,
+  include_scalar = FALSE,
+  seed = 1
+)
+
+grid_fit <- fit_perturbation_grid(
+  sim$design,
+  q_grid = c(0.6, 0.8),
+  c0_grid = c(0.7, 0.4),
+  B = 1,
+  selectboost_B = 1,
+  selector = "msgps",
+  association_method = "hybrid",
+  bandwidth = 3,
+  levels = c("feature", "group"),
+  seed = 2
+)
+
+grid_fit
+head(selection_surface(grid_fit))
+summarise_perturbation_grid(grid_fit)
+```
+
+The returned object keeps the statistical result as ordinary data frames:
+
+```{r}
+feature_surface <- selection_map(grid_fit, level = "feature")
+group_surface <- selection_map(grid_fit, level = "group")
+
+head(feature_surface[, c("feature", "q", "c0", "selection", "selected")])
+head(group_surface[, c("group", "q", "c0", "mean_selection", "max_selection")])
+```
+
+The same data can be filtered before plotting or reporting:
+
+```{r}
+head(selected_surface(grid_fit, threshold = 0.5, level = "feature"))
+```

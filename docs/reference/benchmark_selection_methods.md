@@ -69,13 +69,18 @@ bench <- benchmark_selection_methods(
 )
 head(bench$metrics)
 #>     level n_universe n_truth n_selected tp fp fn tn precision recall
-#> 1 feature         34       8         24  6 18  2  8 0.2500000   0.75
-#> 2 feature         34       8         29  8 21  0  5 0.2758621   1.00
-#> 3   group          4       3          4  3  1  0  0 0.7500000   1.00
-#> 4   group          4       3          4  3  1  0  0 0.7500000   1.00
+#> 1 feature         34       8         30  8 22  0  4 0.2666667  1.000
+#> 2 feature         34       8         27  7 20  1  6 0.2592593  0.875
+#> 3   group          4       3          4  3  1  0  0 0.7500000  1.000
+#> 4   group          4       3          4  3  1  0  0 0.7500000  1.000
 #>   specificity        f1   jaccard selection_rate       c0            method
-#> 1   0.3076923 0.3750000 0.2307692      0.7058824 c0 = 0.5       selectboost
-#> 2   0.1923077 0.4324324 0.2758621      0.8529412 c0 = 0.5 plain_selectboost
+#> 1   0.1538462 0.4210526 0.2666667      0.8823529 c0 = 0.5       selectboost
+#> 2   0.2307692 0.4000000 0.2500000      0.7941176 c0 = 0.5 plain_selectboost
 #> 3   0.0000000 0.8571429 0.7500000      1.0000000 c0 = 0.5       selectboost
 #> 4   0.0000000 0.8571429 0.7500000      1.0000000 c0 = 0.5 plain_selectboost
+#>          scenario representation   family
+#> 1 localized_dense           grid gaussian
+#> 2 localized_dense           grid gaussian
+#> 3 localized_dense           grid gaussian
+#> 4 localized_dense           grid gaussian
 ```

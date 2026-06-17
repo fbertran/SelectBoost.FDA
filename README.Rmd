@@ -18,7 +18,7 @@ if (requireNamespace("pkgload", quietly = TRUE)) {
 ```
 
 
-# SelectBoost.FDA <img src="man/figures/logo_selectboost_FDA.png" align="right" width="200"/>
+# SelectBoost.FDA <img src="man/figures/logo_selectboost_FDA.png" align="right" width="200" alt="SelectBoost.FDA logo"/>
 ## Frédéric Bertrand
 
 <!-- badges: start -->
@@ -46,6 +46,13 @@ unstable.
 - Grouped stability selection for functional blocks and interval summaries.
 - FDA-aware `SelectBoost` wrappers plus a plain `SelectBoost` baseline.
 - Simulation, benchmark, and evaluation helpers with mapped ground truth.
+- Two-parameter perturbation grids over subsampling rate `q` and SelectBoost
+  strength `c0`.
+- Renderer-neutral extraction functions for selection surfaces, monotonicity
+  paths, precision-recall paths, association heatmaps, interval maps, and
+  benchmark summaries.
+- Association diagnostics and report table helpers for scientific reporting
+  material.
 - Shipped sensitivity-study benchmark summaries for direct mean `F1`
   comparisons between `selectboost_fda()` and plain `SelectBoost`.
 - Seeded simulation and stability-selection workflows that keep RNG changes
@@ -161,6 +168,38 @@ if (requireNamespace("glmnet", quietly = TRUE)) {
 }
 ```
 
+## Two-parameter perturbation surfaces
+
+For focused benchmark workflows, `fit_perturbation_grid()` combines subject-level
+subsampling with FDA-aware SelectBoost perturbations and returns ordinary data
+frames for downstream plotting or reporting.
+
+```{r}
+grid_fit <- fit_perturbation_grid(
+  design,
+  q_grid = c(0.6, 0.8),
+  c0_grid = c(0.7, 0.4),
+  B = 1,
+  selectboost_B = 1,
+  selector = "msgps",
+  association_method = "hybrid",
+  bandwidth = 4,
+  levels = c("feature", "group"),
+  seed = 2
+)
+
+head(selection_surface(grid_fit))
+summarise_perturbation_grid(grid_fit)
+```
+
+The data layer is independent of plotting backends:
+
+```{r}
+head(as_monotonicity_path_data(grid_fit, axis = "c0", level = "feature"))
+summarise_monotonicity(grid_fit, axis = "c0", level = "feature")
+head(as_association_heatmap_data(design, method = "hybrid", bandwidth = 4))
+```
+
 ## Benchmarking on simulated FDA designs
 
 The validation layer can be used to compare FDA-aware `SelectBoost` with a
@@ -229,6 +268,9 @@ narrow-region settings. For example, in the `confounded_blocks` scenario with
 `bandwidth = 8`, the saved mean `F1` values are approximately `0.536` for
 FDA-aware `SelectBoost` versus `0.409` for plain `SelectBoost`.
 
+The focused benchmark driver is available at `tools/run_focused_benchmark.R`.
+It writes to `--output-dir=...` when provided and otherwise uses `tempdir()`.
+
 ## Further documentation
 
 The package vignettes cover the main workflow families:
@@ -238,6 +280,10 @@ The package vignettes cover the main workflow families:
 - basis and FPCA workflows
 - methods, calibration, and formula interfaces
 - simulation and benchmark workflows
+- perturbation grids
+- monotonicity and precision-recall paths
+- association diagnostics
+- focused benchmark workflow
 
 ## References
 
