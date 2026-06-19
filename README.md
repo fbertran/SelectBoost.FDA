@@ -114,15 +114,12 @@ summary(design)
 #>        age         scalar          1
 #>  treatment         scalar          1
 head(selection_map(design, level = "basis"))
-#>                 predictor representation basis_type
-#> nuisance.spline  nuisance          basis     spline
-#> signal.fpca        signal          basis       fpca
-#>                 source_representation n_components first_component
-#> nuisance.spline                  grid            5              B1
-#> signal.fpca                      grid            3             PC1
-#>                 last_component         components
-#> nuisance.spline             B5 B1, B2, B3, B4, B5
-#> signal.fpca                PC3      PC1, PC2, PC3
+#>                 predictor representation basis_type source_representation n_components
+#> nuisance.spline  nuisance          basis     spline                  grid            5
+#> signal.fpca        signal          basis       fpca                  grid            3
+#>                 first_component last_component         components
+#> nuisance.spline              B1             B5 B1, B2, B3, B4, B5
+#> signal.fpca                 PC1            PC3      PC1, PC2, PC3
 #>                                                                                                               component_keys
 #> nuisance.spline nuisance::spline::B1, nuisance::spline::B2, nuisance::spline::B3, nuisance::spline::B4, nuisance::spline::B5
 #> signal.fpca                                                          signal::fpca::PC1, signal::fpca::PC2, signal::fpca::PC3
@@ -155,26 +152,21 @@ summary(fit_sb)
 #>   groups: 4 
 #>   c0 values: 2
 head(selection_map(fit_sb, level = "group", c0 = colnames(fit_sb$feature_selection)[1]))
-#>   predictor group_id     group representation basis_type
-#> 1    signal        1    signal          basis       fpca
-#> 2  nuisance        2  nuisance          basis     spline
-#> 3       age        3       age         scalar           
-#> 4 treatment        4 treatment         scalar           
-#>   source_representation n_features start_position end_position
-#> 1                  grid          3              1            3
-#> 2                  grid          5              1            5
-#> 3                scalar          1              1            1
-#> 4                scalar          1              1            1
-#>   start_argval end_argval domain_start domain_end       c0
-#> 1          PC1        PC3         1100       2500 c0 = 0.6
-#> 2           B1         B5         1100       2500 c0 = 0.6
-#> 3          age        age          age        age c0 = 0.6
-#> 4    treatment  treatment    treatment  treatment c0 = 0.6
+#>   predictor group_id     group representation basis_type source_representation n_features
+#> 1    signal        1    signal          basis       fpca                  grid          3
+#> 2  nuisance        2  nuisance          basis     spline                  grid          5
+#> 3       age        3       age         scalar                           scalar          1
+#> 4 treatment        4 treatment         scalar                           scalar          1
+#>   start_position end_position start_argval end_argval domain_start domain_end       c0
+#> 1              1            3          PC1        PC3         1100       2500 c0 = 0.6
+#> 2              1            5           B1         B5         1100       2500 c0 = 0.6
+#> 3              1            1          age        age          age        age c0 = 0.6
+#> 4              1            1    treatment  treatment    treatment  treatment c0 = 0.6
 #>   mean_selection max_selection selected_features
-#> 1      0.6666667          1.00                 2
-#> 2      0.5000000          0.75                 5
-#> 3      0.7500000          0.75                 1
-#> 4      1.0000000          1.00                 1
+#> 1      0.6666667           1.0                 2
+#> 2      0.3000000           0.5                 4
+#> 3      0.5000000           0.5                 1
+#> 4      1.0000000           1.0                 1
 ```
 
 ## Grouped stability selection
@@ -196,31 +188,21 @@ if (requireNamespace("glmnet", quietly = TRUE)) {
   summary(fit_stab)
   head(selection_map(fit_stab, level = "group"))
 }
-#>   predictor group_id     group representation basis_type
-#> 1    signal        1    signal          basis       fpca
-#> 2  nuisance        2  nuisance          basis     spline
-#> 3       age        3       age         scalar           
-#> 4 treatment        4 treatment         scalar           
-#>   source_representation n_features start_position end_position
-#> 1                  grid          3              1            3
-#> 2                  grid          5              1            5
-#> 3                scalar          1              1            1
-#> 4                scalar          1              1            1
-#>   start_argval end_argval domain_start domain_end
-#> 1          PC1        PC3         1100       2500
-#> 2           B1         B5         1100       2500
-#> 3          age        age          age        age
-#> 4    treatment  treatment    treatment  treatment
-#>   mean_feature_frequency max_feature_frequency selected_features
-#> 1              0.4166667                 0.750                 2
-#> 2              0.0500000                 0.125                 0
-#> 3              0.0000000                 0.000                 0
-#> 4              0.2500000                 0.250                 0
-#>   group_frequency group_selected
-#> 1           0.750           TRUE
-#> 2           0.125          FALSE
-#> 3           0.000          FALSE
-#> 4           0.250          FALSE
+#>   predictor group_id     group representation basis_type source_representation n_features
+#> 1    signal        1    signal          basis       fpca                  grid          3
+#> 2  nuisance        2  nuisance          basis     spline                  grid          5
+#> 3       age        3       age         scalar                           scalar          1
+#> 4 treatment        4 treatment         scalar                           scalar          1
+#>   start_position end_position start_argval end_argval domain_start domain_end
+#> 1              1            3          PC1        PC3         1100       2500
+#> 2              1            5           B1         B5         1100       2500
+#> 3              1            1          age        age          age        age
+#> 4              1            1    treatment  treatment    treatment  treatment
+#>   mean_feature_frequency max_feature_frequency selected_features group_frequency group_selected
+#> 1              0.4166667                 0.750                 2           0.750           TRUE
+#> 2              0.0500000                 0.125                 0           0.125          FALSE
+#> 3              0.0000000                 0.000                 0           0.000          FALSE
+#> 4              0.2500000                 0.250                 0           0.250          FALSE
 ```
 
 Interval summaries can be requested directly:
@@ -239,42 +221,30 @@ if (requireNamespace("glmnet", quietly = TRUE)) {
 
   head(selection_map(fit_interval, level = "group"))
 }
-#>   predictor group_id          group representation basis_type
-#> 1    signal        1    signal[1:3]          basis       fpca
-#> 2  nuisance        2  nuisance[1:4]          basis     spline
-#> 3  nuisance        3  nuisance[5:5]          basis     spline
-#> 4       age        4       age[1:1]         scalar           
-#> 5 treatment        5 treatment[1:1]         scalar           
-#>   source_representation n_features start_position end_position
-#> 1                  grid          3              1            3
-#> 2                  grid          4              1            4
-#> 3                  grid          1              5            5
-#> 4                scalar          1              1            1
-#> 5                scalar          1              1            1
-#>   start_argval end_argval     domain_start       domain_end
-#> 1          PC1        PC3             1100             2500
-#> 2           B1         B4             1100 2464.10256410256
-#> 3           B5         B5 1817.94871794872             2500
-#> 4          age        age              age              age
-#> 5    treatment  treatment        treatment        treatment
-#>   mean_feature_frequency max_feature_frequency selected_features
-#> 1              0.4166667                 0.750                 2
-#> 2              0.0625000                 0.125                 0
-#> 3              0.0000000                 0.000                 0
-#> 4              0.0000000                 0.000                 0
-#> 5              0.2500000                 0.250                 0
-#>   group_frequency group_selected interval_start interval_end
-#> 1           0.750           TRUE              1            3
-#> 2           0.125          FALSE              1            4
-#> 3           0.000          FALSE              5            5
-#> 4           0.000          FALSE              1            1
-#> 5           0.250          FALSE              1            1
-#>   interval_label
-#> 1    signal[1:3]
-#> 2  nuisance[1:4]
-#> 3  nuisance[5:5]
-#> 4       age[1:1]
-#> 5 treatment[1:1]
+#>   predictor group_id          group representation basis_type source_representation n_features
+#> 1    signal        1    signal[1:3]          basis       fpca                  grid          3
+#> 2  nuisance        2  nuisance[1:4]          basis     spline                  grid          4
+#> 3  nuisance        3  nuisance[5:5]          basis     spline                  grid          1
+#> 4       age        4       age[1:1]         scalar                           scalar          1
+#> 5 treatment        5 treatment[1:1]         scalar                           scalar          1
+#>   start_position end_position start_argval end_argval     domain_start       domain_end
+#> 1              1            3          PC1        PC3             1100             2500
+#> 2              1            4           B1         B4             1100 2464.10256410256
+#> 3              5            5           B5         B5 1817.94871794872             2500
+#> 4              1            1          age        age              age              age
+#> 5              1            1    treatment  treatment        treatment        treatment
+#>   mean_feature_frequency max_feature_frequency selected_features group_frequency group_selected
+#> 1              0.4166667                 0.750                 2           0.750           TRUE
+#> 2              0.0625000                 0.125                 0           0.125          FALSE
+#> 3              0.0000000                 0.000                 0           0.000          FALSE
+#> 4              0.0000000                 0.000                 0           0.000          FALSE
+#> 5              0.2500000                 0.250                 0           0.250          FALSE
+#>   interval_start interval_end interval_label
+#> 1              1            3    signal[1:3]
+#> 2              1            4  nuisance[1:4]
+#> 3              5            5  nuisance[5:5]
+#> 4              1            1       age[1:1]
+#> 5              1            1 treatment[1:1]
 ```
 
 ## Two-parameter perturbation surfaces
@@ -299,165 +269,79 @@ grid_fit <- fit_perturbation_grid(
 )
 
 head(selection_surface(grid_fit))
-#>                                 feature predictor group   level   q
-#> age.feature.0.6.0.4.selectboost     age       age   age feature 0.6
-#> age.feature.0.6.0.7.selectboost     age       age   age feature 0.6
-#> age.feature.0.8.0.4.selectboost     age       age   age feature 0.8
-#> age.feature.0.8.0.7.selectboost     age       age   age feature 0.8
-#> age.group.0.6.0.4.selectboost       age       age   age   group 0.6
-#> age.group.0.6.0.7.selectboost       age       age   age   group 0.6
-#>                                  c0 selection mean_selection
-#> age.feature.0.6.0.4.selectboost 0.4         1              1
-#> age.feature.0.6.0.7.selectboost 0.7         1              1
-#> age.feature.0.8.0.4.selectboost 0.4         1              1
-#> age.feature.0.8.0.7.selectboost 0.7         0              0
-#> age.group.0.6.0.4.selectboost   0.4         1              1
-#> age.group.0.6.0.7.selectboost   0.7         1              1
-#>                                 max_selection selected
-#> age.feature.0.6.0.4.selectboost             1     TRUE
-#> age.feature.0.6.0.7.selectboost             1     TRUE
-#> age.feature.0.8.0.4.selectboost             1     TRUE
-#> age.feature.0.8.0.7.selectboost             0    FALSE
-#> age.group.0.6.0.4.selectboost               1     TRUE
-#> age.group.0.6.0.7.selectboost               1     TRUE
-#>                                 representation basis_type
-#> age.feature.0.6.0.4.selectboost         scalar       <NA>
-#> age.feature.0.6.0.7.selectboost         scalar       <NA>
-#> age.feature.0.8.0.4.selectboost         scalar       <NA>
-#> age.feature.0.8.0.7.selectboost         scalar       <NA>
-#> age.group.0.6.0.4.selectboost           scalar           
-#> age.group.0.6.0.7.selectboost           scalar           
-#>                                 source_representation
-#> age.feature.0.6.0.4.selectboost                scalar
-#> age.feature.0.6.0.7.selectboost                scalar
-#> age.feature.0.8.0.4.selectboost                scalar
-#> age.feature.0.8.0.7.selectboost                scalar
-#> age.group.0.6.0.4.selectboost                  scalar
-#> age.group.0.6.0.7.selectboost                  scalar
-#>                                 start_position end_position
-#> age.feature.0.6.0.4.selectboost              1            1
-#> age.feature.0.6.0.7.selectboost              1            1
-#> age.feature.0.8.0.4.selectboost              1            1
-#> age.feature.0.8.0.7.selectboost              1            1
-#> age.group.0.6.0.4.selectboost                1            1
-#> age.group.0.6.0.7.selectboost                1            1
-#>                                 start_argval end_argval
-#> age.feature.0.6.0.4.selectboost          age        age
-#> age.feature.0.6.0.7.selectboost          age        age
-#> age.feature.0.8.0.4.selectboost          age        age
-#> age.feature.0.8.0.7.selectboost          age        age
-#> age.group.0.6.0.4.selectboost            age        age
-#> age.group.0.6.0.7.selectboost            age        age
-#>                                 domain_start domain_end      method
-#> age.feature.0.6.0.4.selectboost          age        age selectboost
-#> age.feature.0.6.0.7.selectboost          age        age selectboost
-#> age.feature.0.8.0.4.selectboost          age        age selectboost
-#> age.feature.0.8.0.7.selectboost          age        age selectboost
-#> age.group.0.6.0.4.selectboost            age        age selectboost
-#> age.group.0.6.0.7.selectboost            age        age selectboost
-#>                                 block position argval   transform
-#> age.feature.0.6.0.4.selectboost   age        1    age standardize
-#> age.feature.0.6.0.7.selectboost   age        1    age standardize
-#> age.feature.0.8.0.4.selectboost   age        1    age standardize
-#> age.feature.0.8.0.7.selectboost   age        1    age standardize
-#> age.group.0.6.0.4.selectboost    <NA>       NA   <NA>        <NA>
-#> age.group.0.6.0.7.selectboost    <NA>       NA   <NA>        <NA>
-#>                                 source_predictor
-#> age.feature.0.6.0.4.selectboost              age
-#> age.feature.0.6.0.7.selectboost              age
-#> age.feature.0.8.0.4.selectboost              age
-#> age.feature.0.8.0.7.selectboost              age
-#> age.group.0.6.0.4.selectboost               <NA>
-#> age.group.0.6.0.7.selectboost               <NA>
-#>                                 source_position_start
-#> age.feature.0.6.0.4.selectboost                     1
-#> age.feature.0.6.0.7.selectboost                     1
-#> age.feature.0.8.0.4.selectboost                     1
-#> age.feature.0.8.0.7.selectboost                     1
-#> age.group.0.6.0.4.selectboost                      NA
-#> age.group.0.6.0.7.selectboost                      NA
-#>                                 source_position_end
-#> age.feature.0.6.0.4.selectboost                   1
-#> age.feature.0.6.0.7.selectboost                   1
-#> age.feature.0.8.0.4.selectboost                   1
-#> age.feature.0.8.0.7.selectboost                   1
-#> age.group.0.6.0.4.selectboost                    NA
-#> age.group.0.6.0.7.selectboost                    NA
-#>                                 source_argval_start
-#> age.feature.0.6.0.4.selectboost                 age
-#> age.feature.0.6.0.7.selectboost                 age
-#> age.feature.0.8.0.4.selectboost                 age
-#> age.feature.0.8.0.7.selectboost                 age
-#> age.group.0.6.0.4.selectboost                  <NA>
-#> age.group.0.6.0.7.selectboost                  <NA>
-#>                                 source_argval_end component unit
-#> age.feature.0.6.0.4.selectboost               age      <NA> <NA>
-#> age.feature.0.6.0.7.selectboost               age      <NA> <NA>
-#> age.feature.0.8.0.4.selectboost               age      <NA> <NA>
-#> age.feature.0.8.0.7.selectboost               age      <NA> <NA>
-#> age.group.0.6.0.4.selectboost                <NA>      <NA> <NA>
-#> age.group.0.6.0.7.selectboost                <NA>      <NA> <NA>
-#>                                 feature_index basis_component
-#> age.feature.0.6.0.4.selectboost             9            <NA>
-#> age.feature.0.6.0.7.selectboost             9            <NA>
-#> age.feature.0.8.0.4.selectboost             9            <NA>
-#> age.feature.0.8.0.7.selectboost             9            <NA>
-#> age.group.0.6.0.4.selectboost              NA            <NA>
-#> age.group.0.6.0.7.selectboost              NA            <NA>
-#>                                 domain_label group_id n_features
-#> age.feature.0.6.0.4.selectboost          age        3         NA
-#> age.feature.0.6.0.7.selectboost          age        3         NA
-#> age.feature.0.8.0.4.selectboost          age        3         NA
-#> age.feature.0.8.0.7.selectboost          age        3         NA
-#> age.group.0.6.0.4.selectboost           <NA>        3          1
-#> age.group.0.6.0.7.selectboost           <NA>        3          1
-#>                                 selected_features replicate
-#> age.feature.0.6.0.4.selectboost                NA        NA
-#> age.feature.0.6.0.7.selectboost                NA        NA
-#> age.feature.0.8.0.4.selectboost                NA        NA
-#> age.feature.0.8.0.7.selectboost                NA        NA
-#> age.group.0.6.0.4.selectboost                   1        NA
-#> age.group.0.6.0.7.selectboost                   1        NA
-#>                                 association_method group_method
-#> age.feature.0.6.0.4.selectboost             hybrid    threshold
-#> age.feature.0.6.0.7.selectboost             hybrid    threshold
-#> age.feature.0.8.0.4.selectboost             hybrid    threshold
-#> age.feature.0.8.0.7.selectboost             hybrid    threshold
-#> age.group.0.6.0.4.selectboost               hybrid    threshold
-#> age.group.0.6.0.7.selectboost               hybrid    threshold
-#>                                 within_blocks bandwidth width
-#> age.feature.0.6.0.4.selectboost          TRUE         4    NA
-#> age.feature.0.6.0.7.selectboost          TRUE         4    NA
-#> age.feature.0.8.0.4.selectboost          TRUE         4    NA
-#> age.feature.0.8.0.7.selectboost          TRUE         4    NA
-#> age.group.0.6.0.4.selectboost            TRUE         4    NA
-#> age.group.0.6.0.7.selectboost            TRUE         4    NA
-#>                                 n_replicates
-#> age.feature.0.6.0.4.selectboost            1
-#> age.feature.0.6.0.7.selectboost            1
-#> age.feature.0.8.0.4.selectboost            1
-#> age.feature.0.8.0.7.selectboost            1
-#> age.group.0.6.0.4.selectboost              1
-#> age.group.0.6.0.7.selectboost              1
+#>                                 feature predictor group   level   q  c0 selection mean_selection
+#> age.feature.0.6.0.4.selectboost     age       age   age feature 0.6 0.4         1              1
+#> age.feature.0.6.0.7.selectboost     age       age   age feature 0.6 0.7         0              0
+#> age.feature.0.8.0.4.selectboost     age       age   age feature 0.8 0.4         0              0
+#> age.feature.0.8.0.7.selectboost     age       age   age feature 0.8 0.7         1              1
+#> age.group.0.6.0.4.selectboost       age       age   age   group 0.6 0.4         1              1
+#> age.group.0.6.0.7.selectboost       age       age   age   group 0.6 0.7         0              0
+#>                                 max_selection selected representation basis_type
+#> age.feature.0.6.0.4.selectboost             1     TRUE         scalar       <NA>
+#> age.feature.0.6.0.7.selectboost             0    FALSE         scalar       <NA>
+#> age.feature.0.8.0.4.selectboost             0    FALSE         scalar       <NA>
+#> age.feature.0.8.0.7.selectboost             1     TRUE         scalar       <NA>
+#> age.group.0.6.0.4.selectboost               1     TRUE         scalar           
+#> age.group.0.6.0.7.selectboost               0    FALSE         scalar           
+#>                                 source_representation start_position end_position start_argval
+#> age.feature.0.6.0.4.selectboost                scalar              1            1          age
+#> age.feature.0.6.0.7.selectboost                scalar              1            1          age
+#> age.feature.0.8.0.4.selectboost                scalar              1            1          age
+#> age.feature.0.8.0.7.selectboost                scalar              1            1          age
+#> age.group.0.6.0.4.selectboost                  scalar              1            1          age
+#> age.group.0.6.0.7.selectboost                  scalar              1            1          age
+#>                                 end_argval domain_start domain_end      method block position
+#> age.feature.0.6.0.4.selectboost        age          age        age selectboost   age        1
+#> age.feature.0.6.0.7.selectboost        age          age        age selectboost   age        1
+#> age.feature.0.8.0.4.selectboost        age          age        age selectboost   age        1
+#> age.feature.0.8.0.7.selectboost        age          age        age selectboost   age        1
+#> age.group.0.6.0.4.selectboost          age          age        age selectboost  <NA>       NA
+#> age.group.0.6.0.7.selectboost          age          age        age selectboost  <NA>       NA
+#>                                 argval   transform source_predictor source_position_start
+#> age.feature.0.6.0.4.selectboost    age standardize              age                     1
+#> age.feature.0.6.0.7.selectboost    age standardize              age                     1
+#> age.feature.0.8.0.4.selectboost    age standardize              age                     1
+#> age.feature.0.8.0.7.selectboost    age standardize              age                     1
+#> age.group.0.6.0.4.selectboost     <NA>        <NA>             <NA>                    NA
+#> age.group.0.6.0.7.selectboost     <NA>        <NA>             <NA>                    NA
+#>                                 source_position_end source_argval_start source_argval_end component
+#> age.feature.0.6.0.4.selectboost                   1                 age               age      <NA>
+#> age.feature.0.6.0.7.selectboost                   1                 age               age      <NA>
+#> age.feature.0.8.0.4.selectboost                   1                 age               age      <NA>
+#> age.feature.0.8.0.7.selectboost                   1                 age               age      <NA>
+#> age.group.0.6.0.4.selectboost                    NA                <NA>              <NA>      <NA>
+#> age.group.0.6.0.7.selectboost                    NA                <NA>              <NA>      <NA>
+#>                                 unit feature_index basis_component domain_label group_id n_features
+#> age.feature.0.6.0.4.selectboost <NA>             9            <NA>          age        3         NA
+#> age.feature.0.6.0.7.selectboost <NA>             9            <NA>          age        3         NA
+#> age.feature.0.8.0.4.selectboost <NA>             9            <NA>          age        3         NA
+#> age.feature.0.8.0.7.selectboost <NA>             9            <NA>          age        3         NA
+#> age.group.0.6.0.4.selectboost   <NA>            NA            <NA>         <NA>        3          1
+#> age.group.0.6.0.7.selectboost   <NA>            NA            <NA>         <NA>        3          1
+#>                                 selected_features replicate association_method group_method
+#> age.feature.0.6.0.4.selectboost                NA        NA             hybrid    threshold
+#> age.feature.0.6.0.7.selectboost                NA        NA             hybrid    threshold
+#> age.feature.0.8.0.4.selectboost                NA        NA             hybrid    threshold
+#> age.feature.0.8.0.7.selectboost                NA        NA             hybrid    threshold
+#> age.group.0.6.0.4.selectboost                   1        NA             hybrid    threshold
+#> age.group.0.6.0.7.selectboost                   0        NA             hybrid    threshold
+#>                                 within_blocks bandwidth width n_replicates
+#> age.feature.0.6.0.4.selectboost          TRUE         4    NA            1
+#> age.feature.0.6.0.7.selectboost          TRUE         4    NA            1
+#> age.feature.0.8.0.4.selectboost          TRUE         4    NA            1
+#> age.feature.0.8.0.7.selectboost          TRUE         4    NA            1
+#> age.group.0.6.0.4.selectboost            TRUE         4    NA            1
+#> age.group.0.6.0.7.selectboost            TRUE         4    NA            1
 summarise_perturbation_grid(grid_fit)
-#>                   level   q  c0 n_items n_selected mean_selection
-#> feature.0.6.0.4 feature 0.6 0.4      10          5      0.5000000
-#> feature.0.6.0.7 feature 0.6 0.7      10          7      0.7000000
-#> feature.0.8.0.4 feature 0.8 0.4      10          5      0.5000000
-#> feature.0.8.0.7 feature 0.8 0.7      10          3      0.3000000
-#> group.0.6.0.4     group 0.6 0.4       4          4      0.7166667
-#> group.0.6.0.7     group 0.6 0.7       4          4      0.8166667
-#> group.0.8.0.4     group 0.8 0.4       4          4      0.7166667
-#> group.0.8.0.7     group 0.8 0.7       4          2      0.4166667
-#>                 max_selection
-#> feature.0.6.0.4             1
-#> feature.0.6.0.7             1
-#> feature.0.8.0.4             1
-#> feature.0.8.0.7             1
-#> group.0.6.0.4               1
-#> group.0.6.0.7               1
-#> group.0.8.0.4               1
-#> group.0.8.0.7               1
+#>                   level   q  c0 n_items n_selected mean_selection max_selection
+#> feature.0.6.0.4 feature 0.6 0.4      10          4      0.4000000             1
+#> feature.0.6.0.7 feature 0.6 0.7      10          8      0.8000000             1
+#> feature.0.8.0.4 feature 0.8 0.4      10          5      0.5000000             1
+#> feature.0.8.0.7 feature 0.8 0.7      10          6      0.6000000             1
+#> group.0.6.0.4     group 0.6 0.4       4          3      0.6666667             1
+#> group.0.6.0.7     group 0.6 0.7       4          3      0.6666667             1
+#> group.0.8.0.4     group 0.8 0.4       4          3      0.5166667             1
+#> group.0.8.0.7     group 0.8 0.7       4          4      0.7666667             1
 ```
 
 The data layer is independent of plotting backends:
@@ -472,55 +356,34 @@ head(as_monotonicity_path_data(grid_fit, axis = "c0", level = "feature"))
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                         age
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost nuisance_B1
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost nuisance_B1
-#>                                                                                      level
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                 feature
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                 feature
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                 feature
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                 feature
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost feature
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost feature
-#>                                                                                    axis
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                   c0
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                   c0
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                   c0
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                   c0
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost   c0
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost   c0
-#>                                                                                    axis_value
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                        0.4
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                        0.7
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                        0.4
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                        0.7
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost        0.4
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost        0.7
-#>                                                                                    value
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     1
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     1
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     1
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     0
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     0
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     0
-#>                                                                                    delta
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                    NA
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     0
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                    NA
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                    -1
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost    NA
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     0
-#>                                                                                    violation
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     FALSE
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     FALSE
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     FALSE
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     FALSE
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     FALSE
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     FALSE
+#>                                                                                      level axis
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                 feature   c0
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                 feature   c0
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                 feature   c0
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                 feature   c0
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost feature   c0
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost feature   c0
+#>                                                                                    axis_value value
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                        0.4     1
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                        0.7     0
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                        0.4     0
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                        0.7     1
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost        0.4     0
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost        0.7     1
+#>                                                                                    delta violation
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                    NA     FALSE
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                    -1     FALSE
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                    NA     FALSE
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     1      TRUE
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost    NA     FALSE
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     1      TRUE
 #>                                                                                    violation_size
 #> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                              0
 #> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                              0
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                              0
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                              0
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                              1
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost              0
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost              0
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost              1
 #>                                                                                         method
 #> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                 selectboost
 #> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                 selectboost
@@ -528,20 +391,13 @@ head(as_monotonicity_path_data(grid_fit, axis = "c0", level = "feature"))
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                 selectboost
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost selectboost
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost selectboost
-#>                                                                                    replicate
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                        NA
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                        NA
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                        NA
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                        NA
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost        NA
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost        NA
-#>                                                                                      q
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                 0.6
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                 0.6
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                 0.8
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                 0.8
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost 0.6
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost 0.6
+#>                                                                                    replicate   q
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                        NA 0.6
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                        NA 0.6
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                        NA 0.8
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                        NA 0.8
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost        NA 0.6
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost        NA 0.6
 #>                                                                                     c0
 #> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                 0.4
 #> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                 0.7
@@ -550,32 +406,23 @@ head(as_monotonicity_path_data(grid_fit, axis = "c0", level = "feature"))
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost 0.4
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost 0.7
 summarise_monotonicity(grid_fit, axis = "c0", level = "feature")
-#>              level axis n_paths n_monotone fraction_monotone
-#> feature.c0 feature   c0      20         18               0.9
-#>            mean_total_violation max_violation
-#> feature.c0                  0.1             1
+#>              level axis n_paths n_monotone fraction_monotone mean_total_violation max_violation
+#> feature.c0 feature   c0      20         12               0.6                  0.4             1
 head(as_association_heatmap_data(design, method = "hybrid", bandwidth = 4))
-#>     feature_i  feature_j predictor_i predictor_j position_i
-#> 1  signal_PC1 signal_PC1      signal      signal          1
-#> 2  signal_PC2 signal_PC1      signal      signal          2
-#> 3  signal_PC3 signal_PC1      signal      signal          3
-#> 4 nuisance_B1 signal_PC1    nuisance      signal          1
-#> 5 nuisance_B2 signal_PC1    nuisance      signal          2
-#> 6 nuisance_B3 signal_PC1    nuisance      signal          3
-#>   position_j argval_i argval_j  association same_block
-#> 1          1      PC1      PC1 1.000000e+00       TRUE
-#> 2          1      PC2      PC1 2.998446e-16       TRUE
-#> 3          1      PC3      PC1 2.368387e-16       TRUE
-#> 4          1       B1      PC1 0.000000e+00      FALSE
-#> 5          1       B2      PC1 0.000000e+00      FALSE
-#> 6          1       B3      PC1 0.000000e+00      FALSE
-#>   within_bandwidth method
-#> 1             TRUE hybrid
-#> 2             TRUE hybrid
-#> 3             TRUE hybrid
-#> 4             TRUE hybrid
-#> 5             TRUE hybrid
-#> 6             TRUE hybrid
+#>     feature_i  feature_j predictor_i predictor_j position_i position_j argval_i argval_j
+#> 1  signal_PC1 signal_PC1      signal      signal          1          1      PC1      PC1
+#> 2  signal_PC2 signal_PC1      signal      signal          2          1      PC2      PC1
+#> 3  signal_PC3 signal_PC1      signal      signal          3          1      PC3      PC1
+#> 4 nuisance_B1 signal_PC1    nuisance      signal          1          1       B1      PC1
+#> 5 nuisance_B2 signal_PC1    nuisance      signal          2          1       B2      PC1
+#> 6 nuisance_B3 signal_PC1    nuisance      signal          3          1       B3      PC1
+#>    association same_block within_bandwidth method
+#> 1 1.000000e+00       TRUE             TRUE hybrid
+#> 2 2.998446e-16       TRUE             TRUE hybrid
+#> 3 2.368387e-16       TRUE             TRUE hybrid
+#> 4 0.000000e+00      FALSE             TRUE hybrid
+#> 5 0.000000e+00      FALSE             TRUE hybrid
+#> 6 0.000000e+00      FALSE             TRUE hybrid
 ```
 
 ## Benchmarking on simulated FDA designs
@@ -603,31 +450,21 @@ bench <- benchmark_selection_methods(
 )
 
 head(bench$metrics)
-#>     level n_universe n_truth n_selected tp fp fn tn precision
-#> 1 feature         42       9         33  9 24  0  9 0.2727273
-#> 2 feature         42       9         34  9 25  0  8 0.2647059
-#> 3   group          4       3          4  3  1  0  0 0.7500000
-#> 4   group          4       3          4  3  1  0  0 0.7500000
-#>   recall specificity        f1   jaccard selection_rate       c0
-#> 1      1   0.2727273 0.4285714 0.2727273      0.7857143 c0 = 0.5
-#> 2      1   0.2424242 0.4186047 0.2647059      0.8095238 c0 = 0.5
-#> 3      1   0.0000000 0.8571429 0.7500000      1.0000000 c0 = 0.5
-#> 4      1   0.0000000 0.8571429 0.7500000      1.0000000 c0 = 0.5
-#>              method        scenario representation   family
-#> 1       selectboost localized_dense           grid gaussian
-#> 2 plain_selectboost localized_dense           grid gaussian
-#> 3       selectboost localized_dense           grid gaussian
-#> 4 plain_selectboost localized_dense           grid gaussian
-#>   noise_axis snr noise_sd effective_noise_sd effective_snr
-#> 1   noise_sd  NA      0.4                0.4      2.213897
-#> 2   noise_sd  NA      0.4                0.4      2.213897
-#> 3   noise_sd  NA      0.4                0.4      2.213897
-#> 4   noise_sd  NA      0.4                0.4      2.213897
-#>   effective_variance_snr
-#> 1               4.901339
-#> 2               4.901339
-#> 3               4.901339
-#> 4               4.901339
+#>     level n_universe n_truth n_selected tp fp fn tn precision recall specificity        f1
+#> 1 feature         42       9         36  9 27  0  6 0.2500000      1  0.18181818 0.4000000
+#> 2 feature         42       9         39  9 30  0  3 0.2307692      1  0.09090909 0.3750000
+#> 3   group          4       3          4  3  1  0  0 0.7500000      1  0.00000000 0.8571429
+#> 4   group          4       3          4  3  1  0  0 0.7500000      1  0.00000000 0.8571429
+#>     jaccard selection_rate       c0            method        scenario representation   family
+#> 1 0.2500000      0.8571429 c0 = 0.5       selectboost localized_dense           grid gaussian
+#> 2 0.2307692      0.9285714 c0 = 0.5 plain_selectboost localized_dense           grid gaussian
+#> 3 0.7500000      1.0000000 c0 = 0.5       selectboost localized_dense           grid gaussian
+#> 4 0.7500000      1.0000000 c0 = 0.5 plain_selectboost localized_dense           grid gaussian
+#>   noise_axis snr noise_sd effective_noise_sd effective_snr effective_variance_snr
+#> 1   noise_sd  NA      0.4                0.4      2.213897               4.901339
+#> 2   noise_sd  NA      0.4                0.4      2.213897               4.901339
+#> 3   noise_sd  NA      0.4                0.4      2.213897               4.901339
+#> 4   noise_sd  NA      0.4                0.4      2.213897               4.901339
 ```
 
 The simulator exposes a scenario catalog for different FDA signal structures:
@@ -674,30 +511,18 @@ utils::head(
   ],
   5
 )
-#>            scenario confounding_strength active_region_scale
-#> 1 confounded_blocks                  0.6                 0.5
-#> 2 confounded_blocks                  1.0                 0.8
-#> 3 confounded_blocks                  0.6                 0.8
-#> 4   localized_dense                  0.6                 0.5
-#> 5 confounded_blocks                  0.6                 0.5
-#>   local_correlation association_method bandwidth
-#> 1                 2           interval         8
-#> 2                 2             hybrid         4
-#> 3                 2             hybrid         4
-#> 4                 2       neighborhood         4
-#> 5                 2             hybrid         4
-#>   selectboost_f1_mean plain_selectboost_f1_mean delta_mean
-#> 1           0.5362319                 0.4087266 0.12750533
-#> 2           0.5885135                 0.4826750 0.10583853
-#> 3           0.5833671                 0.4944862 0.08888092
-#> 4           0.4972542                 0.4144859 0.08276831
-#> 5           0.5429293                 0.4657088 0.07722048
-#>    win_rate
-#> 1 1.0000000
-#> 2 1.0000000
-#> 3 1.0000000
-#> 4 0.6666667
-#> 5 0.6666667
+#>            scenario confounding_strength active_region_scale local_correlation association_method
+#> 1 confounded_blocks                  0.6                 0.5                 2           interval
+#> 2 confounded_blocks                  1.0                 0.8                 2             hybrid
+#> 3 confounded_blocks                  0.6                 0.8                 2             hybrid
+#> 4   localized_dense                  0.6                 0.5                 2       neighborhood
+#> 5 confounded_blocks                  0.6                 0.5                 2             hybrid
+#>   bandwidth selectboost_f1_mean plain_selectboost_f1_mean delta_mean  win_rate
+#> 1         8           0.5362319                 0.4087266 0.12750533 1.0000000
+#> 2         4           0.5885135                 0.4826750 0.10583853 1.0000000
+#> 3         4           0.5833671                 0.4944862 0.08888092 1.0000000
+#> 4         4           0.4972542                 0.4144859 0.08276831 0.6666667
+#> 5         4           0.5429293                 0.4657088 0.07722048 0.6666667
 ```
 
 In the shipped benchmark, the strongest gains appear in the high-correlation,

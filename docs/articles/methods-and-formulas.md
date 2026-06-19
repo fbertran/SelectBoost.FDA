@@ -131,10 +131,10 @@ cal_width$grid
 #> 2                   1
 cal_selectboost$grid
 #>                c0 n_selected_features n_selected_groups mean_feature_selection
-#> c0 = 0.4 c0 = 0.4                   9                 4              0.5909091
+#> c0 = 0.4 c0 = 0.4                   8                 5              0.5909091
 #> c0 = 0.7 c0 = 0.7                   7                 4              0.5681818
 #>          max_feature_selection mean_group_selection max_group_selection
-#> c0 = 0.4                     1                 0.66                   1
+#> c0 = 0.4                     1                 0.70                   1
 #> c0 = 0.7                     1                 0.65                   1
 ```
 
@@ -160,7 +160,7 @@ summary(comparison)
 #>       method n_selected_features n_selected_groups mean_feature_frequency
 #>    stability                   5                 4              0.5113636
 #>     interval                   5                 4              0.5227273
-#>  selectboost                  11                 5                     NA
+#>  selectboost                   7                 4                     NA
 #>  selectboost                   7                 4                     NA
 #>  max_feature_frequency mean_group_frequency max_group_frequency width       c0
 #>                      1                0.775                   1    NA     <NA>
@@ -170,7 +170,7 @@ summary(comparison)
 #>  mean_feature_selection max_feature_selection mean_group_selection
 #>                      NA                    NA                   NA
 #>                      NA                    NA                   NA
-#>               0.6363636                     1                 0.72
+#>               0.5454545                     1                 0.64
 #>               0.5681818                     1                 0.65
 #>  max_group_selection
 #>                   NA
