@@ -104,8 +104,8 @@
   benchmark configuration files now record these interface arguments so
   assessment and extended benchmark campaigns can be audited and
   reproduced. `--surface-use-main-settings` is documented as inheriting
-  from the first representative row of the main simulation grid, not every
-  main-grid setting.
+  from the first representative row of the main simulation grid, not
+  every main-grid setting.
 
 ## SelectBoost.FDA 0.6.0
 

@@ -6,7 +6,6 @@ output: github_document
 
 
 
-
 # SelectBoost.FDA <img src="man/figures/logo_selectboost_FDA.png" align="right" width="200" alt="SelectBoost.FDA logo"/>
 ## Frédéric Bertrand
 
@@ -173,8 +172,8 @@ head(selection_map(fit_sb, level = "group", c0 = colnames(fit_sb$feature_selecti
 #> 4    treatment  treatment    treatment  treatment c0 = 0.6
 #>   mean_selection max_selection selected_features
 #> 1      0.6666667          1.00                 2
-#> 2      0.2000000          0.75                 2
-#> 3      0.2500000          0.25                 1
+#> 2      0.5000000          0.75                 5
+#> 3      0.7500000          0.75                 1
 #> 4      1.0000000          1.00                 1
 ```
 
@@ -308,18 +307,18 @@ head(selection_surface(grid_fit))
 #> age.group.0.6.0.4.selectboost       age       age   age   group 0.6
 #> age.group.0.6.0.7.selectboost       age       age   age   group 0.6
 #>                                  c0 selection mean_selection
-#> age.feature.0.6.0.4.selectboost 0.4         0              0
+#> age.feature.0.6.0.4.selectboost 0.4         1              1
 #> age.feature.0.6.0.7.selectboost 0.7         1              1
-#> age.feature.0.8.0.4.selectboost 0.4         0              0
+#> age.feature.0.8.0.4.selectboost 0.4         1              1
 #> age.feature.0.8.0.7.selectboost 0.7         0              0
-#> age.group.0.6.0.4.selectboost   0.4         0              0
+#> age.group.0.6.0.4.selectboost   0.4         1              1
 #> age.group.0.6.0.7.selectboost   0.7         1              1
 #>                                 max_selection selected
-#> age.feature.0.6.0.4.selectboost             0    FALSE
+#> age.feature.0.6.0.4.selectboost             1     TRUE
 #> age.feature.0.6.0.7.selectboost             1     TRUE
-#> age.feature.0.8.0.4.selectboost             0    FALSE
+#> age.feature.0.8.0.4.selectboost             1     TRUE
 #> age.feature.0.8.0.7.selectboost             0    FALSE
-#> age.group.0.6.0.4.selectboost               0    FALSE
+#> age.group.0.6.0.4.selectboost               1     TRUE
 #> age.group.0.6.0.7.selectboost               1     TRUE
 #>                                 representation basis_type
 #> age.feature.0.6.0.4.selectboost         scalar       <NA>
@@ -417,7 +416,7 @@ head(selection_surface(grid_fit))
 #> age.feature.0.6.0.7.selectboost                NA        NA
 #> age.feature.0.8.0.4.selectboost                NA        NA
 #> age.feature.0.8.0.7.selectboost                NA        NA
-#> age.group.0.6.0.4.selectboost                   0        NA
+#> age.group.0.6.0.4.selectboost                   1        NA
 #> age.group.0.6.0.7.selectboost                   1        NA
 #>                                 association_method group_method
 #> age.feature.0.6.0.4.selectboost             hybrid    threshold
@@ -443,13 +442,13 @@ head(selection_surface(grid_fit))
 summarise_perturbation_grid(grid_fit)
 #>                   level   q  c0 n_items n_selected mean_selection
 #> feature.0.6.0.4 feature 0.6 0.4      10          5      0.5000000
-#> feature.0.6.0.7 feature 0.6 0.7      10          4      0.4000000
-#> feature.0.8.0.4 feature 0.8 0.4      10          4      0.4000000
-#> feature.0.8.0.7 feature 0.8 0.7      10          4      0.4000000
-#> group.0.6.0.4     group 0.6 0.4       4          3      0.5166667
-#> group.0.6.0.7     group 0.6 0.7       4          3      0.6666667
-#> group.0.8.0.4     group 0.8 0.4       4          3      0.4666667
-#> group.0.8.0.7     group 0.8 0.7       4          3      0.4666667
+#> feature.0.6.0.7 feature 0.6 0.7      10          7      0.7000000
+#> feature.0.8.0.4 feature 0.8 0.4      10          5      0.5000000
+#> feature.0.8.0.7 feature 0.8 0.7      10          3      0.3000000
+#> group.0.6.0.4     group 0.6 0.4       4          4      0.7166667
+#> group.0.6.0.7     group 0.6 0.7       4          4      0.8166667
+#> group.0.8.0.4     group 0.8 0.4       4          4      0.7166667
+#> group.0.8.0.7     group 0.8 0.7       4          2      0.4166667
 #>                 max_selection
 #> feature.0.6.0.4             1
 #> feature.0.6.0.7             1
@@ -495,29 +494,29 @@ head(as_monotonicity_path_data(grid_fit, axis = "c0", level = "feature"))
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost        0.4
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost        0.7
 #>                                                                                    value
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     0
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     1
 #> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     1
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     0
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     1
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     0
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     1
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     0
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     0
 #>                                                                                    delta
 #> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                    NA
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     1
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     0
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                    NA
-#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     0
+#> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                    -1
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost    NA
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost    -1
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     0
 #>                                                                                    violation
 #> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     FALSE
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                      TRUE
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     FALSE
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     FALSE
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     FALSE
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     FALSE
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     FALSE
 #>                                                                                    violation_size
 #> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                              0
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                              1
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                              0
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                              0
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                              0
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost              0
@@ -605,13 +604,13 @@ bench <- benchmark_selection_methods(
 
 head(bench$metrics)
 #>     level n_universe n_truth n_selected tp fp fn tn precision
-#> 1 feature         42       9         36  9 27  0  6 0.2500000
-#> 2 feature         42       9         35  9 26  0  7 0.2571429
+#> 1 feature         42       9         33  9 24  0  9 0.2727273
+#> 2 feature         42       9         34  9 25  0  8 0.2647059
 #> 3   group          4       3          4  3  1  0  0 0.7500000
 #> 4   group          4       3          4  3  1  0  0 0.7500000
 #>   recall specificity        f1   jaccard selection_rate       c0
-#> 1      1   0.1818182 0.4000000 0.2500000      0.8571429 c0 = 0.5
-#> 2      1   0.2121212 0.4090909 0.2571429      0.8333333 c0 = 0.5
+#> 1      1   0.2727273 0.4285714 0.2727273      0.7857143 c0 = 0.5
+#> 2      1   0.2424242 0.4186047 0.2647059      0.8095238 c0 = 0.5
 #> 3      1   0.0000000 0.8571429 0.7500000      1.0000000 c0 = 0.5
 #> 4      1   0.0000000 0.8571429 0.7500000      1.0000000 c0 = 0.5
 #>              method        scenario representation   family

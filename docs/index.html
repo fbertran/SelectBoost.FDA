@@ -217,8 +217,8 @@
 <span><span class="co">#&gt; 4    treatment  treatment    treatment  treatment c0 = 0.6</span></span>
 <span><span class="co">#&gt;   mean_selection max_selection selected_features</span></span>
 <span><span class="co">#&gt; 1      0.6666667          1.00                 2</span></span>
-<span><span class="co">#&gt; 2      0.2000000          0.75                 2</span></span>
-<span><span class="co">#&gt; 3      0.2500000          0.25                 1</span></span>
+<span><span class="co">#&gt; 2      0.5000000          0.75                 5</span></span>
+<span><span class="co">#&gt; 3      0.7500000          0.75                 1</span></span>
 <span><span class="co">#&gt; 4      1.0000000          1.00                 1</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -341,18 +341,18 @@
 <span><span class="co">#&gt; age.group.0.6.0.4.selectboost       age       age   age   group 0.6</span></span>
 <span><span class="co">#&gt; age.group.0.6.0.7.selectboost       age       age   age   group 0.6</span></span>
 <span><span class="co">#&gt;                                  c0 selection mean_selection</span></span>
-<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost 0.4         0              0</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost 0.4         1              1</span></span>
 <span><span class="co">#&gt; age.feature.0.6.0.7.selectboost 0.7         1              1</span></span>
-<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost 0.4         0              0</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost 0.4         1              1</span></span>
 <span><span class="co">#&gt; age.feature.0.8.0.7.selectboost 0.7         0              0</span></span>
-<span><span class="co">#&gt; age.group.0.6.0.4.selectboost   0.4         0              0</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost   0.4         1              1</span></span>
 <span><span class="co">#&gt; age.group.0.6.0.7.selectboost   0.7         1              1</span></span>
 <span><span class="co">#&gt;                                 max_selection selected</span></span>
-<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost             0    FALSE</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost             1     TRUE</span></span>
 <span><span class="co">#&gt; age.feature.0.6.0.7.selectboost             1     TRUE</span></span>
-<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost             0    FALSE</span></span>
+<span><span class="co">#&gt; age.feature.0.8.0.4.selectboost             1     TRUE</span></span>
 <span><span class="co">#&gt; age.feature.0.8.0.7.selectboost             0    FALSE</span></span>
-<span><span class="co">#&gt; age.group.0.6.0.4.selectboost               0    FALSE</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost               1     TRUE</span></span>
 <span><span class="co">#&gt; age.group.0.6.0.7.selectboost               1     TRUE</span></span>
 <span><span class="co">#&gt;                                 representation basis_type</span></span>
 <span><span class="co">#&gt; age.feature.0.6.0.4.selectboost         scalar       &lt;NA&gt;</span></span>
@@ -450,7 +450,7 @@
 <span><span class="co">#&gt; age.feature.0.6.0.7.selectboost                NA        NA</span></span>
 <span><span class="co">#&gt; age.feature.0.8.0.4.selectboost                NA        NA</span></span>
 <span><span class="co">#&gt; age.feature.0.8.0.7.selectboost                NA        NA</span></span>
-<span><span class="co">#&gt; age.group.0.6.0.4.selectboost                   0        NA</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost                   1        NA</span></span>
 <span><span class="co">#&gt; age.group.0.6.0.7.selectboost                   1        NA</span></span>
 <span><span class="co">#&gt;                                 association_method group_method</span></span>
 <span><span class="co">#&gt; age.feature.0.6.0.4.selectboost             hybrid    threshold</span></span>
@@ -476,13 +476,13 @@
 <span><span class="fu"><a href="reference/summarise_perturbation_grid.html">summarise_perturbation_grid</a></span><span class="op">(</span><span class="va">grid_fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                   level   q  c0 n_items n_selected mean_selection</span></span>
 <span><span class="co">#&gt; feature.0.6.0.4 feature 0.6 0.4      10          5      0.5000000</span></span>
-<span><span class="co">#&gt; feature.0.6.0.7 feature 0.6 0.7      10          4      0.4000000</span></span>
-<span><span class="co">#&gt; feature.0.8.0.4 feature 0.8 0.4      10          4      0.4000000</span></span>
-<span><span class="co">#&gt; feature.0.8.0.7 feature 0.8 0.7      10          4      0.4000000</span></span>
-<span><span class="co">#&gt; group.0.6.0.4     group 0.6 0.4       4          3      0.5166667</span></span>
-<span><span class="co">#&gt; group.0.6.0.7     group 0.6 0.7       4          3      0.6666667</span></span>
-<span><span class="co">#&gt; group.0.8.0.4     group 0.8 0.4       4          3      0.4666667</span></span>
-<span><span class="co">#&gt; group.0.8.0.7     group 0.8 0.7       4          3      0.4666667</span></span>
+<span><span class="co">#&gt; feature.0.6.0.7 feature 0.6 0.7      10          7      0.7000000</span></span>
+<span><span class="co">#&gt; feature.0.8.0.4 feature 0.8 0.4      10          5      0.5000000</span></span>
+<span><span class="co">#&gt; feature.0.8.0.7 feature 0.8 0.7      10          3      0.3000000</span></span>
+<span><span class="co">#&gt; group.0.6.0.4     group 0.6 0.4       4          4      0.7166667</span></span>
+<span><span class="co">#&gt; group.0.6.0.7     group 0.6 0.7       4          4      0.8166667</span></span>
+<span><span class="co">#&gt; group.0.8.0.4     group 0.8 0.4       4          4      0.7166667</span></span>
+<span><span class="co">#&gt; group.0.8.0.7     group 0.8 0.7       4          2      0.4166667</span></span>
 <span><span class="co">#&gt;                 max_selection</span></span>
 <span><span class="co">#&gt; feature.0.6.0.4             1</span></span>
 <span><span class="co">#&gt; feature.0.6.0.7             1</span></span>
@@ -524,29 +524,29 @@
 <span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost        0.4</span></span>
 <span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost        0.7</span></span>
 <span><span class="co">#&gt;                                                                                    value</span></span>
-<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     0</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     1</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     1</span></span>
-<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     0</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     1</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     0</span></span>
-<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     1</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     0</span></span>
 <span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     0</span></span>
 <span><span class="co">#&gt;                                                                                    delta</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                    NA</span></span>
-<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     1</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     0</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                    NA</span></span>
-<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     0</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                    -1</span></span>
 <span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost    NA</span></span>
-<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost    -1</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     0</span></span>
 <span><span class="co">#&gt;                                                                                    violation</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     FALSE</span></span>
-<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                      TRUE</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     FALSE</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     FALSE</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     FALSE</span></span>
 <span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     FALSE</span></span>
 <span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     FALSE</span></span>
 <span><span class="co">#&gt;                                                                                    violation_size</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                              0</span></span>
-<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                              1</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                              0</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                              0</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                              0</span></span>
 <span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost              0</span></span>
@@ -629,13 +629,13 @@
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">bench</span><span class="op">$</span><span class="va">metrics</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     level n_universe n_truth n_selected tp fp fn tn precision</span></span>
-<span><span class="co">#&gt; 1 feature         42       9         36  9 27  0  6 0.2500000</span></span>
-<span><span class="co">#&gt; 2 feature         42       9         35  9 26  0  7 0.2571429</span></span>
+<span><span class="co">#&gt; 1 feature         42       9         33  9 24  0  9 0.2727273</span></span>
+<span><span class="co">#&gt; 2 feature         42       9         34  9 25  0  8 0.2647059</span></span>
 <span><span class="co">#&gt; 3   group          4       3          4  3  1  0  0 0.7500000</span></span>
 <span><span class="co">#&gt; 4   group          4       3          4  3  1  0  0 0.7500000</span></span>
 <span><span class="co">#&gt;   recall specificity        f1   jaccard selection_rate       c0</span></span>
-<span><span class="co">#&gt; 1      1   0.1818182 0.4000000 0.2500000      0.8571429 c0 = 0.5</span></span>
-<span><span class="co">#&gt; 2      1   0.2121212 0.4090909 0.2571429      0.8333333 c0 = 0.5</span></span>
+<span><span class="co">#&gt; 1      1   0.2727273 0.4285714 0.2727273      0.7857143 c0 = 0.5</span></span>
+<span><span class="co">#&gt; 2      1   0.2424242 0.4186047 0.2647059      0.8095238 c0 = 0.5</span></span>
 <span><span class="co">#&gt; 3      1   0.0000000 0.8571429 0.7500000      1.0000000 c0 = 0.5</span></span>
 <span><span class="co">#&gt; 4      1   0.0000000 0.8571429 0.7500000      1.0000000 c0 = 0.5</span></span>
 <span><span class="co">#&gt;              method        scenario representation   family</span></span>
@@ -732,10 +732,7 @@
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"--output-dir="</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"selectboost_fda_focused_n30"</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>With <code>--surface-use-main-settings</code>, surface diagnostics inherit
-<code>n</code>, <code>grid_length</code>, and noise/SNR from the first representative row
-of the main simulation grid. They are not recomputed for every main-grid
-setting.</p>
+<p>With <code>--surface-use-main-settings</code>, surface diagnostics inherit <code>n</code>, <code>grid_length</code>, and noise/SNR from the first representative row of the main simulation grid. They are not recomputed for every main-grid setting.</p>
 <p>For a lighter local run, use <code>--no-save-surfaces</code> or <code>--no-save-association-diagnostics</code> to skip the heavier optional diagnostics. The broader <code>--no-assessment-summary</code> shortcut disables both of those optional diagnostic families while keeping the core benchmark and paired-gain tables.</p>
 </div>
 <div class="section level2">

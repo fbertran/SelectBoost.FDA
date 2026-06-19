@@ -169,14 +169,14 @@ summarise_benchmark_advantage(
 #> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.correlation.<NA>.0.9.0.7.2.feature.selectboost.plain_selectboost.f1     1
 #> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1             1
 #>                                                                                                                       target_value_mean
-#> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.correlation.<NA>.0.9.0.7.2.feature.selectboost.plain_selectboost.f1         0.3243243
-#> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                 0.3428571
+#> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.correlation.<NA>.0.9.0.7.2.feature.selectboost.plain_selectboost.f1         0.3428571
+#> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                 0.3157895
 #>                                                                                                                       reference_value_mean
-#> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.correlation.<NA>.0.9.0.7.2.feature.selectboost.plain_selectboost.f1            0.3428571
-#> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                    0.3428571
+#> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.correlation.<NA>.0.9.0.7.2.feature.selectboost.plain_selectboost.f1            0.4242424
+#> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                    0.3636364
 #>                                                                                                                        delta_mean
-#> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.correlation.<NA>.0.9.0.7.2.feature.selectboost.plain_selectboost.f1 -0.01853282
-#> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1          0.00000000
+#> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.correlation.<NA>.0.9.0.7.2.feature.selectboost.plain_selectboost.f1 -0.08138528
+#> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1         -0.04784689
 #>                                                                                                                       delta_sd
 #> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.correlation.<NA>.0.9.0.7.2.feature.selectboost.plain_selectboost.f1        0
 #> confounded_blocks.grid.gaussian.noise_sd.<NA>.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                0
