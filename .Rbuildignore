@@ -71,3 +71,5 @@ genlogo.R
 ^vignettes/.*_files$
 
 \.DS_Store$
+^internal.*$
+
