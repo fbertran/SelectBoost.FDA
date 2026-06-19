@@ -7,6 +7,7 @@ design/selection machinery as before.
 ## Fit preprocessing from raw curves
 
 ``` r
+
 library(SelectBoost.FDA)
 data("motion_example", package = "SelectBoost.FDA")
 
@@ -53,6 +54,7 @@ summary(prep)
 ## Build a design with the fitted preprocessor
 
 ``` r
+
 design <- fda_design(
   response = motion_example$response,
   predictors = predictors,
@@ -111,6 +113,9 @@ selection_map(design, level = "basis")
 #>                 n_components first_component last_component         components
 #> nuisance.spline            5              B1             B5 B1, B2, B3, B4, B5
 #> signal.fpca                3             PC1            PC3      PC1, PC2, PC3
+#>                                                                                                               component_keys
+#> nuisance.spline nuisance::spline::B1, nuisance::spline::B2, nuisance::spline::B3, nuisance::spline::B4, nuisance::spline::B5
+#> signal.fpca                                                          signal::fpca::PC1, signal::fpca::PC2, signal::fpca::PC3
 #>                 domain_start domain_end
 #> nuisance.spline            0          1
 #> signal.fpca                0          1
@@ -119,6 +124,7 @@ selection_map(design, level = "basis")
 ## Fit grouped stability selection
 
 ``` r
+
 fit <- fit_stability(
   design,
   selector = "glmnet",
@@ -231,21 +237,29 @@ selection_map(fit, level = "basis")
 #>                 n_components first_component last_component         components
 #> nuisance.spline            5              B1             B5 B1, B2, B3, B4, B5
 #> signal.fpca                3             PC1            PC3      PC1, PC2, PC3
+#>                                                                                                               component_keys
+#> nuisance.spline nuisance::spline::B1, nuisance::spline::B2, nuisance::spline::B3, nuisance::spline::B4, nuisance::spline::B5
+#> signal.fpca                                                          signal::fpca::PC1, signal::fpca::PC2, signal::fpca::PC3
 #>                 domain_start domain_end mean_feature_frequency
 #> nuisance.spline            0          1              0.0800000
 #> signal.fpca                0          1              0.5555556
 #>                 max_feature_frequency selected_components
 #> nuisance.spline             0.1333333                   0
 #> signal.fpca                 1.0000000                   1
+#>                 selected_component_keys
+#> nuisance.spline                        
+#> signal.fpca           signal::fpca::PC1
 selected(fit, level = "basis")
 #>             predictor representation basis_type source_representation
 #> signal.fpca    signal          basis       fpca                  grid
 #>             n_components first_component last_component    components
 #> signal.fpca            3             PC1            PC3 PC1, PC2, PC3
+#>                                                      component_keys
+#> signal.fpca signal::fpca::PC1, signal::fpca::PC2, signal::fpca::PC3
 #>             domain_start domain_end mean_feature_frequency
 #> signal.fpca            0          1              0.5555556
-#>             max_feature_frequency selected_components
-#> signal.fpca                     1                   1
+#>             max_feature_frequency selected_components selected_component_keys
+#> signal.fpca                     1                   1       signal::fpca::PC1
 plot(fit, type = "basis", value = "mean")
 ```
 

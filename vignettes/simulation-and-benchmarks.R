@@ -50,7 +50,7 @@ study_dense <- run_simulation_study(
     n = 50,
     grid_length = 28,
     scenario = "localized_dense",
-    representation = "basis"
+    representation = "bspline"
   ),
   benchmark_args = list(
     methods = c("stability", "selectboost", "plain_selectboost"),
@@ -67,8 +67,8 @@ study_smooth <- run_simulation_study(
   simulate_args = list(
     n = 50,
     grid_length = 28,
-    scenario = "distributed_smooth",
-    representation = "basis"
+    scenario = "smooth_sparse",
+    representation = "bspline"
   ),
   benchmark_args = list(
     methods = c("stability", "selectboost", "plain_selectboost"),
@@ -100,10 +100,10 @@ summarise_benchmark_advantage(
 sensitivity <- run_selectboost_sensitivity_study(
   n_rep = 1,
   simulate_grid = data.frame(
-    scenario = c("localized_dense", "confounded_blocks"),
-    confounding_strength = c(0.4, 0.9),
-    active_region_scale = c(0.8, 0.7),
-    local_correlation = c(1, 2),
+    scenario = c("localized_dense", "confounded_blocks", "smooth_sparse", "null_signal"),
+    confounding_strength = c(0.4, 0.9, 0.4, 0.0),
+    active_region_scale = c(0.8, 0.7, 0.6, 1.0),
+    local_correlation = c(1, 2, 2, 2),
     stringsAsFactors = FALSE
   ),
   selectboost_grid = data.frame(

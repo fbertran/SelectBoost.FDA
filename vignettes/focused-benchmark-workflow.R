@@ -9,7 +9,45 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 #     "--quick",
 #     "--n-replicates=1",
 #     "--seed=20260616",
+#     "--n-grid=50,100",
+#     "--grid-length-grid=30,75",
+#     "--snr-grid=0.5,1,2,4",
 #     paste0("--output-dir=", file.path(tempdir(), "selectboost_fda_focused_benchmark"))
+#   )
+# )
+
+## ----eval = FALSE-------------------------------------------------------------
+# system2(
+#   file.path(R.home("bin"), "Rscript"),
+#   c(
+#     "tools/run_focused_benchmark.R",
+#     "--medium",
+#     "--seed=20260616",
+#     "--representation-grid=grid,bspline",
+#     "--scenario-grid=localized_dense,confounded_blocks,smooth_sparse",
+#     "--n-grid=50,100",
+#     "--grid-length-grid=30,75",
+#     "--snr-grid=0.5,1,2,4",
+#     "--q-grid=0.5,0.632,0.8",
+#     "--c0-grid=0.9,0.7,0.5,0.3",
+#     "--association-grid=correlation,neighborhood,hybrid,interval",
+#     "--bandwidth-grid=4,8",
+#     "--assessment-summary",
+#     "--save-surfaces",
+#     "--save-association-diagnostics",
+#     "--bootstrap-reps=2000",
+#     paste0("--output-dir=", file.path(tempdir(), "selectboost_fda_focused_campaign"))
+#   )
+# )
+
+## ----eval = FALSE-------------------------------------------------------------
+# system2(
+#   file.path(R.home("bin"), "Rscript"),
+#   c(
+#     "tools/run_focused_benchmark.R",
+#     "--medium",
+#     "--seed=20260616",
+#     paste0("--output-dir=", file.path(tempdir(), "selectboost_fda_focused_n30"))
 #   )
 # )
 

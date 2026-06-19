@@ -11,6 +11,7 @@ FDA-native design object:
 ## Build a design from a formula
 
 ``` r
+
 library(SelectBoost.FDA)
 data("spectra_example", package = "SelectBoost.FDA")
 
@@ -58,6 +59,9 @@ selection_map(design, level = "basis")
 #>                 n_components first_component last_component         components
 #> nuisance.spline            5              B1             B5 B1, B2, B3, B4, B5
 #> signal.fpca                3             PC1            PC3      PC1, PC2, PC3
+#>                                                                                                               component_keys
+#> nuisance.spline nuisance::spline::B1, nuisance::spline::B2, nuisance::spline::B3, nuisance::spline::B4, nuisance::spline::B5
+#> signal.fpca                                                          signal::fpca::PC1, signal::fpca::PC2, signal::fpca::PC3
 #>                 domain_start domain_end
 #> nuisance.spline         1100       2500
 #> signal.fpca             1100       2500
@@ -69,6 +73,7 @@ These helpers run actual fits over user-defined grids and summarize the
 result.
 
 ``` r
+
 cal_stability <- calibrate_stability_selection(
   design,
   selector = "lasso",
@@ -107,7 +112,7 @@ cal_stability$grid
 #>   mean_feature_frequency max_feature_frequency mean_group_frequency
 #> 1              0.5227273                     1                0.750
 #> 2              0.6136364                     1                0.800
-#> 3              0.4886364                     1                0.725
+#> 3              0.5113636                     1                0.775
 #> 4              0.5795455                     1                0.825
 #>   max_group_frequency
 #> 1                   1
@@ -119,23 +124,24 @@ cal_width$grid
 #> 1     4    4   FALSE                   6                 4
 #> 2     6    6   FALSE                   5                 4
 #>   mean_feature_frequency max_feature_frequency mean_group_frequency
-#> 1              0.5340909                     1            0.6666667
-#> 2              0.4886364                     1            0.7250000
+#> 1              0.5227273                     1            0.6458333
+#> 2              0.5113636                     1            0.7750000
 #>   max_group_frequency
 #> 1                   1
 #> 2                   1
 cal_selectboost$grid
 #>                c0 n_selected_features n_selected_groups mean_feature_selection
-#> c0 = 0.4 c0 = 0.4                  11                 5              0.6818182
-#> c0 = 0.7 c0 = 0.7                   9                 5              0.6818182
+#> c0 = 0.4 c0 = 0.4                  10                 5              0.6136364
+#> c0 = 0.7 c0 = 0.7                   8                 4              0.5909091
 #>          max_feature_selection mean_group_selection max_group_selection
-#> c0 = 0.4                     1                 0.82                   1
-#> c0 = 0.7                     1                 0.86                   1
+#> c0 = 0.4                     1                 0.71                   1
+#> c0 = 0.7                     1                 0.66                   1
 ```
 
 ## Compare methods on one design
 
 ``` r
+
 comparison <- compare_selection_methods(
   design,
   methods = c("stability", "interval", "selectboost"),
@@ -152,20 +158,20 @@ summary(comparison)
 #> FDA method comparison summary
 #>   methods: stability, interval, selectboost 
 #>       method n_selected_features n_selected_groups mean_feature_frequency
-#>    stability                   5                 4              0.4886364
+#>    stability                   5                 4              0.5113636
 #>     interval                   5                 4              0.5227273
-#>  selectboost                   9                 5                     NA
-#>  selectboost                   9                 5                     NA
+#>  selectboost                   9                 4                     NA
+#>  selectboost                   7                 4                     NA
 #>  max_feature_frequency mean_group_frequency max_group_frequency width       c0
-#>                      1                0.725                   1    NA     <NA>
+#>                      1                0.775                   1    NA     <NA>
 #>                      1                0.725                   1     3     <NA>
 #>                     NA                   NA                  NA    NA c0 = 0.4
 #>                     NA                   NA                  NA    NA c0 = 0.7
 #>  mean_feature_selection max_feature_selection mean_group_selection
 #>                      NA                    NA                   NA
 #>                      NA                    NA                   NA
-#>               0.6136364                     1                 0.71
-#>               0.6363636                     1                 0.76
+#>               0.6136364                     1                 0.67
+#>               0.5681818                     1                 0.65
 #>  max_group_selection
 #>                   NA
 #>                   NA
@@ -191,14 +197,14 @@ head(selection_map(comparison, level = "group"))
 #> 2         B5         1100       2500                  0.150
 #> 3        age          age        age                  0.875
 #> 4 treatment0   treatment0 treatment0                  1.000
-#> 5 treatment1   treatment1 treatment1                  0.125
+#> 5 treatment1   treatment1 treatment1                  0.375
 #> 6        PC3         1100       2500                  0.875
 #>   max_feature_frequency selected_features group_frequency group_selected
 #> 1                 1.000                 3           1.000           TRUE
 #> 2                 0.375                 0           0.625           TRUE
 #> 3                 0.875                 1           0.875           TRUE
 #> 4                 1.000                 1           1.000           TRUE
-#> 5                 0.125                 0           0.125          FALSE
+#> 5                 0.375                 0           0.375          FALSE
 #> 6                 1.000                 3           1.000           TRUE
 #>      method interval_start interval_end interval_label   c0 mean_selection
 #> 1 stability             NA           NA           <NA> <NA>             NA
@@ -222,6 +228,7 @@ The selector argument now accepts common aliases such as `"lasso"`,
 `"group_lasso"`, and `"sparse_group_lasso"`.
 
 ``` r
+
 fit_stability(
   design,
   selector = "sparse_group_lasso",

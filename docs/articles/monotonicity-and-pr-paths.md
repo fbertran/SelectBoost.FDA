@@ -5,6 +5,7 @@ backend. A selection surface can be checked directly for monotonicity
 over `c0` or `q`.
 
 ``` r
+
 library(SelectBoost.FDA)
 
 surface <- data.frame(
@@ -52,6 +53,7 @@ summarise_monotonicity(diagnostic)
 Monotone post-processing returns data, not a modified fit object:
 
 ``` r
+
 enforce_monotone_selection(
   surface,
   axis = "c0",
@@ -85,6 +87,7 @@ Precision-recall paths use the same surface data and a mapped truth
 object.
 
 ``` r
+
 truth <- list(
   active_features = "a",
   feature_universe = c("a", "b")

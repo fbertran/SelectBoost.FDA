@@ -12,12 +12,12 @@ bibentry(bibtype = "Manual",
          year = year,
          note = vers,
          url = "https://CRAN.R-project.org/package=SelectBoost.FDA",
-#         doi = doi,
+         doi = doi,
          textVersion =
            paste(
              "Frederic Bertrand (", year, "). ",
              titl, ", ", vers, 
-#             ". doi:", doi, ".",
+             ". doi:", doi, ".",
              sep=""
            )
 )

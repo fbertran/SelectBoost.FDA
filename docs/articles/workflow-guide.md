@@ -62,6 +62,7 @@ The last two vignettes are benchmark-oriented.
 The package entry point is still the FDA-native design object.
 
 ``` r
+
 library(SelectBoost.FDA)
 
 sim <- simulate_fda_scenario(

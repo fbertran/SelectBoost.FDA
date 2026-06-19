@@ -40,6 +40,21 @@ sim_grid$truth$active_predictors
 The returned object keeps both the fitted `fda_design` and the mapped truth for
 the transformed feature space.
 
+The simulator covers seven primary signal structures:
+
+- `localized_dense`: dense local active regions.
+- `confounded_blocks`: active regions near correlated nuisance blocks.
+- `smooth_sparse`: smooth coefficient structure on sparse active domains.
+- `basis_block_signal`: signal aligned with spline-like basis blocks.
+- `fpca_low_rank_signal`: response driven by the first FPCA components.
+- `null_signal`: no active functional or scalar truth, useful for false-positive summaries.
+- `mislocalized_signal`: fragmented active regions that are intentionally hard for locality rules.
+
+The older `distributed_smooth` label remains available for backwards
+compatibility. In the null scenario, recovery tables should be read through
+`fp`, `n_selected`, specificity, and selection rate rather than `F1`, because
+there is no positive support to recover.
+
 ## Benchmark multiple methods on shared truth
 
 ```{r, eval = has_glmnet}
@@ -81,7 +96,7 @@ study_dense <- run_simulation_study(
     n = 50,
     grid_length = 28,
     scenario = "localized_dense",
-    representation = "basis"
+    representation = "bspline"
   ),
   benchmark_args = list(
     methods = c("stability", "selectboost", "plain_selectboost"),
@@ -98,8 +113,8 @@ study_smooth <- run_simulation_study(
   simulate_args = list(
     n = 50,
     grid_length = 28,
-    scenario = "distributed_smooth",
-    representation = "basis"
+    scenario = "smooth_sparse",
+    representation = "bspline"
   ),
   benchmark_args = list(
     methods = c("stability", "selectboost", "plain_selectboost"),
@@ -130,8 +145,10 @@ summarise_benchmark_advantage(
 
 The repeated-study summary reports the mean and standard deviation of recovery
 metrics by method, evaluation level, scenario, and `c0` when applicable. In
-practice, the `localized_dense` setting is the most direct stress test for the
-FDA-aware grouping built into `selectboost_fda()`.
+practice, `localized_dense`, `smooth_sparse`, and `confounded_blocks` are the
+main positive-signal stress tests, while `null_signal` and
+`mislocalized_signal` are useful for describing false positives and failure
+modes.
 
 ## Run a targeted sensitivity study for FDA-aware SelectBoost
 
@@ -139,10 +156,10 @@ FDA-aware grouping built into `selectboost_fda()`.
 sensitivity <- run_selectboost_sensitivity_study(
   n_rep = 1,
   simulate_grid = data.frame(
-    scenario = c("localized_dense", "confounded_blocks"),
-    confounding_strength = c(0.4, 0.9),
-    active_region_scale = c(0.8, 0.7),
-    local_correlation = c(1, 2),
+    scenario = c("localized_dense", "confounded_blocks", "smooth_sparse", "null_signal"),
+    confounding_strength = c(0.4, 0.9, 0.4, 0.0),
+    active_region_scale = c(0.8, 0.7, 0.6, 1.0),
+    local_correlation = c(1, 2, 2, 2),
     stringsAsFactors = FALSE
   ),
   selectboost_grid = data.frame(

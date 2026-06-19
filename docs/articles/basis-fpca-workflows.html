@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Basis and FPCA Workflows • SelectBoost.FDA</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Inter-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Inter-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Basis and FPCA Workflows">
@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SelectBoost.FDA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.6.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -191,6 +191,9 @@ then reuse the same design/selection machinery as before.</p>
 <span><span class="co">#&gt;                 n_components first_component last_component         components</span></span>
 <span><span class="co">#&gt; nuisance.spline            5              B1             B5 B1, B2, B3, B4, B5</span></span>
 <span><span class="co">#&gt; signal.fpca                3             PC1            PC3      PC1, PC2, PC3</span></span>
+<span><span class="co">#&gt;                                                                                                               component_keys</span></span>
+<span><span class="co">#&gt; nuisance.spline nuisance::spline::B1, nuisance::spline::B2, nuisance::spline::B3, nuisance::spline::B4, nuisance::spline::B5</span></span>
+<span><span class="co">#&gt; signal.fpca                                                          signal::fpca::PC1, signal::fpca::PC2, signal::fpca::PC3</span></span>
 <span><span class="co">#&gt;                 domain_start domain_end</span></span>
 <span><span class="co">#&gt; nuisance.spline            0          1</span></span>
 <span><span class="co">#&gt; signal.fpca                0          1</span></span></code></pre></div>
@@ -311,21 +314,29 @@ then reuse the same design/selection machinery as before.</p>
 <span><span class="co">#&gt;                 n_components first_component last_component         components</span></span>
 <span><span class="co">#&gt; nuisance.spline            5              B1             B5 B1, B2, B3, B4, B5</span></span>
 <span><span class="co">#&gt; signal.fpca                3             PC1            PC3      PC1, PC2, PC3</span></span>
+<span><span class="co">#&gt;                                                                                                               component_keys</span></span>
+<span><span class="co">#&gt; nuisance.spline nuisance::spline::B1, nuisance::spline::B2, nuisance::spline::B3, nuisance::spline::B4, nuisance::spline::B5</span></span>
+<span><span class="co">#&gt; signal.fpca                                                          signal::fpca::PC1, signal::fpca::PC2, signal::fpca::PC3</span></span>
 <span><span class="co">#&gt;                 domain_start domain_end mean_feature_frequency</span></span>
 <span><span class="co">#&gt; nuisance.spline            0          1              0.0800000</span></span>
 <span><span class="co">#&gt; signal.fpca                0          1              0.5555556</span></span>
 <span><span class="co">#&gt;                 max_feature_frequency selected_components</span></span>
 <span><span class="co">#&gt; nuisance.spline             0.1333333                   0</span></span>
 <span><span class="co">#&gt; signal.fpca                 1.0000000                   1</span></span>
+<span><span class="co">#&gt;                 selected_component_keys</span></span>
+<span><span class="co">#&gt; nuisance.spline                        </span></span>
+<span><span class="co">#&gt; signal.fpca           signal::fpca::PC1</span></span>
 <span><span class="fu"><a href="../reference/selected.html">selected</a></span><span class="op">(</span><span class="va">fit</span>, level <span class="op">=</span> <span class="st">"basis"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;             predictor representation basis_type source_representation</span></span>
 <span><span class="co">#&gt; signal.fpca    signal          basis       fpca                  grid</span></span>
 <span><span class="co">#&gt;             n_components first_component last_component    components</span></span>
 <span><span class="co">#&gt; signal.fpca            3             PC1            PC3 PC1, PC2, PC3</span></span>
+<span><span class="co">#&gt;                                                      component_keys</span></span>
+<span><span class="co">#&gt; signal.fpca signal::fpca::PC1, signal::fpca::PC2, signal::fpca::PC3</span></span>
 <span><span class="co">#&gt;             domain_start domain_end mean_feature_frequency</span></span>
 <span><span class="co">#&gt; signal.fpca            0          1              0.5555556</span></span>
-<span><span class="co">#&gt;             max_feature_frequency selected_components</span></span>
-<span><span class="co">#&gt; signal.fpca                     1                   1</span></span>
+<span><span class="co">#&gt;             max_feature_frequency selected_components selected_component_keys</span></span>
+<span><span class="co">#&gt; signal.fpca                     1                   1       signal::fpca::PC1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"basis"</span>, value <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="basis-fpca-workflows_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="700"></p>
 <p>The basis-level summary is often the most convenient table for

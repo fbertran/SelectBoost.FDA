@@ -6,15 +6,17 @@
 \usage{
 run_selectboost_sensitivity_study(
   n_rep = 10L,
-  simulate_grid = expand.grid(scenario = c("localized_dense", "confounded_blocks"),
-    confounding_strength = c(0.4, 0.9), active_region_scale = c(1, 0.7),
-    local_correlation = c(0, 2), stringsAsFactors = FALSE),
+  simulate_grid = expand.grid(scenario = c("localized_dense", "confounded_blocks",
+    "smooth_sparse", "null_signal"), confounding_strength = c(0.4, 0.9),
+    active_region_scale = c(1, 0.7), local_correlation = c(0, 2), stringsAsFactors =
+    FALSE),
   selectboost_grid = expand.grid(association_method = c("correlation", "neighborhood",
     "hybrid", "interval"), bandwidth = c(NA, 4, 8), stringsAsFactors = FALSE),
   simulate_args = list(),
   benchmark_args = list(),
   seed = NULL,
-  keep_results = FALSE
+  keep_results = FALSE,
+  progress = NULL
 )
 }
 \arguments{
@@ -38,6 +40,17 @@ When omitted, the study compares FDA-aware \code{SelectBoost}, plain
 per-setting seeds.}
 
 \item{keep_results}{Should the individual benchmark objects be returned?}
+
+\item{progress}{Optional callback function used for long-running studies.
+When supplied, it is called with named arguments including \code{event},
+\code{replicate}, \code{completed_runs}, \code{total_runs}, and, at replicate completion,
+the completed replicate \code{metrics}. No files are written by default.
+
+The returned raw metrics include runtime diagnostics for each setting:
+elapsed, user, and system time; warning and failure counts; runtime status;
+error messages for failed settings; and fitted benchmark object size in MB
+when available. Failed benchmark settings are retained as rows with missing
+recovery metrics and \code{runtime_status = "failed"}.}
 }
 \value{
 An object inheriting from \code{fda_selectboost_sensitivity_study} and

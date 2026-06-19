@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Simulation and Benchmark Workflows • SelectBoost.FDA</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Inter-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Inter-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Simulation and Benchmark Workflows">
@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SelectBoost.FDA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.6.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -107,6 +107,8 @@ and direct advantage summaries for FDA-aware
 <span><span class="co">#&gt;   confounding strength: 0 </span></span>
 <span><span class="co">#&gt;   active region scale: 1 </span></span>
 <span><span class="co">#&gt;   local correlation: 0 </span></span>
+<span><span class="co">#&gt;   noise axis: noise_sd </span></span>
+<span><span class="co">#&gt;   noise sd: 0.4 </span></span>
 <span><span class="co">#&gt;   active predictors: signal, age, treatment</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/selection_map.html">selection_map</a></span><span class="op">(</span><span class="va">sim_grid</span><span class="op">$</span><span class="va">design</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;           feature predictor  block position             argval representation</span></span>
@@ -148,6 +150,34 @@ and direct advantage summaries for FDA-aware
 <span><span class="co">#&gt; [1] "signal"    "age"       "treatment"</span></span></code></pre></div>
 <p>The returned object keeps both the fitted <code>fda_design</code> and
 the mapped truth for the transformed feature space.</p>
+<p>The simulator covers seven primary signal structures:</p>
+<ul>
+<li>
+<code>localized_dense</code>: dense local active regions.</li>
+<li>
+<code>confounded_blocks</code>: active regions near correlated
+nuisance blocks.</li>
+<li>
+<code>smooth_sparse</code>: smooth coefficient structure on sparse
+active domains.</li>
+<li>
+<code>basis_block_signal</code>: signal aligned with spline-like
+basis blocks.</li>
+<li>
+<code>fpca_low_rank_signal</code>: response driven by the first FPCA
+components.</li>
+<li>
+<code>null_signal</code>: no active functional or scalar truth,
+useful for false-positive summaries.</li>
+<li>
+<code>mislocalized_signal</code>: fragmented active regions that are
+intentionally hard for locality rules.</li>
+</ul>
+<p>The older <code>distributed_smooth</code> label remains available for
+backwards compatibility. In the null scenario, recovery tables should be
+read through <code>fp</code>, <code>n_selected</code>, specificity, and
+selection rate rather than <code>F1</code>, because there is no positive
+support to recover.</p>
 </div>
 <div class="section level2">
 <h2 id="benchmark-multiple-methods-on-shared-truth">Benchmark multiple methods on shared truth<a class="anchor" aria-label="anchor" href="#benchmark-multiple-methods-on-shared-truth"></a>
@@ -171,10 +201,10 @@ the mapped truth for the transformed feature space.</p>
 <span><span class="co">#&gt;      level n_universe n_truth n_selected tp fp fn tn precision    recall</span></span>
 <span><span class="co">#&gt; 1  feature         62      13          9  5  4  8 45 0.5555556 0.3846154</span></span>
 <span><span class="co">#&gt; 2  feature         62      13         10  7  3  6 46 0.7000000 0.5384615</span></span>
-<span><span class="co">#&gt; 3  feature         62      13         20  8 12  5 37 0.4000000 0.6153846</span></span>
-<span><span class="co">#&gt; 4  feature         62      13         24  9 15  4 34 0.3750000 0.6923077</span></span>
-<span><span class="co">#&gt; 5  feature         62      13         21  8 13  5 36 0.3809524 0.6153846</span></span>
-<span><span class="co">#&gt; 6  feature         62      13         29 11 18  2 31 0.3793103 0.8461538</span></span>
+<span><span class="co">#&gt; 3  feature         62      13         25  9 16  4 33 0.3600000 0.6923077</span></span>
+<span><span class="co">#&gt; 4  feature         62      13         25 12 13  1 36 0.4800000 0.9230769</span></span>
+<span><span class="co">#&gt; 5  feature         62      13         24 10 14  3 35 0.4166667 0.7692308</span></span>
+<span><span class="co">#&gt; 6  feature         62      13         25 10 15  3 34 0.4000000 0.7692308</span></span>
 <span><span class="co">#&gt; 7    group          4       3          4  3  1  0  0 0.7500000 1.0000000</span></span>
 <span><span class="co">#&gt; 8    group         14       6          5  4  1  2  7 0.8000000 0.6666667</span></span>
 <span><span class="co">#&gt; 9    group          4       3          4  3  1  0  0 0.7500000 1.0000000</span></span>
@@ -184,29 +214,42 @@ the mapped truth for the transformed feature space.</p>
 <span><span class="co">#&gt;    specificity        f1   jaccard selection_rate            method       c0</span></span>
 <span><span class="co">#&gt; 1    0.9183673 0.4545455 0.2941176      0.1451613         stability     &lt;NA&gt;</span></span>
 <span><span class="co">#&gt; 2    0.9387755 0.6086957 0.4375000      0.1612903          interval     &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 3    0.7551020 0.4848485 0.3200000      0.3225806       selectboost c0 = 0.7</span></span>
-<span><span class="co">#&gt; 4    0.6938776 0.4864865 0.3214286      0.3870968       selectboost c0 = 0.4</span></span>
-<span><span class="co">#&gt; 5    0.7346939 0.4705882 0.3076923      0.3387097 plain_selectboost c0 = 0.7</span></span>
-<span><span class="co">#&gt; 6    0.6326531 0.5238095 0.3548387      0.4677419 plain_selectboost c0 = 0.4</span></span>
+<span><span class="co">#&gt; 3    0.6734694 0.4736842 0.3103448      0.4032258       selectboost c0 = 0.7</span></span>
+<span><span class="co">#&gt; 4    0.7346939 0.6315789 0.4615385      0.4032258       selectboost c0 = 0.4</span></span>
+<span><span class="co">#&gt; 5    0.7142857 0.5405405 0.3703704      0.3870968 plain_selectboost c0 = 0.7</span></span>
+<span><span class="co">#&gt; 6    0.6938776 0.5263158 0.3571429      0.4032258 plain_selectboost c0 = 0.4</span></span>
 <span><span class="co">#&gt; 7    0.0000000 0.8571429 0.7500000      1.0000000         stability     &lt;NA&gt;</span></span>
 <span><span class="co">#&gt; 8    0.8750000 0.7272727 0.5714286      0.3571429          interval     &lt;NA&gt;</span></span>
 <span><span class="co">#&gt; 9    0.0000000 0.8571429 0.7500000      1.0000000       selectboost c0 = 0.7</span></span>
 <span><span class="co">#&gt; 10   0.0000000 0.8571429 0.7500000      1.0000000       selectboost c0 = 0.4</span></span>
 <span><span class="co">#&gt; 11   0.0000000 0.8571429 0.7500000      1.0000000 plain_selectboost c0 = 0.7</span></span>
 <span><span class="co">#&gt; 12   0.0000000 0.8571429 0.7500000      1.0000000 plain_selectboost c0 = 0.4</span></span>
-<span><span class="co">#&gt;           scenario representation   family</span></span>
-<span><span class="co">#&gt; 1  localized_dense           grid gaussian</span></span>
-<span><span class="co">#&gt; 2  localized_dense           grid gaussian</span></span>
-<span><span class="co">#&gt; 3  localized_dense           grid gaussian</span></span>
-<span><span class="co">#&gt; 4  localized_dense           grid gaussian</span></span>
-<span><span class="co">#&gt; 5  localized_dense           grid gaussian</span></span>
-<span><span class="co">#&gt; 6  localized_dense           grid gaussian</span></span>
-<span><span class="co">#&gt; 7  localized_dense           grid gaussian</span></span>
-<span><span class="co">#&gt; 8  localized_dense           grid gaussian</span></span>
-<span><span class="co">#&gt; 9  localized_dense           grid gaussian</span></span>
-<span><span class="co">#&gt; 10 localized_dense           grid gaussian</span></span>
-<span><span class="co">#&gt; 11 localized_dense           grid gaussian</span></span>
-<span><span class="co">#&gt; 12 localized_dense           grid gaussian</span></span>
+<span><span class="co">#&gt;           scenario representation   family noise_axis snr noise_sd</span></span>
+<span><span class="co">#&gt; 1  localized_dense           grid gaussian   noise_sd  NA      0.4</span></span>
+<span><span class="co">#&gt; 2  localized_dense           grid gaussian   noise_sd  NA      0.4</span></span>
+<span><span class="co">#&gt; 3  localized_dense           grid gaussian   noise_sd  NA      0.4</span></span>
+<span><span class="co">#&gt; 4  localized_dense           grid gaussian   noise_sd  NA      0.4</span></span>
+<span><span class="co">#&gt; 5  localized_dense           grid gaussian   noise_sd  NA      0.4</span></span>
+<span><span class="co">#&gt; 6  localized_dense           grid gaussian   noise_sd  NA      0.4</span></span>
+<span><span class="co">#&gt; 7  localized_dense           grid gaussian   noise_sd  NA      0.4</span></span>
+<span><span class="co">#&gt; 8  localized_dense           grid gaussian   noise_sd  NA      0.4</span></span>
+<span><span class="co">#&gt; 9  localized_dense           grid gaussian   noise_sd  NA      0.4</span></span>
+<span><span class="co">#&gt; 10 localized_dense           grid gaussian   noise_sd  NA      0.4</span></span>
+<span><span class="co">#&gt; 11 localized_dense           grid gaussian   noise_sd  NA      0.4</span></span>
+<span><span class="co">#&gt; 12 localized_dense           grid gaussian   noise_sd  NA      0.4</span></span>
+<span><span class="co">#&gt;    effective_noise_sd effective_snr</span></span>
+<span><span class="co">#&gt; 1                 0.4      2.418105</span></span>
+<span><span class="co">#&gt; 2                 0.4      2.418105</span></span>
+<span><span class="co">#&gt; 3                 0.4      2.418105</span></span>
+<span><span class="co">#&gt; 4                 0.4      2.418105</span></span>
+<span><span class="co">#&gt; 5                 0.4      2.418105</span></span>
+<span><span class="co">#&gt; 6                 0.4      2.418105</span></span>
+<span><span class="co">#&gt; 7                 0.4      2.418105</span></span>
+<span><span class="co">#&gt; 8                 0.4      2.418105</span></span>
+<span><span class="co">#&gt; 9                 0.4      2.418105</span></span>
+<span><span class="co">#&gt; 10                0.4      2.418105</span></span>
+<span><span class="co">#&gt; 11                0.4      2.418105</span></span>
+<span><span class="co">#&gt; 12                0.4      2.418105</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/selection_map.html">selection_map</a></span><span class="op">(</span><span class="va">bench</span>, level <span class="op">=</span> <span class="st">"group"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   predictor group_id        group representation basis_type</span></span>
 <span><span class="co">#&gt; 1    signal        1       signal           grid           </span></span>
@@ -251,96 +294,171 @@ the mapped truth for the transformed feature space.</p>
 <span><span class="co">#&gt; 5    signal[1:5] &lt;NA&gt;             NA            NA</span></span>
 <span><span class="co">#&gt; 6   signal[6:10] &lt;NA&gt;             NA            NA</span></span>
 <span><span class="fu"><a href="../reference/summarise_benchmark_performance.html">summarise_benchmark_performance</a></span><span class="op">(</span><span class="va">bench</span>, level <span class="op">=</span> <span class="st">"feature"</span>, metric <span class="op">=</span> <span class="st">"f1"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                                                                scenario</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature          localized_dense</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature localized_dense</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature       localized_dense</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature         localized_dense</span></span>
-<span><span class="co">#&gt;                                                         representation   family</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature                    grid gaussian</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature           grid gaussian</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                 grid gaussian</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature                   grid gaussian</span></span>
-<span><span class="co">#&gt;                                                                    method</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature                   interval</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature plain_selectboost</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature             selectboost</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature                 stability</span></span>
-<span><span class="co">#&gt;                                                           level n_rep</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature          feature     1</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature feature     1</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature       feature     1</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature         feature     1</span></span>
-<span><span class="co">#&gt;                                                         n_truth_mean n_truth_sd</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature                    13          0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature           13          0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                 13          0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature                   13          0</span></span>
-<span><span class="co">#&gt;                                                         n_selected_mean</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature                       10</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature              29</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                    24</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature                       9</span></span>
-<span><span class="co">#&gt;                                                         n_selected_sd tp_mean</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature                      0       7</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature             0      11</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                   0       9</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature                     0       5</span></span>
-<span><span class="co">#&gt;                                                         tp_sd fp_mean fp_sd</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature              0       3     0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature     0      18     0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature           0      15     0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature             0       4     0</span></span>
-<span><span class="co">#&gt;                                                         fn_mean fn_sd tn_mean</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature                6     0      46</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature       2     0      31</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature             4     0      34</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature               8     0      45</span></span>
-<span><span class="co">#&gt;                                                         tn_sd precision_mean</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature              0      0.7000000</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature     0      0.3793103</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature           0      0.3750000</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature             0      0.5555556</span></span>
-<span><span class="co">#&gt;                                                         precision_sd</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature                     0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature            0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                  0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature                    0</span></span>
-<span><span class="co">#&gt;                                                         recall_mean recall_sd</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature            0.5384615         0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature   0.8461538         0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature         0.6923077         0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature           0.3846154         0</span></span>
-<span><span class="co">#&gt;                                                         specificity_mean</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature                 0.9387755</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature        0.6326531</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature              0.6938776</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature                0.9183673</span></span>
-<span><span class="co">#&gt;                                                         specificity_sd</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature                       0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature              0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                    0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature                      0</span></span>
-<span><span class="co">#&gt;                                                           f1_mean f1_sd</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature          0.6086957     0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature 0.5238095     0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature       0.4864865     0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature         0.4545455     0</span></span>
-<span><span class="co">#&gt;                                                         jaccard_mean jaccard_sd</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature             0.4375000          0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature    0.3548387          0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature          0.3214286          0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature            0.2941176          0</span></span>
-<span><span class="co">#&gt;                                                         selection_rate_mean</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature                    0.1612903</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature           0.4677419</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                 0.3870968</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature                   0.1451613</span></span>
-<span><span class="co">#&gt;                                                         selection_rate_sd</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.feature                          0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature                 0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                       0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.stability.feature                         0</span></span>
+<span><span class="co">#&gt;                                                                                  scenario</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature          localized_dense</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature localized_dense</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature       localized_dense</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature         localized_dense</span></span>
+<span><span class="co">#&gt;                                                                           representation</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                    grid</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature           grid</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature                 grid</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature                   grid</span></span>
+<span><span class="co">#&gt;                                                                             family</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature          gaussian</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature gaussian</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature       gaussian</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature         gaussian</span></span>
+<span><span class="co">#&gt;                                                                           noise_axis</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature            noise_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature   noise_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature         noise_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature           noise_sd</span></span>
+<span><span class="co">#&gt;                                                                           snr</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature           NA</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature  NA</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature        NA</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature          NA</span></span>
+<span><span class="co">#&gt;                                                                           noise_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature               0.4</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature      0.4</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature            0.4</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature              0.4</span></span>
+<span><span class="co">#&gt;                                                                                      method</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                   interval</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature plain_selectboost</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature             selectboost</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature                 stability</span></span>
+<span><span class="co">#&gt;                                                                             level</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature          feature</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature feature</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature       feature</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature         feature</span></span>
+<span><span class="co">#&gt;                                                                           n_rep</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature              1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature     1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature           1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature             1</span></span>
+<span><span class="co">#&gt;                                                                           n_truth_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                    13</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature           13</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature                 13</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature                   13</span></span>
+<span><span class="co">#&gt;                                                                           n_truth_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                   0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature          0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature                0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature                  0</span></span>
+<span><span class="co">#&gt;                                                                           n_selected_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                       10</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature              24</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature                    25</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature                       9</span></span>
+<span><span class="co">#&gt;                                                                           n_selected_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                      0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature             0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature                   0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature                     0</span></span>
+<span><span class="co">#&gt;                                                                           tp_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                7</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature      10</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature            12</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature               5</span></span>
+<span><span class="co">#&gt;                                                                           tp_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature              0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature     0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature           0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature             0</span></span>
+<span><span class="co">#&gt;                                                                           fp_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                3</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature      14</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature            13</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature               4</span></span>
+<span><span class="co">#&gt;                                                                           fp_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature              0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature     0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature           0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature             0</span></span>
+<span><span class="co">#&gt;                                                                           fn_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                6</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature       3</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature             1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature               8</span></span>
+<span><span class="co">#&gt;                                                                           fn_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature              0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature     0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature           0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature             0</span></span>
+<span><span class="co">#&gt;                                                                           tn_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature               46</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature      35</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature            36</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature              45</span></span>
+<span><span class="co">#&gt;                                                                           tn_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature              0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature     0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature           0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature             0</span></span>
+<span><span class="co">#&gt;                                                                           precision_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature               0.7000000</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature      0.4166667</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature            0.4800000</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature              0.5555556</span></span>
+<span><span class="co">#&gt;                                                                           precision_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                     0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature            0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature                  0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature                    0</span></span>
+<span><span class="co">#&gt;                                                                           recall_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature            0.5384615</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature   0.7692308</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature         0.9230769</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature           0.3846154</span></span>
+<span><span class="co">#&gt;                                                                           recall_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                  0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature         0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature               0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature                 0</span></span>
+<span><span class="co">#&gt;                                                                           specificity_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                 0.9387755</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature        0.7142857</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature              0.7346939</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature                0.9183673</span></span>
+<span><span class="co">#&gt;                                                                           specificity_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                       0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature              0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature                    0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature                      0</span></span>
+<span><span class="co">#&gt;                                                                             f1_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature          0.6086957</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature 0.5405405</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature       0.6315789</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature         0.4545455</span></span>
+<span><span class="co">#&gt;                                                                           f1_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature              0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature     0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature           0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature             0</span></span>
+<span><span class="co">#&gt;                                                                           jaccard_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature             0.4375000</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature    0.3703704</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature          0.4615385</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature            0.2941176</span></span>
+<span><span class="co">#&gt;                                                                           jaccard_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                   0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature          0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature                0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature                  0</span></span>
+<span><span class="co">#&gt;                                                                           selection_rate_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                    0.1612903</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature           0.3870968</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature                 0.4032258</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature                   0.1451613</span></span>
+<span><span class="co">#&gt;                                                                           selection_rate_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.feature                          0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.plain_selectboost.feature                 0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.selectboost.feature                       0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.stability.feature                         0</span></span>
 <span><span class="fu"><a href="../reference/summarise_benchmark_advantage.html">summarise_benchmark_advantage</a></span><span class="op">(</span></span>
 <span>  <span class="va">bench</span>,</span>
 <span>  target <span class="op">=</span> <span class="st">"selectboost"</span>,</span>
@@ -348,45 +466,54 @@ the mapped truth for the transformed feature space.</p>
 <span>  level <span class="op">=</span> <span class="st">"feature"</span>,</span>
 <span>  metric <span class="op">=</span> <span class="st">"f1"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;                                                                               scenario</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.plain_selectboost.f1 localized_dense</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.stability.f1         localized_dense</span></span>
-<span><span class="co">#&gt;                                                                        representation</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.plain_selectboost.f1           grid</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.stability.f1                   grid</span></span>
-<span><span class="co">#&gt;                                                                          family</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.plain_selectboost.f1 gaussian</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.stability.f1         gaussian</span></span>
-<span><span class="co">#&gt;                                                                          level</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.plain_selectboost.f1 feature</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.stability.f1         feature</span></span>
-<span><span class="co">#&gt;                                                                             target</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.plain_selectboost.f1 selectboost</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.stability.f1         selectboost</span></span>
-<span><span class="co">#&gt;                                                                                reference</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.plain_selectboost.f1 plain_selectboost</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.stability.f1                 stability</span></span>
-<span><span class="co">#&gt;                                                                        metric</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.plain_selectboost.f1     f1</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.stability.f1             f1</span></span>
-<span><span class="co">#&gt;                                                                        n_rep</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.plain_selectboost.f1     1</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.stability.f1             1</span></span>
-<span><span class="co">#&gt;                                                                        target_value_mean</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.plain_selectboost.f1         0.4864865</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.stability.f1                 0.4864865</span></span>
-<span><span class="co">#&gt;                                                                        reference_value_mean</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.plain_selectboost.f1            0.5238095</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.stability.f1                    0.4545455</span></span>
-<span><span class="co">#&gt;                                                                         delta_mean</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.plain_selectboost.f1 -0.03732304</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.stability.f1          0.03194103</span></span>
-<span><span class="co">#&gt;                                                                        delta_sd</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.plain_selectboost.f1        0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.stability.f1                0</span></span>
-<span><span class="co">#&gt;                                                                        win_rate</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.plain_selectboost.f1        0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.feature.selectboost.stability.f1                1</span></span></code></pre></div>
+<span><span class="co">#&gt;                                                                                                 scenario</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 localized_dense</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         localized_dense</span></span>
+<span><span class="co">#&gt;                                                                                          representation</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1           grid</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1                   grid</span></span>
+<span><span class="co">#&gt;                                                                                            family</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 gaussian</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         gaussian</span></span>
+<span><span class="co">#&gt;                                                                                          noise_axis</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1   noise_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1           noise_sd</span></span>
+<span><span class="co">#&gt;                                                                                          snr</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1  NA</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1          NA</span></span>
+<span><span class="co">#&gt;                                                                                          noise_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1      0.4</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1              0.4</span></span>
+<span><span class="co">#&gt;                                                                                            level</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 feature</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         feature</span></span>
+<span><span class="co">#&gt;                                                                                               target</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 selectboost</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         selectboost</span></span>
+<span><span class="co">#&gt;                                                                                                  reference</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 plain_selectboost</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1                 stability</span></span>
+<span><span class="co">#&gt;                                                                                          metric</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1     f1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1             f1</span></span>
+<span><span class="co">#&gt;                                                                                          n_rep</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1     1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1             1</span></span>
+<span><span class="co">#&gt;                                                                                          target_value_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1         0.6315789</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1                 0.6315789</span></span>
+<span><span class="co">#&gt;                                                                                          reference_value_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1            0.5405405</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1                    0.4545455</span></span>
+<span><span class="co">#&gt;                                                                                          delta_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 0.09103841</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         0.17703349</span></span>
+<span><span class="co">#&gt;                                                                                          delta_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1        0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1                0</span></span>
+<span><span class="co">#&gt;                                                                                          win_rate</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1        1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1                1</span></span></code></pre></div>
 <p>This keeps the comparison object available, so the same
 <code><a href="../reference/selection_map.html">selection_map()</a></code> and <code><a href="../reference/selected.html">selected()</a></code> methods work on
 top of the benchmark output. The summary helpers make it easier to
@@ -405,7 +532,7 @@ at its best <code>c0</code>.</p>
 <span>    n <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>    grid_length <span class="op">=</span> <span class="fl">28</span>,</span>
 <span>    scenario <span class="op">=</span> <span class="st">"localized_dense"</span>,</span>
-<span>    representation <span class="op">=</span> <span class="st">"basis"</span></span>
+<span>    representation <span class="op">=</span> <span class="st">"bspline"</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  benchmark_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    methods <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"stability"</span>, <span class="st">"selectboost"</span>, <span class="st">"plain_selectboost"</span><span class="op">)</span>,</span>
@@ -422,8 +549,8 @@ at its best <code>c0</code>.</p>
 <span>  simulate_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    n <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>    grid_length <span class="op">=</span> <span class="fl">28</span>,</span>
-<span>    scenario <span class="op">=</span> <span class="st">"distributed_smooth"</span>,</span>
-<span>    representation <span class="op">=</span> <span class="st">"basis"</span></span>
+<span>    scenario <span class="op">=</span> <span class="st">"smooth_sparse"</span>,</span>
+<span>    representation <span class="op">=</span> <span class="st">"bspline"</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  benchmark_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    methods <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"stability"</span>, <span class="st">"selectboost"</span>, <span class="st">"plain_selectboost"</span><span class="op">)</span>,</span>
@@ -442,45 +569,54 @@ at its best <code>c0</code>.</p>
 <span>  level <span class="op">=</span> <span class="st">"feature"</span>,</span>
 <span>  metric <span class="op">=</span> <span class="st">"f1"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;                                                                                scenario</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.plain_selectboost.f1 localized_dense</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.stability.f1         localized_dense</span></span>
-<span><span class="co">#&gt;                                                                         representation</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.plain_selectboost.f1          basis</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.stability.f1                  basis</span></span>
-<span><span class="co">#&gt;                                                                           family</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.plain_selectboost.f1 gaussian</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.stability.f1         gaussian</span></span>
-<span><span class="co">#&gt;                                                                           level</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.plain_selectboost.f1 feature</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.stability.f1         feature</span></span>
-<span><span class="co">#&gt;                                                                              target</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.plain_selectboost.f1 selectboost</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.stability.f1         selectboost</span></span>
-<span><span class="co">#&gt;                                                                                 reference</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.plain_selectboost.f1 plain_selectboost</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.stability.f1                 stability</span></span>
-<span><span class="co">#&gt;                                                                         metric</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.plain_selectboost.f1     f1</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.stability.f1             f1</span></span>
-<span><span class="co">#&gt;                                                                         n_rep</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.plain_selectboost.f1     2</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.stability.f1             2</span></span>
-<span><span class="co">#&gt;                                                                         target_value_mean</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.plain_selectboost.f1         0.7309524</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.stability.f1                 0.7309524</span></span>
-<span><span class="co">#&gt;                                                                         reference_value_mean</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.plain_selectboost.f1            0.7655678</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.stability.f1                    0.6923077</span></span>
-<span><span class="co">#&gt;                                                                          delta_mean</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.plain_selectboost.f1 -0.03461538</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.stability.f1          0.03864469</span></span>
-<span><span class="co">#&gt;                                                                           delta_sd</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.plain_selectboost.f1 0.04895355</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.stability.f1         0.15255894</span></span>
-<span><span class="co">#&gt;                                                                         win_rate</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.plain_selectboost.f1      0.0</span></span>
-<span><span class="co">#&gt; localized_dense.basis.gaussian.feature.selectboost.stability.f1              0.5</span></span>
+<span><span class="co">#&gt;                                                                                                    scenario</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 localized_dense</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         localized_dense</span></span>
+<span><span class="co">#&gt;                                                                                             representation</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1        bspline</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1                bspline</span></span>
+<span><span class="co">#&gt;                                                                                               family</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 gaussian</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         gaussian</span></span>
+<span><span class="co">#&gt;                                                                                             noise_axis</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1   noise_sd</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1           noise_sd</span></span>
+<span><span class="co">#&gt;                                                                                             snr</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1  NA</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1          NA</span></span>
+<span><span class="co">#&gt;                                                                                             noise_sd</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1      0.4</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1              0.4</span></span>
+<span><span class="co">#&gt;                                                                                               level</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 feature</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         feature</span></span>
+<span><span class="co">#&gt;                                                                                                  target</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 selectboost</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         selectboost</span></span>
+<span><span class="co">#&gt;                                                                                                     reference</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 plain_selectboost</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1                 stability</span></span>
+<span><span class="co">#&gt;                                                                                             metric</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1     f1</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1             f1</span></span>
+<span><span class="co">#&gt;                                                                                             n_rep</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1     2</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1             2</span></span>
+<span><span class="co">#&gt;                                                                                             target_value_mean</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1         0.7684211</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1                 0.7684211</span></span>
+<span><span class="co">#&gt;                                                                                             reference_value_mean</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1            0.7963801</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1                    0.6923077</span></span>
+<span><span class="co">#&gt;                                                                                              delta_mean</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 -0.02795904</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1          0.07611336</span></span>
+<span><span class="co">#&gt;                                                                                               delta_sd</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 0.08305431</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         0.06412628</span></span>
+<span><span class="co">#&gt;                                                                                             win_rate</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1      0.5</span></span>
+<span><span class="co">#&gt; localized_dense.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1              1.0</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/summarise_benchmark_advantage.html">summarise_benchmark_advantage</a></span><span class="op">(</span></span>
 <span>  <span class="va">study_smooth</span>,</span>
@@ -489,50 +625,62 @@ at its best <code>c0</code>.</p>
 <span>  level <span class="op">=</span> <span class="st">"feature"</span>,</span>
 <span>  metric <span class="op">=</span> <span class="st">"f1"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;                                                                                      scenario</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.plain_selectboost.f1 distributed_smooth</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.stability.f1         distributed_smooth</span></span>
-<span><span class="co">#&gt;                                                                            representation</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.plain_selectboost.f1          basis</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.stability.f1                  basis</span></span>
-<span><span class="co">#&gt;                                                                              family</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.plain_selectboost.f1 gaussian</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.stability.f1         gaussian</span></span>
-<span><span class="co">#&gt;                                                                              level</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.plain_selectboost.f1 feature</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.stability.f1         feature</span></span>
-<span><span class="co">#&gt;                                                                                 target</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.plain_selectboost.f1 selectboost</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.stability.f1         selectboost</span></span>
-<span><span class="co">#&gt;                                                                                    reference</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.plain_selectboost.f1 plain_selectboost</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.stability.f1                 stability</span></span>
-<span><span class="co">#&gt;                                                                            metric</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.plain_selectboost.f1     f1</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.stability.f1             f1</span></span>
-<span><span class="co">#&gt;                                                                            n_rep</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.plain_selectboost.f1     2</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.stability.f1             2</span></span>
-<span><span class="co">#&gt;                                                                            target_value_mean</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.plain_selectboost.f1         0.7960526</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.stability.f1                 0.7960526</span></span>
-<span><span class="co">#&gt;                                                                            reference_value_mean</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.plain_selectboost.f1            0.7529412</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.stability.f1                    0.5000000</span></span>
-<span><span class="co">#&gt;                                                                            delta_mean</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.plain_selectboost.f1 0.04311146</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.stability.f1         0.29605263</span></span>
-<span><span class="co">#&gt;                                                                              delta_sd</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.plain_selectboost.f1 0.13167948</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.stability.f1         0.06512826</span></span>
-<span><span class="co">#&gt;                                                                            win_rate</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.plain_selectboost.f1      0.5</span></span>
-<span><span class="co">#&gt; distributed_smooth.basis.gaussian.feature.selectboost.stability.f1              1.0</span></span></code></pre></div>
+<span><span class="co">#&gt;                                                                                                scenario</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 smooth_sparse</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         smooth_sparse</span></span>
+<span><span class="co">#&gt;                                                                                           representation</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1        bspline</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1                bspline</span></span>
+<span><span class="co">#&gt;                                                                                             family</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 gaussian</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         gaussian</span></span>
+<span><span class="co">#&gt;                                                                                           noise_axis</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1   noise_sd</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1           noise_sd</span></span>
+<span><span class="co">#&gt;                                                                                           snr</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1  NA</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1          NA</span></span>
+<span><span class="co">#&gt;                                                                                           noise_sd</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1      0.4</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1              0.4</span></span>
+<span><span class="co">#&gt;                                                                                             level</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 feature</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         feature</span></span>
+<span><span class="co">#&gt;                                                                                                target</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 selectboost</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         selectboost</span></span>
+<span><span class="co">#&gt;                                                                                                   reference</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 plain_selectboost</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1                 stability</span></span>
+<span><span class="co">#&gt;                                                                                           metric</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1     f1</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1             f1</span></span>
+<span><span class="co">#&gt;                                                                                           n_rep</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1     2</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1             2</span></span>
+<span><span class="co">#&gt;                                                                                           target_value_mean</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1         0.8710526</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1                 0.8710526</span></span>
+<span><span class="co">#&gt;                                                                                           reference_value_mean</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1            0.8288043</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1                    0.7708333</span></span>
+<span><span class="co">#&gt;                                                                                           delta_mean</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 0.04224828</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         0.10021930</span></span>
+<span><span class="co">#&gt;                                                                                             delta_sd</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1 0.02439276</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1         0.10637615</span></span>
+<span><span class="co">#&gt;                                                                                           win_rate</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.plain_selectboost.f1        1</span></span>
+<span><span class="co">#&gt; smooth_sparse.bspline.gaussian.noise_sd.&lt;NA&gt;.0.4.feature.selectboost.stability.f1                1</span></span></code></pre></div>
 <p>The repeated-study summary reports the mean and standard deviation of
 recovery metrics by method, evaluation level, scenario, and
-<code>c0</code> when applicable. In practice, the
-<code>localized_dense</code> setting is the most direct stress test for
-the FDA-aware grouping built into <code><a href="../reference/selectboost_fda.html">selectboost_fda()</a></code>.</p>
+<code>c0</code> when applicable. In practice,
+<code>localized_dense</code>, <code>smooth_sparse</code>, and
+<code>confounded_blocks</code> are the main positive-signal stress
+tests, while <code>null_signal</code> and
+<code>mislocalized_signal</code> are useful for describing false
+positives and failure modes.</p>
 </div>
 <div class="section level2">
 <h2 id="run-a-targeted-sensitivity-study-for-fda-aware-selectboost">Run a targeted sensitivity study for FDA-aware SelectBoost<a class="anchor" aria-label="anchor" href="#run-a-targeted-sensitivity-study-for-fda-aware-selectboost"></a>
@@ -541,10 +689,10 @@ the FDA-aware grouping built into <code><a href="../reference/selectboost_fda.ht
 <code class="sourceCode R"><span><span class="va">sensitivity</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_selectboost_sensitivity_study.html">run_selectboost_sensitivity_study</a></span><span class="op">(</span></span>
 <span>  n_rep <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  simulate_grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>    scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"localized_dense"</span>, <span class="st">"confounded_blocks"</span><span class="op">)</span>,</span>
-<span>    confounding_strength <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.9</span><span class="op">)</span>,</span>
-<span>    active_region_scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.8</span>, <span class="fl">0.7</span><span class="op">)</span>,</span>
-<span>    local_correlation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>    scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"localized_dense"</span>, <span class="st">"confounded_blocks"</span>, <span class="st">"smooth_sparse"</span>, <span class="st">"null_signal"</span><span class="op">)</span>,</span>
+<span>    confounding_strength <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.9</span>, <span class="fl">0.4</span>, <span class="fl">0.0</span><span class="op">)</span>,</span>
+<span>    active_region_scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.8</span>, <span class="fl">0.7</span>, <span class="fl">0.6</span>, <span class="fl">1.0</span><span class="op">)</span>,</span>
+<span>    local_correlation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>,</span>
 <span>    stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  selectboost_grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -570,96 +718,279 @@ the FDA-aware grouping built into <code><a href="../reference/selectboost_fda.ht
 <span>  level <span class="op">=</span> <span class="st">"feature"</span>,</span>
 <span>  metric <span class="op">=</span> <span class="st">"f1"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;                                                                                                        scenario</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1   confounded_blocks</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1 confounded_blocks</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1       localized_dense</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1     localized_dense</span></span>
-<span><span class="co">#&gt;                                                                                               representation</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1             grid</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1           grid</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1               grid</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1             grid</span></span>
-<span><span class="co">#&gt;                                                                                                 family</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1   gaussian</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1 gaussian</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1     gaussian</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1   gaussian</span></span>
-<span><span class="co">#&gt;                                                                                               association_method</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1               hybrid</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1           interval</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                 hybrid</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1             interval</span></span>
-<span><span class="co">#&gt;                                                                                               bandwidth</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1           4</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1         4</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1             4</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1           4</span></span>
-<span><span class="co">#&gt;                                                                                               confounding_strength</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                    0.9</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                  0.9</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                      0.4</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                    0.4</span></span>
-<span><span class="co">#&gt;                                                                                               active_region_scale</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                   0.7</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                 0.7</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                     0.8</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                   0.8</span></span>
-<span><span class="co">#&gt;                                                                                               local_correlation</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                   2</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                 2</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                     1</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                   1</span></span>
-<span><span class="co">#&gt;                                                                                                 level</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1   feature</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1 feature</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1     feature</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1   feature</span></span>
-<span><span class="co">#&gt;                                                                                                    target</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1   selectboost</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1 selectboost</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1     selectboost</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1   selectboost</span></span>
-<span><span class="co">#&gt;                                                                                                       reference</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1   plain_selectboost</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1 plain_selectboost</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1     plain_selectboost</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1   plain_selectboost</span></span>
-<span><span class="co">#&gt;                                                                                               metric</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1       f1</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1     f1</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1         f1</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1       f1</span></span>
-<span><span class="co">#&gt;                                                                                               n_rep</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1       1</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1     1</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1         1</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1       1</span></span>
-<span><span class="co">#&gt;                                                                                               target_value_mean</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1           0.5185185</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1         0.5517241</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1             0.4615385</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1           0.5517241</span></span>
-<span><span class="co">#&gt;                                                                                               reference_value_mean</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1              0.4516129</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1            0.5161290</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                0.5882353</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1              0.4347826</span></span>
-<span><span class="co">#&gt;                                                                                                delta_mean</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1    0.06690562</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1  0.03559511</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1     -0.12669683</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1    0.11694153</span></span>
-<span><span class="co">#&gt;                                                                                               delta_sd</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1          0</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1        0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1            0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1          0</span></span>
-<span><span class="co">#&gt;                                                                                               win_rate</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1          1</span></span>
-<span><span class="co">#&gt; confounded_blocks.grid.gaussian.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1        1</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1            0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1          1</span></span></code></pre></div>
+<span><span class="co">#&gt;                                                                                                                                scenario</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1 confounded_blocks</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1         confounded_blocks</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1       confounded_blocks</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1     localized_dense</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1             localized_dense</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1           localized_dense</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1                 null_signal</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                         null_signal</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                       null_signal</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1         smooth_sparse</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                 smooth_sparse</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1               smooth_sparse</span></span>
+<span><span class="co">#&gt;                                                                                                                       representation</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1           grid</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                   grid</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                 grid</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1             grid</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                     grid</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                   grid</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1                     grid</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                             grid</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                           grid</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1               grid</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                       grid</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                     grid</span></span>
+<span><span class="co">#&gt;                                                                                                                         family</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1 gaussian</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1         gaussian</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1       gaussian</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1   gaussian</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1           gaussian</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1         gaussian</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1           gaussian</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                   gaussian</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                 gaussian</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1     gaussian</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1             gaussian</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1           gaussian</span></span>
+<span><span class="co">#&gt;                                                                                                                       noise_axis</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1   noise_sd</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1           noise_sd</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1         noise_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1     noise_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1             noise_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1           noise_sd</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1             noise_sd</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                     noise_sd</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                   noise_sd</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1       noise_sd</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1               noise_sd</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1             noise_sd</span></span>
+<span><span class="co">#&gt;                                                                                                                       snr</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1  NA</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1          NA</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1        NA</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1    NA</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1            NA</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1          NA</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1            NA</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                    NA</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                  NA</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1      NA</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1              NA</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1            NA</span></span>
+<span><span class="co">#&gt;                                                                                                                       noise_sd</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1      0.4</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1              0.4</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1            0.4</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1        0.4</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                0.4</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1              0.4</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1                0.4</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                        0.4</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                      0.4</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1          0.4</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                  0.4</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                0.4</span></span>
+<span><span class="co">#&gt;                                                                                                                       association_method</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1        correlation</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                     hybrid</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                 interval</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1          correlation</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                       hybrid</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                   interval</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1                  correlation</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                               hybrid</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                           interval</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1            correlation</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                         hybrid</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                     interval</span></span>
+<span><span class="co">#&gt;                                                                                                                       bandwidth</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1        NA</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                 4</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1               4</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1          NA</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                   4</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                 4</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1                  NA</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                           4</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                         4</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1            NA</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                     4</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                   4</span></span>
+<span><span class="co">#&gt;                                                                                                                       confounding_strength</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                  0.9</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                          0.9</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                        0.9</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                    0.4</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                            0.4</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                          0.4</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1                            0.0</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                                    0.0</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                                  0.0</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                      0.4</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                              0.4</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                            0.4</span></span>
+<span><span class="co">#&gt;                                                                                                                       active_region_scale</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                 0.7</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                         0.7</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                       0.7</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                   0.8</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                           0.8</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                         0.8</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1                           1.0</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                                   1.0</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                                 1.0</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                     0.6</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                             0.6</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                           0.6</span></span>
+<span><span class="co">#&gt;                                                                                                                       local_correlation</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                 2</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                         2</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                       2</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                   1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                           1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                         1</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1                           2</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                                   2</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                                 2</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                     2</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                             2</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                           2</span></span>
+<span><span class="co">#&gt;                                                                                                                         level</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1 feature</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1         feature</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1       feature</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1   feature</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1           feature</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1         feature</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1           feature</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                   feature</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                 feature</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1     feature</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1             feature</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1           feature</span></span>
+<span><span class="co">#&gt;                                                                                                                            target</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1 selectboost</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1         selectboost</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1       selectboost</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1   selectboost</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1           selectboost</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1         selectboost</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1           selectboost</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                   selectboost</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                 selectboost</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1     selectboost</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1             selectboost</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1           selectboost</span></span>
+<span><span class="co">#&gt;                                                                                                                               reference</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1 plain_selectboost</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1         plain_selectboost</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1       plain_selectboost</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1   plain_selectboost</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1           plain_selectboost</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1         plain_selectboost</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1           plain_selectboost</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                   plain_selectboost</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                 plain_selectboost</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1     plain_selectboost</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1             plain_selectboost</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1           plain_selectboost</span></span>
+<span><span class="co">#&gt;                                                                                                                       metric</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1     f1</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1             f1</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1           f1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1       f1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1               f1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1             f1</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1               f1</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                       f1</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                     f1</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1         f1</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                 f1</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1               f1</span></span>
+<span><span class="co">#&gt;                                                                                                                       n_rep</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1     1</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1             1</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1           1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1       1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1               1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1             1</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1               1</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                       1</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                     1</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1         1</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                 1</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1               1</span></span>
+<span><span class="co">#&gt;                                                                                                                       target_value_mean</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1         0.5806452</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                 0.5714286</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1               0.6206897</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1           0.5000000</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                   0.5454545</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                 0.5333333</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1                         NaN</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                                 NaN</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                               NaN</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1             0.4166667</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                     0.4545455</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                   0.4761905</span></span>
+<span><span class="co">#&gt;                                                                                                                       reference_value_mean</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1            0.4444444</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                    0.5142857</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                  0.4571429</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1              0.4347826</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                      0.5128205</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                    0.4545455</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1                            NaN</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                                    NaN</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                                  NaN</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                0.4347826</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                        0.4761905</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                      0.4166667</span></span>
+<span><span class="co">#&gt;                                                                                                                        delta_mean</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1  0.13620072</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1          0.05714286</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1        0.16354680</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1    0.06521739</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1            0.03263403</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1          0.07878788</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1                   NaN</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                           NaN</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                         NaN</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1     -0.01811594</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1             -0.02164502</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1            0.05952381</span></span>
+<span><span class="co">#&gt;                                                                                                                       delta_sd</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1        0</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                0</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1              0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1          0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                  0</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                0</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1                  0</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                          0</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                        0</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1            0</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                    0</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                  0</span></span>
+<span><span class="co">#&gt;                                                                                                                       win_rate</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.9.0.7.2.feature.selectboost.plain_selectboost.f1        1</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1                1</span></span>
+<span><span class="co">#&gt; confounded_blocks.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.9.0.7.2.feature.selectboost.plain_selectboost.f1              1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.8.1.feature.selectboost.plain_selectboost.f1          1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                  1</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.8.1.feature.selectboost.plain_selectboost.f1                1</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.1.2.feature.selectboost.plain_selectboost.f1                NaN</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.1.2.feature.selectboost.plain_selectboost.f1                        NaN</span></span>
+<span><span class="co">#&gt; null_signal.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.1.2.feature.selectboost.plain_selectboost.f1                      NaN</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.correlation.&lt;NA&gt;.0.4.0.6.2.feature.selectboost.plain_selectboost.f1            0</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.hybrid.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                    0</span></span>
+<span><span class="co">#&gt; smooth_sparse.grid.gaussian.noise_sd.&lt;NA&gt;.0.4.interval.4.0.4.0.6.2.feature.selectboost.plain_selectboost.f1                  1</span></span></code></pre></div>
 <p>This is the intended benchmark workflow when the goal is to show when
 FDA-aware grouping matters. The summary table keeps
 <code>association_method</code>, <code>bandwidth</code>,

@@ -59,6 +59,8 @@ genlogo.R
 ^doc$
 ^Meta$
 ^cran-comments[.].*$
+^inst/extdata/benchmarks/focused_runs$
+^inst/extdata/benchmarks/focused_runs/
 
 #Vignette cache
 ^cran-comments[.].*$

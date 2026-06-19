@@ -8,16 +8,20 @@ simulate_fda_scenario(
   n = 80L,
   grid_length = 60L,
   family = c("gaussian", "binomial"),
-  representation = c("grid", "basis", "fpca"),
+  representation = c("grid", "bspline", "fpca", "basis"),
   transforms = NULL,
   basis_df = 7L,
   n_components = 5L,
-  scenario = c("localized_dense", "distributed_smooth", "confounded_blocks"),
+  scenario = c("localized_dense", "confounded_blocks", "smooth_sparse",
+    "basis_block_signal", "fpca_low_rank_signal", "null_signal", "mislocalized_signal",
+    "distributed_smooth"),
   confounding_strength = NULL,
   active_region_scale = 1,
   local_correlation = 0,
   include_scalar = TRUE,
+  noise_axis = NULL,
   noise_sd = 0.4,
+  snr = NULL,
   seed = NULL
 )
 }
@@ -29,21 +33,27 @@ simulate_fda_scenario(
 \item{family}{Model family used to generate the response.}
 
 \item{representation}{Representation used when building the returned
-\code{\link[=fda_design]{fda_design()}}: \code{"grid"} keeps the raw curves, \code{"basis"} applies a
-spline-basis transform, and \code{"fpca"} applies FPCA scores.}
+\code{\link[=fda_design]{fda_design()}}: \code{"grid"} keeps the raw curves, \code{"bspline"} applies a
+spline-basis transform, and \code{"fpca"} applies FPCA scores. The older
+\code{"basis"} label is accepted as an alias for \code{"bspline"}.}
 
 \item{transforms}{Optional transform list passed to \code{\link[=fda_design]{fda_design()}}. When
 omitted, a sensible default is chosen from \code{representation}.}
 
-\item{basis_df}{Degrees of freedom used when \code{representation = "basis"}.}
+\item{basis_df}{Degrees of freedom used when \code{representation = "bspline"}.}
 
 \item{n_components}{Number of FPCA components used when
 \code{representation = "fpca"}.}
 
-\item{scenario}{Benchmark scenario. \code{"localized_dense"} emphasizes narrow
-active regions under strong local correlation, \code{"distributed_smooth"}
-spreads the effect over broader smooth regions, and \code{"confounded_blocks"}
-adds stronger nuisance structure near the active block.}
+\item{scenario}{Benchmark scenario. Supported values are:
+\code{"localized_dense"} for dense local signal, \code{"confounded_blocks"} for
+correlated nuisance blocks, \code{"smooth_sparse"} for smooth coefficients on a
+sparse active domain, \code{"basis_block_signal"} for signal aligned with
+basis-like blocks, \code{"fpca_low_rank_signal"} for signal carried by the first
+FPCA components, \code{"null_signal"} for no true active effect, and
+\code{"mislocalized_signal"} for fragmented signal that is intentionally poorly
+aligned with interval/locality rules. \code{"distributed_smooth"} is retained as
+a backwards-compatible alias for the earlier broad smooth scenario.}
 
 \item{confounding_strength}{Strength of cross-block confounding injected into
 the nuisance curve. Higher values make plain \code{SelectBoost} less able to
@@ -58,7 +68,15 @@ simulated curves. Larger values increase local correlation along the grid.}
 \item{include_scalar}{Should scalar covariates be included in the design and
 truth object?}
 
-\item{noise_sd}{Observation noise level.}
+\item{noise_axis}{Optional label describing whether the benchmark setting is
+part of the default, fixed-SNR, or fixed-noise axis.}
+
+\item{noise_sd}{Observation noise level. Ignored for Gaussian responses when
+\code{snr} is supplied.}
+
+\item{snr}{Optional target signal-to-noise ratio for Gaussian responses. When
+supplied, the observation noise standard deviation is set to
+\code{sd(linear_predictor) / snr}.}
 
 \item{seed}{Optional random seed.}
 }

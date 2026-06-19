@@ -1,5 +1,94 @@
 # Changelog
 
+## SelectBoost.FDA 0.6.1
+
+- Added the named focused benchmark baseline
+  `baseline_focused_benchmark_2026`, with a committed machine-readable
+  grid definition at
+  `inst/extdata/benchmarks/config_focused_baseline.yml`.
+- Updated `tools/run_focused_benchmark.R` so generated benchmark CSV
+  outputs carry package version, Git commit SHA when available, seed,
+  replicate, method, scenario, representation, association method,
+  bandwidth, selector, `B`, and `steps.seq`.
+- Added quick, medium, and final focused benchmark profiles. The medium
+  profile writes `benchmark_summary_n30.csv`; final n = 50 or n = 100
+  runs also write `benchmark_summary_n50_or_n100.csv`.
+- Added paired simulation and benchmark seed columns plus
+  `paired_gain_summary.csv`, including mean, standard deviation,
+  standard error, win rate, valid paired replicate count, method-failure
+  flags, and deterministic bootstrap confidence intervals for FDA-aware
+  versus plain SelectBoost `F1` gains.
+- Added `paired_gain_bootstrap_ci.csv` as a focused uncertainty table
+  derived from replicate-level paired `F1` differences.
+- Added Phase 8 assessment-oriented all-setting summaries:
+  `assessment_top_positive_settings.csv`,
+  `assessment_negative_gain_settings.csv`,
+  `assessment_all_setting_summary.csv`, and
+  `assessment_failure_modes.csv`. These make negative-gain settings and
+  failure modes visible, and document the rule that best settings should
+  be interpreted together with the all-setting summary.
+- Added Phase 9 two-parameter perturbation-surface summaries to the
+  focused benchmark driver. Runs now write
+  `assessment_surface_summary.csv`,
+  `assessment_monotonicity_summary.csv`,
+  `assessment_precision_recall_paths.csv`, and
+  `assessment_best_thresholds.csv` for representative scenario types,
+  including fixed-threshold summaries at 0.5, 0.75, and 0.9 plus
+  best-`F1` thresholds.
+- Added Phase 10 association-geometry diagnostics to the focused
+  benchmark driver. Runs now write `association_diagnostics.csv`,
+  `association_group_size_summary.csv`, and
+  `assessment_association_comparison_table.csv`, retaining benchmark
+  setting keys for joins to performance summaries.
+- Added Phase 11 method-comparison outputs to distinguish FDA-aware
+  grouping from the base selector choice. Runs now write
+  `method_comparison_summary.csv`, `method_comparison_runtime.csv`, and
+  `assessment_method_comparison_table.csv`, with optional `glmnet`,
+  `grpreg`, and `SGL` backends recorded as skipped when unavailable.
+- Added Phase 12 runtime and computational reporting to the focused
+  benchmark driver. Runs now write `runtime_by_setting.csv` and
+  `runtime_by_method.csv`, with elapsed, user, and system time; warning
+  and failure counts; selected-feature summaries; and fitted-object
+  memory size where available. Failed settings are recorded as failed
+  runtime rows instead of being silently dropped.
+- Made the focused benchmark driver reproducible for fixed seeds by
+  using a recorded deterministic SelectBoost perturbation backend by
+  default, with `--upstream-rfast-rvmf` available for direct
+  upstream-generator comparisons.
+- Added Phase 4 simulation scenarios: `smooth_sparse`,
+  `basis_block_signal`, `fpca_low_rank_signal`, `null_signal`, and
+  `mislocalized_signal`, while retaining `localized_dense`,
+  `confounded_blocks`, and the legacy `distributed_smooth` scenario.
+  Null-signal runs now provide explicit empty ground truth for
+  false-positive summaries.
+- Added `benchmark_scenario_summary.csv` to the focused benchmark
+  driver, summarizing scenario-level mean, standard deviation, and
+  standard error for recovery and false-positive metrics.
+- Added live focused-benchmark progress artifacts: `progress.tsv`,
+  `benchmark_raw_metrics_checkpoint.csv`, and per-replicate raw-metric
+  checkpoint files under `checkpoints/`, so long runs can be inspected
+  before final summary files are written.
+- Added Phase 5 size-resolution controls to the focused benchmark
+  driver: `--n-grid=50,100,200` and `--grid-length-grid=30,75,150`. Runs
+  now keep `n`, `grid_length`, and per-setting elapsed-time columns in
+  raw metrics, and write `benchmark_size_resolution_summary.csv` plus
+  `benchmark_runtime_by_size_resolution.csv`.
+- Added Phase 6 noise and signal-strength controls:
+  `--snr-grid=0.5,1,2,4` for fixed-SNR comparisons and
+  `--noise-sd-grid=0.5,1,2` for fixed-noise stress tests. Benchmark
+  outputs now carry `noise_axis`, `snr`, and `noise_sd`, and the driver
+  writes `benchmark_noise_summary.csv` plus
+  `benchmark_noise_f1_gain_panel.csv`.
+- Added Phase 13 campaign-level controls to
+  `tools/run_focused_benchmark.R`: `--representation-grid`,
+  `--scenario-grid`, `--n-grid`, `--grid-length-grid`, `--snr-grid`,
+  `--noise-sd-grid`, `--q-grid`, `--c0-grid`, `--association-grid`,
+  `--bandwidth-grid`, `--assessment-summary`, `--save-surfaces`,
+  `--save-association-diagnostics`, and `--bootstrap-reps`. Generated
+  benchmark configuration files now record these interface arguments so
+  assessment and extended benchmark campaigns can be audited and
+  reproduced.
+
 ## SelectBoost.FDA 0.6.0
 
 - Added a focused benchmarking and validation layer.

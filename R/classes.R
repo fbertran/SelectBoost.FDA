@@ -40,6 +40,12 @@ feature_map_from_block <- function(feature_names,
   )
 }
 
+basis_component_key <- function(predictor, basis_type, component) {
+  basis_type <- as.character(basis_type)
+  basis_type[is.na(basis_type) | !nzchar(basis_type)] <- "basis"
+  paste(as.character(predictor), basis_type, as.character(component), sep = "::")
+}
+
 clean_predictor_name <- function(x) {
   if (is.null(x) || length(x) == 0L || is.na(x) || !nzchar(x)) {
     return(NULL)
@@ -771,6 +777,7 @@ summarise_selection_map <- function(map, level = c("feature", "group", "basis"))
   do.call(rbind, lapply(split(seq_len(nrow(rows)), split_keys), function(idx) {
     part <- rows[idx, , drop = FALSE]
     part <- part[order(part$position), , drop = FALSE]
+    component_keys <- basis_component_key(part$predictor, part$basis_type, part$basis_component)
 
     out <- data.frame(
       predictor = part$predictor[1],
@@ -781,6 +788,7 @@ summarise_selection_map <- function(map, level = c("feature", "group", "basis"))
       first_component = part$basis_component[1],
       last_component = part$basis_component[nrow(part)],
       components = paste(part$basis_component, collapse = ", "),
+      component_keys = paste(component_keys, collapse = ", "),
       domain_start = part$domain_start[1],
       domain_end = part$domain_end[nrow(part)],
       stringsAsFactors = FALSE
@@ -794,12 +802,16 @@ summarise_selection_map <- function(map, level = c("feature", "group", "basis"))
       out$max_feature_frequency <- max(part$feature_frequency)
     }
     if ("selected" %in% names(part)) {
-      out$selected_components <- sum(part$selected)
+      selected_mask <- part$selected %in% TRUE
+      out$selected_components <- sum(selected_mask)
+      out$selected_component_keys <- paste(component_keys[selected_mask], collapse = ", ")
     }
     if ("selection" %in% names(part)) {
+      selected_mask <- part$selection > 0
       out$mean_selection <- mean(part$selection)
       out$max_selection <- max(part$selection)
-      out$selected_components <- sum(part$selection > 0)
+      out$selected_components <- sum(selected_mask)
+      out$selected_component_keys <- paste(component_keys[selected_mask], collapse = ", ")
     }
 
     out

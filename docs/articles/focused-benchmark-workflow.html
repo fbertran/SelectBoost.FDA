@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Focused Benchmark Workflow • SelectBoost.FDA</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Inter-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Inter-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Focused Benchmark Workflow">
@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SelectBoost.FDA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.6.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,8 +85,170 @@ FDA-aware SelectBoost improves on plain SelectBoost for functional
 predictors: localized dense signals, confounded blocks, high local
 correlation, and narrow active regions.</p>
 <p>The driver script writes only to an explicit
-<code>--output-dir</code> or, when omitted, to
-<code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>.</p>
+<code>--output-dir</code> or, when omitted, to <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>.
+The current named baseline is
+<code>baseline_focused_benchmark_2026</code>. Its grid definition is
+stored in
+<code>inst/extdata/benchmarks/config_focused_baseline.yml</code>, and
+each run writes a copy named <code>benchmark_config_baseline.yml</code>
+beside the CSV outputs.</p>
+<p>Three run profiles are available:</p>
+<ul>
+<li>
+<code>--quick --n-replicates=1</code> keeps the smoke-test benchmark
+small.</li>
+<li>
+<code>--medium</code> runs the n = 30 benchmark and writes
+<code>benchmark_summary_n30.csv</code>.</li>
+<li>
+<code>--final</code> runs the n = 50 benchmark and also writes
+<code>benchmark_summary_n50_or_n100.csv</code>.</li>
+</ul>
+<p>All raw metrics include the replicate index, simulation seed,
+benchmark seed, and method metadata. Summary tables include means,
+standard deviations, standard errors, and
+<code>paired_gain_summary.csv</code> reports paired <code>F1</code>
+gains for FDA-aware SelectBoost over plain SelectBoost. The paired
+comparison is computed as a replicate-level difference,
+<code>F1_selectboost_fda - F1_plain_selectboost</code>, for each matched
+setting. The driver also writes
+<code>paired_gain_bootstrap_ci.csv</code> with deterministic percentile
+bootstrap confidence intervals, win rates, valid paired replicate
+counts, and method-failure flags. Long runs also update
+<code>progress.tsv</code> after study, replicate, simulation, and
+setting milestones; append
+<code>benchmark_raw_metrics_checkpoint.csv</code> after each completed
+replicate; and write per-replicate raw metrics to
+<code>checkpoints/benchmark_raw_metrics_repNNN.csv</code>. For
+reproducibility, the driver uses a recorded deterministic SelectBoost
+perturbation backend by default. Pass <code>--upstream-rfast-rvmf</code>
+only when comparing against the upstream <code>Rfast</code> perturbation
+generator directly.</p>
+<p>For assessment interpretation, use
+<code>benchmark_best_settings.csv</code> only together with
+<code>assessment_all_setting_summary.csv</code>. The driver also writes
+<code>assessment_top_positive_settings.csv</code>,
+<code>assessment_negative_gain_settings.csv</code>, and
+<code>assessment_failure_modes.csv</code>, so the report can state both
+where FDA-aware grouping helps and where it loses against plain
+SelectBoost. A short defensible interpretation is: FDA-aware grouping is
+most useful in settings with local correlation and localized signal, but
+its advantage is not uniform; negative gain rows and failure-mode labels
+should be shown alongside top positive gains.</p>
+<p>The driver also produces a compact two-parameter perturbation
+analysis for representative scenario types. It evaluates selection
+surfaces <code>(q, c0) -&gt; Pi_hat_j(q, c0)</code> on a smoke-test grid
+in <code>--quick</code> runs and on the baseline grid
+<code>q = 0.5, 0.632, 0.8</code> crossed with
+<code>c0 = 0.9, 0.7, 0.5, 0.3</code> in larger runs. The outputs are
+<code>assessment_surface_summary.csv</code>,
+<code>assessment_monotonicity_summary.csv</code>,
+<code>assessment_precision_recall_paths.csv</code>, and
+<code>assessment_best_thresholds.csv</code>. Together they support
+heatmap-like summaries, monotonicity checks across the two axes,
+precision-recall paths, the best threshold by <code>F1</code>, and
+fixed-threshold summaries at <code>0.5</code>, <code>0.75</code>, and
+<code>0.9</code>.</p>
+<p>Association geometry is measured separately from selection
+performance. The driver writes <code>association_diagnostics.csv</code>
+with sparsity, mean and median association, within-block and cross-block
+mass, local and nonlocal mass, and effective degree. It also writes
+<code>association_group_size_summary.csv</code> with the number of
+induced groups and group-size summaries at each <code>c0</code>, plus
+<code>assessment_association_comparison_table.csv</code> for compact
+method comparisons. The diagnostic tables retain the same scenario,
+representation, size, noise, and association-setting keys used by the
+benchmark metrics.</p>
+<p>Method comparison is measured separately from the main
+FDA-versus-plain SelectBoost contrast. The driver writes
+<code>method_comparison_summary.csv</code>,
+<code>method_comparison_runtime.csv</code>, and
+<code>assessment_method_comparison_table.csv</code> for seven labeled
+methods: <code>plain_selectboost</code>,
+<code>selectboost_fda_lasso</code>,
+<code>selectboost_fda_group_lasso</code>,
+<code>selectboost_fda_sparse_group_lasso</code>,
+<code>stability_lasso</code>, <code>stability_group_lasso</code>, and
+<code>stability_sparse_group_lasso</code>. These labels keep
+perturbation type separate from base selector choice. Optional backends
+are guarded with package checks: <code>glmnet</code> for lasso,
+<code>grpreg</code> for group lasso, and <code>SGL</code> for
+sparse-group lasso. Missing packages produce skipped rows in the runtime
+and assessment tables rather than aborting the benchmark.</p>
+<p>Runtime reporting is available at two granularities.
+<code>runtime_by_setting.csv</code> keeps one row per main benchmark
+method and setting, including elapsed time, user time, system time,
+warning and failure counts, selected-feature summaries, and
+fitted-object memory size where available.
+<code>runtime_by_method.csv</code> summarizes the same diagnostics by
+method and runtime source, combining the main benchmark and
+method-comparison runs. Failed settings are represented as failed
+runtime rows, so they can be counted in assessment tables instead of
+being silently dropped.</p>
+<p>Size-resolution sensitivity is controlled with comma-separated grids:
+<code>--n-grid=50,100,200</code> and
+<code>--grid-length-grid=30,75,150</code>. These values are crossed with
+the scenario, representation, and SelectBoost setting grids. The driver
+writes <code>benchmark_size_resolution_summary.csv</code> for recovery
+metrics by <code>n</code> and <code>grid_length</code>, plus
+<code>benchmark_runtime_by_size_resolution.csv</code> for runtime
+summaries at the corresponding setting level.</p>
+<p>Noise and signal-strength sensitivity are controlled with
+<code>--snr-grid=0.5,1,2,4</code> and
+<code>--noise-sd-grid=0.5,1,2</code>. The fixed-SNR grid is the
+recommended axis for the main method comparison because it keeps
+relative difficulty comparable across scenarios, representations, and
+signal structures. The fixed-noise grid is useful as a stress test for
+absolute observation noise. Both axes are recorded in the raw metrics
+and summaries through <code>noise_axis</code>, <code>snr</code>, and
+<code>noise_sd</code>. The driver writes
+<code>benchmark_noise_summary.csv</code> for performance by noise
+condition and <code>benchmark_noise_f1_gain_panel.csv</code> for a
+plot-ready <code>F1</code> gain panel.</p>
+<div class="section level2">
+<h2 id="campaign-interface">Campaign interface<a class="anchor" aria-label="anchor" href="#campaign-interface"></a>
+</h2>
+<p>The driver accepts comma-separated grids for assessment and extended
+benchmark campaigns:</p>
+<ul>
+<li>
+<code>--representation-grid=grid,bspline,fpca</code> chooses the
+functional encoding.</li>
+<li>
+<code>--scenario-grid=localized_dense,confounded_blocks,smooth_sparse</code>
+chooses the simulation scenarios.</li>
+<li>
+<code>--n-grid=50,100,200</code> and
+<code>--grid-length-grid=30,75,150</code> choose sample size and
+functional resolution.</li>
+<li>
+<code>--snr-grid=0.5,1,2,4</code> and
+<code>--noise-sd-grid=0.5,1,2</code> choose fixed-SNR and fixed-noise
+sensitivity axes.</li>
+<li>
+<code>--q-grid=0.5,0.632,0.8</code> and
+<code>--c0-grid=0.9,0.7,0.5,0.3</code> choose the subsampling and
+SelectBoost perturbation surface.</li>
+<li>
+<code>--association-grid=correlation,neighborhood,hybrid,interval</code>
+and <code>--bandwidth-grid=4,8</code> choose the FDA-aware grouping
+geometry.</li>
+<li>
+<code>--bootstrap-reps=2000</code> controls the deterministic
+bootstrap used for paired <code>F1</code> gain confidence
+intervals.</li>
+</ul>
+<p>Assessment-oriented summaries, perturbation surfaces, and association
+diagnostics are written by default for compatibility with the saved
+baseline outputs. Use <code>--assessment-summary</code>,
+<code>--save-surfaces</code>, and
+<code>--save-association-diagnostics</code> to make that choice explicit
+in command logs. For lighter local runs, use
+<code>--no-save-surfaces</code> or
+<code>--no-save-association-diagnostics</code> to skip the heavier
+optional diagnostics. The broader <code>--no-assessment-summary</code>
+shortcut disables both of those optional diagnostic families while
+keeping the core benchmark and paired-gain tables.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/system2.html" class="external-link">system2</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Rhome.html" class="external-link">R.home</a></span><span class="op">(</span><span class="st">"bin"</span><span class="op">)</span>, <span class="st">"Rscript"</span><span class="op">)</span>,</span>
@@ -95,11 +257,47 @@ correlation, and narrow active regions.</p>
 <span>    <span class="st">"--quick"</span>,</span>
 <span>    <span class="st">"--n-replicates=1"</span>,</span>
 <span>    <span class="st">"--seed=20260616"</span>,</span>
+<span>    <span class="st">"--n-grid=50,100"</span>,</span>
+<span>    <span class="st">"--grid-length-grid=30,75"</span>,</span>
+<span>    <span class="st">"--snr-grid=0.5,1,2,4"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"--output-dir="</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"selectboost_fda_focused_benchmark"</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>The package also exposes table extractors for report material.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/system2.html" class="external-link">system2</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Rhome.html" class="external-link">R.home</a></span><span class="op">(</span><span class="st">"bin"</span><span class="op">)</span>, <span class="st">"Rscript"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"tools/run_focused_benchmark.R"</span>,</span>
+<span>    <span class="st">"--medium"</span>,</span>
+<span>    <span class="st">"--seed=20260616"</span>,</span>
+<span>    <span class="st">"--representation-grid=grid,bspline"</span>,</span>
+<span>    <span class="st">"--scenario-grid=localized_dense,confounded_blocks,smooth_sparse"</span>,</span>
+<span>    <span class="st">"--n-grid=50,100"</span>,</span>
+<span>    <span class="st">"--grid-length-grid=30,75"</span>,</span>
+<span>    <span class="st">"--snr-grid=0.5,1,2,4"</span>,</span>
+<span>    <span class="st">"--q-grid=0.5,0.632,0.8"</span>,</span>
+<span>    <span class="st">"--c0-grid=0.9,0.7,0.5,0.3"</span>,</span>
+<span>    <span class="st">"--association-grid=correlation,neighborhood,hybrid,interval"</span>,</span>
+<span>    <span class="st">"--bandwidth-grid=4,8"</span>,</span>
+<span>    <span class="st">"--assessment-summary"</span>,</span>
+<span>    <span class="st">"--save-surfaces"</span>,</span>
+<span>    <span class="st">"--save-association-diagnostics"</span>,</span>
+<span>    <span class="st">"--bootstrap-reps=2000"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"--output-dir="</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"selectboost_fda_focused_campaign"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/system2.html" class="external-link">system2</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Rhome.html" class="external-link">R.home</a></span><span class="op">(</span><span class="st">"bin"</span><span class="op">)</span>, <span class="st">"Rscript"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"tools/run_focused_benchmark.R"</span>,</span>
+<span>    <span class="st">"--medium"</span>,</span>
+<span>    <span class="st">"--seed=20260616"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"--output-dir="</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"selectboost_fda_focused_n30"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>The package also exposes table extractors for report material.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://fbertran.github.io/SelectBoost.FDA/">SelectBoost.FDA</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/report_summary_table.html">report_summary_table</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -163,7 +361,7 @@ correlation, and narrow active regions.</p>
 <span><span class="co">#&gt; [1] "\\mathrm{Precision}=\\frac{|\\widehat S\\cap S^\\star|}{|\\widehat S|},\\quad \\mathrm{Recall}=\\frac{|\\widehat S\\cap S^\\star|}{|S^\\star|}"</span></span></code></pre></div>
 <p>Saved sensitivity-study artifacts shipped with the package can be
 turned into a compact benchmark table:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/report_benchmark_table.html">report_benchmark_table</a></span><span class="op">(</span>top_n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            Scenario  Association Bandwidth F1 FDA-aware  F1 plain      Delta</span></span>
 <span><span class="co">#&gt; 1 confounded_blocks     interval         8    0.5362319 0.4087266 0.12750533</span></span>
@@ -179,7 +377,7 @@ turned into a compact benchmark table:</p>
 <span><span class="co">#&gt; 5 0.6666667</span></span></code></pre></div>
 <p>For new benchmark objects, use the renderer-neutral summary
 extractor:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">metrics</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  scenario <span class="op">=</span> <span class="st">"localized_dense"</span>,</span>
 <span>  representation <span class="op">=</span> <span class="st">"grid"</span>,</span>
@@ -237,6 +435,7 @@ extractor:</p>
 <span><span class="co">#&gt;                                                         selection_rate_sd</span></span>
 <span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature                 0</span></span>
 <span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                       0</span></span></code></pre></div>
+</div>
   </main>
 </div>
 

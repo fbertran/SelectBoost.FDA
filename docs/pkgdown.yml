@@ -1,4 +1,4 @@
-pandoc: 3.6.3
+pandoc: 3.8.3
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
@@ -12,7 +12,7 @@ articles:
   selectboost-spectra: selectboost-spectra.html
   simulation-and-benchmarks: simulation-and-benchmarks.html
   workflow-guide: workflow-guide.html
-last_built: 2026-06-17T14:07Z
+last_built: 2026-06-19T13:32Z
 urls:
   reference: https://fbertran.github.io/SelectBoost.FDA/reference
   article: https://fbertran.github.io/SelectBoost.FDA/articles

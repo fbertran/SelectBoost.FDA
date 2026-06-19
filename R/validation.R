@@ -18,6 +18,11 @@ resolve_plain_grouping_function <- function(association = NULL,
 benchmark_setting_columns <- function(names) {
   intersect(
     c(
+      "n",
+      "grid_length",
+      "noise_axis",
+      "snr",
+      "noise_sd",
       "association_method",
       "bandwidth",
       "group_method",
@@ -28,6 +33,20 @@ benchmark_setting_columns <- function(names) {
     ),
     names
   )
+}
+
+interaction_key <- function(data) {
+  data <- as.data.frame(data, stringsAsFactors = FALSE)
+  for (name in names(data)) {
+    values <- data[[name]]
+    if (is.factor(values)) {
+      values <- as.character(values)
+    }
+    values <- as.character(values)
+    values[is.na(values)] <- "<NA>"
+    data[[name]] <- values
+  }
+  interaction(data, drop = TRUE, lex.order = TRUE)
 }
 
 metric_row <- function(predicted, active, universe, level) {
@@ -102,6 +121,14 @@ resolve_truth_object <- function(truth) {
   stop("`truth` must be an `fda_simulation_data` object or a truth list created from one.", call. = FALSE)
 }
 
+split_component_keys <- function(values) {
+  values <- values[!is.na(values) & nzchar(values)]
+  if (length(values) == 0L) {
+    return(character())
+  }
+  unique(trimws(unlist(strsplit(values, ",", fixed = TRUE), use.names = FALSE)))
+}
+
 truth_targets_for_fit <- function(fit, truth, level = c("feature", "group", "basis")) {
   level <- match.arg(level)
   truth <- resolve_truth_object(truth)
@@ -131,10 +158,31 @@ truth_targets_for_fit <- function(fit, truth, level = c("feature", "group", "bas
   }
 
   feature_map <- fit$x$feature_map
-  active_mask <- feature_map$feature %in% active_features & feature_map$representation == "basis"
+  basis_mask <- feature_map$representation == "basis"
+  basis_component <- ifelse(
+    is.na(feature_map$component) | !nzchar(feature_map$component),
+    feature_map$argval,
+    feature_map$component
+  )
+  component_universe <- basis_component_key(
+    feature_map$predictor[basis_mask],
+    feature_map$basis_type[basis_mask],
+    basis_component[basis_mask]
+  )
+  active_components <- if (!is.null(truth$active_basis_components)) {
+    intersect(truth$active_basis_components, component_universe)
+  } else {
+    active_mask <- feature_map$feature %in% active_features & basis_mask
+    basis_component_key(
+      feature_map$predictor[active_mask],
+      feature_map$basis_type[active_mask],
+      basis_component[active_mask]
+    )
+  }
+
   list(
-    active = unique(feature_map$predictor[active_mask]),
-    universe = unique(feature_map$predictor[feature_map$representation == "basis"])
+    active = unique(active_components),
+    universe = unique(component_universe)
   )
 }
 
@@ -154,7 +202,17 @@ selection_targets_for_map <- function(map,
     return(map$group[metric > threshold])
   }
 
+  if ("selected_component_keys" %in% names(map)) {
+    selected_keys <- split_component_keys(map$selected_component_keys)
+    if (length(selected_keys) > 0L) {
+      return(selected_keys)
+    }
+  }
+
   metric <- if (identical(value, "mean")) map$mean_selection else map$max_selection
+  if ("component_keys" %in% names(map)) {
+    return(split_component_keys(map$component_keys[metric > threshold]))
+  }
   map$predictor[metric > threshold]
 }
 
@@ -180,7 +238,7 @@ summarise_simulation_metrics <- function(metrics) {
     by_cols <- "level"
   }
 
-  split_keys <- interaction(metrics[by_cols], drop = TRUE, lex.order = TRUE)
+    split_keys <- interaction_key(metrics[by_cols])
   do.call(rbind, lapply(split(seq_len(nrow(metrics)), split_keys), function(idx) {
     part <- metrics[idx, , drop = FALSE]
     out <- part[1, by_cols, drop = FALSE]
@@ -234,7 +292,7 @@ best_metric_rows <- function(metrics,
     split_cols <- c("method", "level")
   }
 
-  split_keys <- interaction(metrics[split_cols], drop = TRUE, lex.order = TRUE)
+    split_keys <- interaction_key(metrics[split_cols])
   do.call(rbind, lapply(split(seq_len(nrow(metrics)), split_keys), function(idx) {
     part <- metrics[idx, , drop = FALSE]
     values <- part[[metric]]
@@ -262,7 +320,7 @@ aggregate_benchmark_rows <- function(metrics) {
     "precision", "recall", "specificity", "f1", "jaccard", "selection_rate"
   ), names(metrics))
 
-  split_keys <- interaction(metrics[by_cols], drop = TRUE, lex.order = TRUE)
+    split_keys <- interaction_key(metrics[by_cols])
   do.call(rbind, lapply(split(seq_len(nrow(metrics)), split_keys), function(idx) {
     part <- metrics[idx, , drop = FALSE]
     out <- part[1, by_cols, drop = FALSE]
@@ -293,7 +351,7 @@ advantage_rows <- function(metrics,
     ),
     names(metrics)
   )
-  split_keys <- interaction(metrics[split_cols], drop = TRUE, lex.order = TRUE)
+    split_keys <- interaction_key(metrics[split_cols])
   rows <- vector("list", 0L)
   counter <- 1L
 
@@ -340,7 +398,7 @@ aggregate_advantage_rows <- function(rows) {
     ),
     names(rows)
   )
-  split_keys <- interaction(rows[by_cols], drop = TRUE, lex.order = TRUE)
+    split_keys <- interaction_key(rows[by_cols])
   do.call(rbind, lapply(split(seq_len(nrow(rows)), split_keys), function(idx) {
     part <- rows[idx, , drop = FALSE]
     out <- part[1, by_cols, drop = FALSE]
@@ -421,9 +479,98 @@ append_parameter_columns <- function(data, params) {
   data
 }
 
+timing_value <- function(timing, name) {
+  value <- unname(timing[[name]])
+  if (length(value) == 0L || is.null(value) || is.na(value)) {
+    return(NA_real_)
+  }
+  as.numeric(value)
+}
+
+object_size_mb <- function(x) {
+  if (is.null(x)) {
+    return(NA_real_)
+  }
+  as.numeric(utils::object.size(x)) / (1024^2)
+}
+
+capture_runtime_result <- function(expr) {
+  warning_messages <- character()
+  result <- NULL
+  timing <- system.time({
+    result <- withCallingHandlers(
+      tryCatch(
+        list(value = force(expr), error = NULL),
+        error = function(e) list(value = NULL, error = e)
+      ),
+      warning = function(w) {
+        warning_messages <<- c(warning_messages, conditionMessage(w))
+        invokeRestart("muffleWarning")
+      }
+    )
+  })
+
+  list(
+    value = result$value,
+    error = result$error,
+    warnings = unique(warning_messages),
+    timing = timing
+  )
+}
+
+failed_benchmark_metrics <- function(methods,
+                                     levels,
+                                     data = NULL,
+                                     simulate_labels = list(),
+                                     stage = "benchmark",
+                                     error_message = NA_character_) {
+  methods <- as.character(methods)
+  levels <- as.character(levels)
+  if (length(methods) == 0L) {
+    methods <- NA_character_
+  }
+  if (length(levels) == 0L) {
+    levels <- NA_character_
+  }
+
+  out <- expand.grid(
+    method = methods,
+    level = levels,
+    stringsAsFactors = FALSE
+  )
+  out$n_universe <- NA_integer_
+  out$n_truth <- NA_integer_
+  out$n_selected <- NA_integer_
+  out$tp <- NA_integer_
+  out$fp <- NA_integer_
+  out$fn <- NA_integer_
+  out$tn <- NA_integer_
+  out$precision <- NA_real_
+  out$recall <- NA_real_
+  out$specificity <- NA_real_
+  out$f1 <- NA_real_
+  out$jaccard <- NA_real_
+  out$selection_rate <- NA_real_
+
+  out$scenario <- if (!is.null(data)) data$scenario else simulate_labels$scenario %||% NA_character_
+  out$representation <- if (!is.null(data)) data$representation else simulate_labels$representation %||% NA_character_
+  out$family <- if (!is.null(data)) data$family else simulate_labels$family %||% NA_character_
+  out$noise_axis <- if (!is.null(data)) data$noise_axis %||% NA_character_ else simulate_labels$noise_axis %||% NA_character_
+  out$snr <- if (!is.null(data)) data$snr %||% NA_real_ else simulate_labels$snr %||% NA_real_
+  out$noise_sd <- if (!is.null(data)) data$requested_noise_sd %||% data$noise_sd %||% NA_real_ else simulate_labels$noise_sd %||% NA_real_
+  out$effective_noise_sd <- if (!is.null(data)) data$noise_sd %||% NA_real_ else NA_real_
+  out$effective_snr <- if (!is.null(data)) data$effective_snr %||% NA_real_ else NA_real_
+  out$runtime_status <- "failed"
+  out$failure_stage <- stage
+  out$n_failures <- 1L
+  out$error_message <- as.character(error_message %||% NA_character_)
+  out
+}
+
 build_truth_from_design <- function(design,
                                     active_functional = NULL,
-                                    active_scalar = NULL) {
+                                    active_scalar = NULL,
+                                    active_features = NULL) {
   feature_map <- design$feature_map
   active_mask <- rep(FALSE, nrow(feature_map))
 
@@ -444,15 +591,42 @@ build_truth_from_design <- function(design,
       active_mask <- active_mask | feature_map$predictor == row$predictor
     }
   }
+  if (!is.null(active_features) && length(active_features) > 0L) {
+    active_mask <- active_mask | feature_map$feature %in% active_features
+  }
 
   active_features <- feature_map$feature[active_mask]
   active_predictors <- unique(feature_map$predictor[active_mask])
+  feature_truth <- feature_map
+  feature_truth$active <- active_mask
+
+  basis_mask <- feature_map$representation == "basis"
+  basis_component <- ifelse(
+    is.na(feature_map$component) | !nzchar(feature_map$component),
+    feature_map$argval,
+    feature_map$component
+  )
+  basis_component_universe <- basis_component_key(
+    feature_map$predictor[basis_mask],
+    feature_map$basis_type[basis_mask],
+    basis_component[basis_mask]
+  )
+  active_basis_components <- basis_component_key(
+    feature_map$predictor[basis_mask & active_mask],
+    feature_map$basis_type[basis_mask & active_mask],
+    basis_component[basis_mask & active_mask]
+  )
 
   list(
     active_functional = active_functional,
     active_scalar = active_scalar,
+    feature_truth = feature_truth,
     active_features = active_features,
     feature_universe = feature_map$feature,
+    active_basis_components = unique(active_basis_components),
+    basis_component_universe = unique(basis_component_universe),
+    active_basis = unique(feature_map$predictor[basis_mask & active_mask]),
+    basis_universe = unique(feature_map$predictor[basis_mask]),
     active_predictors = active_predictors,
     predictor_universe = unique(feature_map$predictor)
   )
@@ -600,17 +774,23 @@ print.summary.plain_selectboost_result <- function(x, ...) {
 #' @param grid_length Number of grid points per functional predictor.
 #' @param family Model family used to generate the response.
 #' @param representation Representation used when building the returned
-#'   [fda_design()]: `"grid"` keeps the raw curves, `"basis"` applies a
-#'   spline-basis transform, and `"fpca"` applies FPCA scores.
+#'   [fda_design()]: `"grid"` keeps the raw curves, `"bspline"` applies a
+#'   spline-basis transform, and `"fpca"` applies FPCA scores. The older
+#'   `"basis"` label is accepted as an alias for `"bspline"`.
 #' @param transforms Optional transform list passed to [fda_design()]. When
 #'   omitted, a sensible default is chosen from `representation`.
-#' @param basis_df Degrees of freedom used when `representation = "basis"`.
+#' @param basis_df Degrees of freedom used when `representation = "bspline"`.
 #' @param n_components Number of FPCA components used when
 #'   `representation = "fpca"`.
-#' @param scenario Benchmark scenario. `"localized_dense"` emphasizes narrow
-#'   active regions under strong local correlation, `"distributed_smooth"`
-#'   spreads the effect over broader smooth regions, and `"confounded_blocks"`
-#'   adds stronger nuisance structure near the active block.
+#' @param scenario Benchmark scenario. Supported values are:
+#'   `"localized_dense"` for dense local signal, `"confounded_blocks"` for
+#'   correlated nuisance blocks, `"smooth_sparse"` for smooth coefficients on a
+#'   sparse active domain, `"basis_block_signal"` for signal aligned with
+#'   basis-like blocks, `"fpca_low_rank_signal"` for signal carried by the first
+#'   FPCA components, `"null_signal"` for no true active effect, and
+#'   `"mislocalized_signal"` for fragmented signal that is intentionally poorly
+#'   aligned with interval/locality rules. `"distributed_smooth"` is retained as
+#'   a backwards-compatible alias for the earlier broad smooth scenario.
 #' @param confounding_strength Strength of cross-block confounding injected into
 #'   the nuisance curve. Higher values make plain `SelectBoost` less able to
 #'   separate true local signals from correlated nuisance structure.
@@ -620,7 +800,13 @@ print.summary.plain_selectboost_result <- function(x, ...) {
 #'   simulated curves. Larger values increase local correlation along the grid.
 #' @param include_scalar Should scalar covariates be included in the design and
 #'   truth object?
-#' @param noise_sd Observation noise level.
+#' @param noise_axis Optional label describing whether the benchmark setting is
+#'   part of the default, fixed-SNR, or fixed-noise axis.
+#' @param noise_sd Observation noise level. Ignored for Gaussian responses when
+#'   `snr` is supplied.
+#' @param snr Optional target signal-to-noise ratio for Gaussian responses. When
+#'   supplied, the observation noise standard deviation is set to
+#'   `sd(linear_predictor) / snr`.
 #' @param seed Optional random seed.
 #'
 #' @returns An object of class `fda_simulation_data`.
@@ -632,19 +818,31 @@ print.summary.plain_selectboost_result <- function(x, ...) {
 simulate_fda_scenario <- function(n = 80L,
                                   grid_length = 60L,
                                   family = c("gaussian", "binomial"),
-                                  representation = c("grid", "basis", "fpca"),
+                                  representation = c("grid", "bspline", "fpca", "basis"),
                                   transforms = NULL,
                                   basis_df = 7L,
                                   n_components = 5L,
-                                  scenario = c("localized_dense", "distributed_smooth", "confounded_blocks"),
+                                  scenario = c(
+                                    "localized_dense",
+                                    "confounded_blocks",
+                                    "smooth_sparse",
+                                    "basis_block_signal",
+                                    "fpca_low_rank_signal",
+                                    "null_signal",
+                                    "mislocalized_signal",
+                                    "distributed_smooth"
+                                  ),
                                   confounding_strength = NULL,
                                   active_region_scale = 1,
                                   local_correlation = 0,
                                   include_scalar = TRUE,
+                                  noise_axis = NULL,
                                   noise_sd = 0.4,
+                                  snr = NULL,
                                   seed = NULL) {
   family <- match.arg(family)
   representation <- match.arg(representation)
+  representation <- if (identical(representation, "basis")) "bspline" else representation
   scenario <- match.arg(scenario)
   n <- as.integer(n)
   grid_length <- as.integer(grid_length)
@@ -653,12 +851,25 @@ simulate_fda_scenario <- function(n = 80L,
   if (is.null(confounding_strength)) {
     confounding_strength <- if (identical(scenario, "confounded_blocks")) 0.7 else 0
   }
+  if (is.null(noise_axis) || length(noise_axis) == 0L ||
+      (length(noise_axis) == 1L && is.na(noise_axis))) {
+    noise_axis <- if (is.null(snr)) "noise_sd" else "snr"
+  }
+  noise_axis <- match.arg(as.character(noise_axis[1L]), c("default", "noise_sd", "snr"))
+  if (!is.numeric(noise_sd) || length(noise_sd) != 1L || is.na(noise_sd) || noise_sd < 0) {
+    stop("`noise_sd` must be a single non-negative number.", call. = FALSE)
+  }
+  if (!is.null(snr) &&
+      (!is.numeric(snr) || length(snr) != 1L || is.na(snr) || !is.finite(snr) || snr <= 0)) {
+    stop("`snr` must be NULL or a single positive finite number.", call. = FALSE)
+  }
 
   with_optional_seed(seed, {
     grid <- seq(0, 1, length.out = grid_length)
     latent_signal_1 <- stats::rnorm(n)
     latent_signal_2 <- stats::rnorm(n)
     latent_nuisance <- stats::rnorm(n)
+    latent_effect <- NULL
     if (identical(scenario, "localized_dense")) {
       signal_shape_1 <- exp(-((grid - 0.25) / 0.08) ^ 2)
       signal_shape_2 <- sin(2 * pi * grid) * exp(-((grid - 0.65) / 0.18) ^ 2)
@@ -675,6 +886,77 @@ simulate_fda_scenario <- function(n = 80L,
       nuisance <- confounding_strength * outer(latent_signal_1, nuisance_shape_2) +
         outer(latent_nuisance, nuisance_shape_1) +
         outer(stats::rnorm(n), nuisance_shape_2)
+    } else if (identical(scenario, "smooth_sparse")) {
+      signal_shape_1 <- sin(pi * grid) * exp(-((grid - 0.34) / 0.18) ^ 2)
+      signal_shape_2 <- cos(2 * pi * grid) * exp(-((grid - 0.72) / 0.12) ^ 2)
+      nuisance_shape_1 <- cos(pi * grid)
+      nuisance_shape_2 <- sin(4 * pi * grid)
+      signal_noise_sd <- 0.10
+      nuisance_noise_sd <- 0.13
+      region_bounds <- rbind(
+        c(max(1L, floor(0.28 * grid_length)), max(2L, floor(0.42 * grid_length))),
+        c(max(1L, floor(0.68 * grid_length)), max(2L, floor(0.80 * grid_length)))
+      )
+      region_bounds <- rescale_region_bounds(region_bounds, active_region_scale = active_region_scale, grid_length = grid_length)
+      region_weights <- c(1.25, -1.0)
+      nuisance <- confounding_strength * outer(latent_signal_2, nuisance_shape_2) +
+        outer(latent_nuisance, nuisance_shape_1) +
+        outer(stats::rnorm(n), nuisance_shape_2)
+    } else if (identical(scenario, "basis_block_signal")) {
+      signal_shape_1 <- pmax(0, 1 - abs(grid - 0.32) / 0.14) ^ 3
+      signal_shape_2 <- pmax(0, 1 - abs(grid - 0.67) / 0.13) ^ 3
+      nuisance_shape_1 <- pmax(0, 1 - abs(grid - 0.48) / 0.18) ^ 2
+      nuisance_shape_2 <- cos(2 * pi * grid)
+      signal_noise_sd <- 0.08
+      nuisance_noise_sd <- 0.12
+      region_bounds <- rbind(
+        c(max(1L, floor(0.22 * grid_length)), max(2L, floor(0.42 * grid_length))),
+        c(max(1L, floor(0.57 * grid_length)), max(2L, floor(0.78 * grid_length)))
+      )
+      region_bounds <- rescale_region_bounds(region_bounds, active_region_scale = active_region_scale, grid_length = grid_length)
+      region_weights <- c(1.35, -1.05)
+      nuisance <- confounding_strength * outer(latent_signal_1, nuisance_shape_1) +
+        outer(latent_nuisance, nuisance_shape_2)
+    } else if (identical(scenario, "fpca_low_rank_signal")) {
+      signal_shape_1 <- sqrt(2) * sin(pi * grid)
+      signal_shape_2 <- sqrt(2) * cos(2 * pi * grid)
+      nuisance_shape_1 <- sqrt(2) * sin(3 * pi * grid)
+      nuisance_shape_2 <- sqrt(2) * cos(4 * pi * grid)
+      signal_noise_sd <- 0.08
+      nuisance_noise_sd <- 0.12
+      region_bounds <- matrix(c(1L, grid_length), ncol = 2L)
+      region_weights <- 1
+      latent_effect <- 1.4 * latent_signal_1 - 1.0 * latent_signal_2
+      nuisance <- confounding_strength * outer(latent_signal_2, nuisance_shape_1) +
+        outer(latent_nuisance, nuisance_shape_2)
+    } else if (identical(scenario, "null_signal")) {
+      signal_shape_1 <- sin(pi * grid)
+      signal_shape_2 <- cos(2 * pi * grid)
+      nuisance_shape_1 <- cos(pi * grid)
+      nuisance_shape_2 <- sin(3 * pi * grid)
+      signal_noise_sd <- 0.16
+      nuisance_noise_sd <- 0.16
+      region_bounds <- matrix(integer(0), ncol = 2L)
+      region_weights <- numeric()
+      latent_effect <- rep(0, n)
+      nuisance <- outer(latent_nuisance, nuisance_shape_1) +
+        outer(stats::rnorm(n), nuisance_shape_2)
+    } else if (identical(scenario, "mislocalized_signal")) {
+      signal_shape_1 <- sin(5 * pi * grid) * exp(-((grid - 0.50) / 0.34) ^ 2)
+      signal_shape_2 <- cos(7 * pi * grid) * exp(-((grid - 0.55) / 0.32) ^ 2)
+      nuisance_shape_1 <- exp(-((grid - 0.35) / 0.20) ^ 2)
+      nuisance_shape_2 <- exp(-((grid - 0.70) / 0.20) ^ 2)
+      signal_noise_sd <- 0.10
+      nuisance_noise_sd <- 0.13
+      centers <- pmax(1L, pmin(grid_length, round(c(0.18, 0.31, 0.49, 0.73) * grid_length)))
+      half_width <- max(0L, floor(0.025 * grid_length * active_region_scale))
+      region_bounds <- cbind(
+        pmax(1L, centers - half_width),
+        pmin(grid_length, centers + half_width)
+      )
+      region_weights <- c(1.15, -1.1, 0.95, -0.9)
+      nuisance <- confounding_strength * outer(latent_signal_1, nuisance_shape_1) +
+        outer(latent_nuisance, nuisance_shape_2)
     } else if (identical(scenario, "distributed_smooth")) {
       signal_shape_1 <- sin(pi * grid)
       signal_shape_2 <- cos(2 * pi * grid)
@@ -715,31 +997,63 @@ simulate_fda_scenario <- function(n = 80L,
     signal <- smooth_curve_matrix(signal, local_correlation = local_correlation)
     nuisance <- smooth_curve_matrix(nuisance, local_correlation = local_correlation)
 
-    region_effects <- vapply(seq_len(nrow(region_bounds)), function(i) {
-      idx <- seq.int(region_bounds[i, 1], region_bounds[i, 2])
-      rowMeans(signal[, idx, drop = FALSE]) * region_weights[i]
-    }, numeric(n))
+    region_effects <- if (nrow(region_bounds) > 0L) {
+      vapply(seq_len(nrow(region_bounds)), function(i) {
+        idx <- seq.int(region_bounds[i, 1], region_bounds[i, 2])
+        rowMeans(signal[, idx, drop = FALSE]) * region_weights[i]
+      }, numeric(n))
+    } else {
+      matrix(0, nrow = n, ncol = 0L)
+    }
 
     scalar_covariates <- NULL
     scalar_truth <- NULL
-    linear_predictor <- rowSums(region_effects)
+    linear_predictor <- if (is.null(latent_effect)) rowSums(region_effects) else latent_effect
     if (isTRUE(include_scalar)) {
       age <- stats::rnorm(n, mean = 50, sd = 7)
       treatment <- stats::rbinom(n, size = 1, prob = 0.45)
       scalar_covariates <- data.frame(age = age, treatment = treatment)
-      linear_predictor <- linear_predictor + 0.05 * age - 0.6 * treatment
-      scalar_truth <- data.frame(
-        predictor = c("age", "treatment"),
-        feature = c("age", "treatment"),
-        weight = c(0.05, -0.6),
-        stringsAsFactors = FALSE
-      )
+      if (!identical(scenario, "null_signal")) {
+        linear_predictor <- linear_predictor + 0.05 * age - 0.6 * treatment
+        scalar_truth <- data.frame(
+          predictor = c("age", "treatment"),
+          feature = c("age", "treatment"),
+          weight = c(0.05, -0.6),
+          stringsAsFactors = FALSE
+        )
+      }
+    }
+
+    signal_sd <- stats::sd(linear_predictor)
+    effective_noise_sd <- noise_sd
+    effective_snr <- if (is.finite(signal_sd) && signal_sd > 0 && noise_sd > 0) {
+      signal_sd / noise_sd
+    } else {
+      NA_real_
+    }
+    if (!is.null(snr) && identical(family, "gaussian")) {
+      effective_noise_sd <- if (is.finite(signal_sd) && signal_sd > 0) {
+        signal_sd / snr
+      } else {
+        noise_sd
+      }
+      effective_snr <- if (is.finite(signal_sd) && signal_sd > 0 && effective_noise_sd > 0) {
+        signal_sd / effective_noise_sd
+      } else {
+        NA_real_
+      }
     }
 
     response <- if (identical(family, "gaussian")) {
-      linear_predictor + stats::rnorm(n, sd = noise_sd)
+      linear_predictor + stats::rnorm(n, sd = effective_noise_sd)
     } else {
-      prob <- stats::plogis(scale(linear_predictor)[, 1])
+      lp_sd <- stats::sd(linear_predictor)
+      scaled_predictor <- if (!is.finite(lp_sd) || lp_sd == 0) {
+        rep(0, length(linear_predictor))
+      } else {
+        as.numeric(scale(linear_predictor)[, 1])
+      }
+      prob <- stats::plogis(scaled_predictor)
       stats::rbinom(n, size = 1, prob = prob)
     }
 
@@ -753,7 +1067,7 @@ simulate_fda_scenario <- function(n = 80L,
       current_transforms <- switch(
         representation,
         grid = NULL,
-        basis = list(
+        bspline = list(
           signal = fda_bspline(df = basis_df),
           nuisance = fda_bspline(df = max(4L, basis_df - 1L))
         ),
@@ -773,21 +1087,49 @@ simulate_fda_scenario <- function(n = 80L,
       scalar_transform = if (isTRUE(include_scalar)) fda_standardize() else NULL
     )
 
-    active_functional <- data.frame(
-      predictor = rep("signal", nrow(region_bounds)),
-      start_position = region_bounds[, 1],
-      end_position = region_bounds[, 2],
-      start_argval = grid[region_bounds[, 1]],
-      end_argval = grid[region_bounds[, 2]],
-      weight = region_weights,
-      stringsAsFactors = FALSE
-    )
+    active_functional <- if (nrow(region_bounds) > 0L) {
+      data.frame(
+        predictor = rep("signal", nrow(region_bounds)),
+        start_position = region_bounds[, 1],
+        end_position = region_bounds[, 2],
+        start_argval = grid[region_bounds[, 1]],
+        end_argval = grid[region_bounds[, 2]],
+        weight = region_weights,
+        stringsAsFactors = FALSE
+      )
+    } else {
+      data.frame(
+        predictor = character(),
+        start_position = integer(),
+        end_position = integer(),
+        start_argval = numeric(),
+        end_argval = numeric(),
+        weight = numeric(),
+        stringsAsFactors = FALSE
+      )
+    }
+
+    active_feature_override <- NULL
+    truth_active_functional <- active_functional
+    if (identical(scenario, "fpca_low_rank_signal") && identical(representation, "fpca")) {
+      feature_map <- design$feature_map
+      active_feature_override <- feature_map$feature[
+        feature_map$predictor == "signal" &
+          feature_map$basis_type == "fpca" &
+          feature_map$component %in% c("PC1", "PC2")
+      ]
+      truth_active_functional <- NULL
+    }
 
     truth <- build_truth_from_design(
       design = design,
-      active_functional = active_functional,
-      active_scalar = scalar_truth
+      active_functional = truth_active_functional,
+      active_scalar = scalar_truth,
+      active_features = active_feature_override
     )
+    if (identical(scenario, "fpca_low_rank_signal") && identical(representation, "fpca")) {
+      truth$active_functional <- active_functional
+    }
 
     output <- list(
       grid = grid,
@@ -802,7 +1144,12 @@ simulate_fda_scenario <- function(n = 80L,
       active_region_scale = active_region_scale,
       local_correlation = local_correlation,
       representation = representation,
-      family = family
+      family = family,
+      noise_axis = noise_axis,
+      snr = snr %||% NA_real_,
+      noise_sd = effective_noise_sd,
+      requested_noise_sd = noise_sd,
+      effective_snr = effective_snr
     )
     class(output) <- "fda_simulation_data"
     output
@@ -819,6 +1166,12 @@ print.fda_simulation_data <- function(x, ...) {
   cat("  confounding strength:", x$confounding_strength, "\n")
   cat("  active region scale:", x$active_region_scale, "\n")
   cat("  local correlation:", x$local_correlation, "\n")
+  cat("  noise axis:", x$noise_axis %||% NA_character_, "\n")
+  cat("  noise sd:", x$noise_sd %||% NA_real_, "\n")
+  target_snr <- x$snr %||% NA_real_
+  if (length(target_snr) == 1L && !is.na(target_snr)) {
+    cat("  target snr:", target_snr, "\n")
+  }
   cat("  active predictors:", paste(x$truth$active_predictors, collapse = ", "), "\n")
   invisible(x)
 }
@@ -853,7 +1206,10 @@ evaluate_selection.fda_stability_selection <- function(x,
   } else if (identical(level, "group")) {
     selected(x, level = "group", cutoff = cutoff, ...)$group
   } else {
-    selected(x, level = "basis", cutoff = cutoff, ...)$predictor
+    selection_targets_for_map(
+      map = selection_map(x, level = "basis", cutoff = cutoff, ...),
+      level = "basis"
+    )
   }
 
   metric_row(predicted = predicted, active = targets$active, universe = targets$universe, level = level)
@@ -968,6 +1324,11 @@ benchmark_selection_methods <- function(data,
     out$scenario <- data$scenario
     out$representation <- data$representation
     out$family <- data$family
+    out$noise_axis <- data$noise_axis %||% NA_character_
+    out$snr <- data$snr %||% NA_real_
+    out$noise_sd <- data$requested_noise_sd %||% data$noise_sd %||% NA_real_
+    out$effective_noise_sd <- data$noise_sd %||% NA_real_
+    out$effective_snr <- data$effective_snr %||% NA_real_
     out
   }))
 
@@ -1170,6 +1531,16 @@ run_simulation_study <- function(n_rep = 10L,
 #' @param seed Optional seed used to derive deterministic per-replication and
 #'   per-setting seeds.
 #' @param keep_results Should the individual benchmark objects be returned?
+#' @param progress Optional callback function used for long-running studies.
+#'   When supplied, it is called with named arguments including `event`,
+#'   `replicate`, `completed_runs`, `total_runs`, and, at replicate completion,
+#'   the completed replicate `metrics`. No files are written by default.
+#'
+#' The returned raw metrics include runtime diagnostics for each setting:
+#' elapsed, user, and system time; warning and failure counts; runtime status;
+#' error messages for failed settings; and fitted benchmark object size in MB
+#' when available. Failed benchmark settings are retained as rows with missing
+#' recovery metrics and `runtime_status = "failed"`.
 #'
 #' @returns An object inheriting from `fda_selectboost_sensitivity_study` and
 #'   `fda_simulation_study`.
@@ -1208,7 +1579,7 @@ run_simulation_study <- function(n_rep = 10L,
 #' @export
 run_selectboost_sensitivity_study <- function(n_rep = 10L,
                                               simulate_grid = expand.grid(
-                                                scenario = c("localized_dense", "confounded_blocks"),
+                                                scenario = c("localized_dense", "confounded_blocks", "smooth_sparse", "null_signal"),
                                                 confounding_strength = c(0.4, 0.9),
                                                 active_region_scale = c(1, 0.7),
                                                 local_correlation = c(0, 2),
@@ -1222,10 +1593,14 @@ run_selectboost_sensitivity_study <- function(n_rep = 10L,
                                               simulate_args = list(),
                                               benchmark_args = list(),
                                               seed = NULL,
-                                              keep_results = FALSE) {
+                                              keep_results = FALSE,
+                                              progress = NULL) {
   n_rep <- as.integer(n_rep)
   if (n_rep < 1L) {
     stop("`n_rep` must be a positive integer.", call. = FALSE)
+  }
+  if (!is.null(progress) && !is.function(progress)) {
+    stop("`progress` must be NULL or a callback function.", call. = FALSE)
   }
   if (!is.data.frame(simulate_grid) || nrow(simulate_grid) == 0L) {
     stop("`simulate_grid` must be a non-empty data frame.", call. = FALSE)
@@ -1243,9 +1618,33 @@ run_selectboost_sensitivity_study <- function(n_rep = 10L,
   benchmark_results <- if (isTRUE(keep_results)) vector("list", total_runs) else NULL
   metric_rows <- vector("list", total_runs)
   counter <- 1L
+  emit_progress <- function(event, ...) {
+    if (is.function(progress)) {
+      progress(event = event, ...)
+    }
+    invisible(NULL)
+  }
+
+  emit_progress(
+    "study_start",
+    n_rep = n_rep,
+    n_simulate_settings = nrow(simulate_grid),
+    n_selectboost_settings = nrow(selectboost_grid),
+    completed_runs = 0L,
+    total_runs = total_runs
+  )
 
   for (replicate in seq_len(n_rep)) {
     replicate_seed <- next_seed(seed, replicate)
+    replicate_rows <- vector("list", nrow(simulate_grid) * nrow(selectboost_grid))
+    replicate_counter <- 1L
+    emit_progress(
+      "replicate_start",
+      replicate = replicate,
+      replicate_seed = replicate_seed,
+      completed_runs = counter - 1L,
+      total_runs = total_runs
+    )
 
     for (i in seq_len(nrow(simulate_grid))) {
       simulate_args_current <- utils::modifyList(
@@ -1253,11 +1652,94 @@ run_selectboost_sensitivity_study <- function(n_rep = 10L,
         grid_row_as_list(simulate_grid, i, na_to_null = TRUE)
       )
       simulate_args_current$seed <- next_seed(replicate_seed, i)
-      sim <- do.call(simulate_fda_scenario, simulate_args_current)
+      simulation_capture <- capture_runtime_result(
+        do.call(simulate_fda_scenario, simulate_args_current)
+      )
+      simulation_timing <- simulation_capture$timing
+      sim <- simulation_capture$value
       simulate_labels <- grid_row_as_list(simulate_grid, i, na_to_null = FALSE)
+      emit_progress(
+        "simulation_complete",
+        replicate = replicate,
+        simulate_index = i,
+        simulation_seed = simulate_args_current$seed,
+        simulation_elapsed = unname(simulation_timing[["elapsed"]]),
+        simulation_user = timing_value(simulation_timing, "user.self"),
+        simulation_system = timing_value(simulation_timing, "sys.self"),
+        n_warnings = length(simulation_capture$warnings),
+        n_failures = if (is.null(simulation_capture$error)) 0L else 1L,
+        runtime_status = if (is.null(simulation_capture$error)) "completed" else "failed",
+        error_message = if (is.null(simulation_capture$error)) NA_character_ else conditionMessage(simulation_capture$error),
+        simulate_labels = simulate_labels,
+        completed_runs = counter - 1L,
+        total_runs = total_runs
+      )
 
       for (j in seq_len(nrow(selectboost_grid))) {
         selectboost_labels <- grid_row_as_list(selectboost_grid, j, na_to_null = FALSE)
+        benchmark_seed <- next_seed(next_seed(simulate_args_current$seed, j), nrow(simulate_grid))
+
+        if (!is.null(simulation_capture$error)) {
+          metrics <- failed_benchmark_metrics(
+            methods = benchmark_args$methods,
+            levels = benchmark_args$levels %||% c("feature", "group"),
+            data = NULL,
+            simulate_labels = simulate_labels,
+            stage = "simulation",
+            error_message = conditionMessage(simulation_capture$error)
+          )
+          metrics$replicate <- replicate
+          metrics$simulation_seed <- simulate_args_current$seed
+          metrics$benchmark_seed <- benchmark_seed
+          metrics$simulation_user <- timing_value(simulation_timing, "user.self")
+          metrics$simulation_system <- timing_value(simulation_timing, "sys.self")
+          metrics$simulation_elapsed <- timing_value(simulation_timing, "elapsed")
+          metrics$benchmark_user <- NA_real_
+          metrics$benchmark_system <- NA_real_
+          metrics$benchmark_elapsed <- NA_real_
+          metrics$setting_user <- metrics$simulation_user
+          metrics$setting_system <- metrics$simulation_system
+          metrics$setting_elapsed <- metrics$simulation_elapsed
+          metrics$n_warnings <- length(simulation_capture$warnings)
+          metrics$warning_messages <- paste(simulation_capture$warnings, collapse = " | ")
+          metrics$result_size_mb <- NA_real_
+          metrics <- append_parameter_columns(metrics, simulate_labels)
+          metrics <- append_parameter_columns(metrics, selectboost_labels)
+          metric_rows[[counter]] <- metrics
+          replicate_rows[[replicate_counter]] <- metrics
+
+          emit_progress(
+            "setting_complete",
+            replicate = replicate,
+            simulate_index = i,
+            selectboost_index = j,
+            simulation_seed = simulate_args_current$seed,
+            benchmark_seed = benchmark_seed,
+            simulate_labels = simulate_labels,
+            selectboost_labels = selectboost_labels,
+            rows = nrow(metrics),
+            simulation_elapsed = timing_value(simulation_timing, "elapsed"),
+            simulation_user = timing_value(simulation_timing, "user.self"),
+            simulation_system = timing_value(simulation_timing, "sys.self"),
+            benchmark_elapsed = NA_real_,
+            benchmark_user = NA_real_,
+            benchmark_system = NA_real_,
+            setting_elapsed = timing_value(simulation_timing, "elapsed"),
+            setting_user = timing_value(simulation_timing, "user.self"),
+            setting_system = timing_value(simulation_timing, "sys.self"),
+            n_warnings = length(simulation_capture$warnings),
+            n_failures = 1L,
+            runtime_status = "failed",
+            error_message = conditionMessage(simulation_capture$error),
+            completed_runs = counter,
+            total_runs = total_runs
+          )
+
+          counter <- counter + 1L
+          replicate_counter <- replicate_counter + 1L
+          next
+        }
+
         selectboost_args_current <- utils::modifyList(
           benchmark_args$selectboost_args %||% list(),
           grid_row_as_list(selectboost_grid, j, na_to_null = TRUE)
@@ -1273,16 +1755,65 @@ run_selectboost_sensitivity_study <- function(n_rep = 10L,
 
         benchmark_args_current <- benchmark_args
         benchmark_args_current$selectboost_args <- selectboost_args_current
-        bench <- do.call(
-          benchmark_selection_methods,
-          c(list(data = sim), benchmark_args_current)
+        emit_progress(
+          "setting_start",
+          replicate = replicate,
+          simulate_index = i,
+          selectboost_index = j,
+          simulation_seed = simulate_args_current$seed,
+          benchmark_seed = benchmark_seed,
+          simulate_labels = simulate_labels,
+          selectboost_labels = selectboost_labels,
+          completed_runs = counter - 1L,
+          total_runs = total_runs
         )
+        benchmark_capture <- capture_runtime_result(
+          with_optional_seed(
+            benchmark_seed,
+            do.call(
+              benchmark_selection_methods,
+              c(list(data = sim), benchmark_args_current)
+            )
+          )
+        )
+        benchmark_timing <- benchmark_capture$timing
+        bench <- benchmark_capture$value
 
-        metrics <- bench$metrics
+        metrics <- if (is.null(benchmark_capture$error)) {
+          bench$metrics
+        } else {
+          failed_benchmark_metrics(
+            methods = benchmark_args$methods,
+            levels = benchmark_args$levels %||% c("feature", "group"),
+            data = sim,
+            stage = "benchmark",
+            error_message = conditionMessage(benchmark_capture$error)
+          )
+        }
         metrics$replicate <- replicate
+        metrics$simulation_seed <- simulate_args_current$seed
+        metrics$benchmark_seed <- benchmark_seed
+        metrics$simulation_user <- timing_value(simulation_timing, "user.self")
+        metrics$simulation_system <- timing_value(simulation_timing, "sys.self")
+        metrics$simulation_elapsed <- timing_value(simulation_timing, "elapsed")
+        metrics$benchmark_user <- timing_value(benchmark_timing, "user.self")
+        metrics$benchmark_system <- timing_value(benchmark_timing, "sys.self")
+        metrics$benchmark_elapsed <- timing_value(benchmark_timing, "elapsed")
+        metrics$setting_user <- metrics$simulation_user + metrics$benchmark_user
+        metrics$setting_system <- metrics$simulation_system + metrics$benchmark_system
+        metrics$setting_elapsed <- metrics$simulation_elapsed + metrics$benchmark_elapsed
+        runtime_warnings <- unique(c(simulation_capture$warnings, benchmark_capture$warnings))
+        metrics$n_warnings <- length(runtime_warnings)
+        metrics$warning_messages <- paste(runtime_warnings, collapse = " | ")
+        metrics$n_failures <- if (is.null(benchmark_capture$error)) 0L else 1L
+        metrics$runtime_status <- if (is.null(benchmark_capture$error)) "completed" else "failed"
+        metrics$failure_stage <- if (is.null(benchmark_capture$error)) NA_character_ else "benchmark"
+        metrics$error_message <- if (is.null(benchmark_capture$error)) NA_character_ else conditionMessage(benchmark_capture$error)
+        metrics$result_size_mb <- if (is.null(benchmark_capture$error)) object_size_mb(bench) else NA_real_
         metrics <- append_parameter_columns(metrics, simulate_labels)
         metrics <- append_parameter_columns(metrics, selectboost_labels)
         metric_rows[[counter]] <- metrics
+        replicate_rows[[replicate_counter]] <- metrics
 
         if (isTRUE(keep_results)) {
           benchmark_results[[counter]] <- list(
@@ -1293,12 +1824,55 @@ run_selectboost_sensitivity_study <- function(n_rep = 10L,
           )
         }
 
+        emit_progress(
+          "setting_complete",
+          replicate = replicate,
+          simulate_index = i,
+          selectboost_index = j,
+          simulation_seed = simulate_args_current$seed,
+          benchmark_seed = benchmark_seed,
+          simulate_labels = simulate_labels,
+          selectboost_labels = selectboost_labels,
+          rows = nrow(metrics),
+          simulation_elapsed = timing_value(simulation_timing, "elapsed"),
+          simulation_user = timing_value(simulation_timing, "user.self"),
+          simulation_system = timing_value(simulation_timing, "sys.self"),
+          benchmark_elapsed = timing_value(benchmark_timing, "elapsed"),
+          benchmark_user = timing_value(benchmark_timing, "user.self"),
+          benchmark_system = timing_value(benchmark_timing, "sys.self"),
+          setting_elapsed = timing_value(simulation_timing, "elapsed") + timing_value(benchmark_timing, "elapsed"),
+          setting_user = timing_value(simulation_timing, "user.self") + timing_value(benchmark_timing, "user.self"),
+          setting_system = timing_value(simulation_timing, "sys.self") + timing_value(benchmark_timing, "sys.self"),
+          n_warnings = length(runtime_warnings),
+          n_failures = if (is.null(benchmark_capture$error)) 0L else 1L,
+          runtime_status = if (is.null(benchmark_capture$error)) "completed" else "failed",
+          error_message = if (is.null(benchmark_capture$error)) NA_character_ else conditionMessage(benchmark_capture$error),
+          result_size_mb = if (is.null(benchmark_capture$error)) object_size_mb(bench) else NA_real_,
+          completed_runs = counter,
+          total_runs = total_runs
+        )
+
         counter <- counter + 1L
+        replicate_counter <- replicate_counter + 1L
       }
     }
+    emit_progress(
+      "replicate_complete",
+      replicate = replicate,
+      replicate_seed = replicate_seed,
+      metrics = rbind_fill_data_frames(replicate_rows),
+      completed_runs = counter - 1L,
+      total_runs = total_runs
+    )
   }
 
   metrics <- rbind_fill_data_frames(metric_rows)
+  emit_progress(
+    "study_complete",
+    metrics = metrics,
+    completed_runs = total_runs,
+    total_runs = total_runs
+  )
   structure(
     list(
       metrics = metrics,

@@ -5,6 +5,7 @@ flattened functional coefficients. The package exposes these structures
 as ordinary matrices and diagnostic tables.
 
 ``` r
+
 library(SelectBoost.FDA)
 
 sim <- simulate_fda_scenario(
@@ -33,6 +34,7 @@ The heatmap extractor returns long-form data and feature metadata. It
 does not require any plotting backend.
 
 ``` r
+
 heatmap_data <- as_association_heatmap_data(
   sim$design,
   method = "hybrid",
@@ -61,6 +63,7 @@ The same diagnostics can be computed for a user-supplied association
 matrix:
 
 ``` r
+
 assoc <- functional_association(sim$design, method = "neighborhood", bandwidth = 2)
 summarise_association_structure(assoc, x = sim$design, bandwidth = 2)
 #>   method mean_association median_association  sparsity within_block_mass

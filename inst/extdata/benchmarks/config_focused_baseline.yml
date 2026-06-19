@@ -1,0 +1,281 @@
+baseline_name: baseline_focused_benchmark_2026
+package_version: 0.6.1
+git_commit: null
+seed: 20260616
+n_replicates: 50
+run_profile: final
+quick: false
+rng_backend: base_r_deterministic_vmf_shim
+interface_args:
+  scenario_grid:
+    - localized_dense
+    - confounded_blocks
+    - smooth_sparse
+    - basis_block_signal
+    - fpca_low_rank_signal
+    - null_signal
+    - mislocalized_signal
+  q_grid:
+    - 0.5
+    - 0.632
+    - 0.8
+  c0_grid:
+    - 0.9
+    - 0.7
+    - 0.5
+    - 0.3
+  association_grid:
+    - correlation
+    - neighborhood
+    - hybrid
+    - interval
+  bandwidth_grid:
+    - null
+    - 4
+    - 8
+  assessment_summary: true
+  save_surfaces: true
+  save_association_diagnostics: true
+  bootstrap_reps: 2000
+run_profiles:
+  - profile: quick
+    quick: true
+    n_replicates: 1
+    purpose: smoke_test
+  - profile: medium
+    quick: false
+    n_replicates: 30
+    purpose: stable_development_benchmark
+  - profile: final
+    quick: false
+    n_replicates: 50
+    purpose: final_report_benchmark
+requested_methods:
+  - selectboost_fda
+  - plain_selectboost
+benchmark_methods:
+  - selectboost
+  - plain_selectboost
+simulate_args:
+  n: 50
+  grid_length: 30
+  representation_grid:
+    - grid
+    - bspline
+    - fpca
+  n_grid:
+    - 50
+    - 100
+    - 200
+  grid_length_grid:
+    - 30
+    - 75
+    - 150
+  snr_grid:
+    - 0.5
+    - 1
+    - 2
+    - 4
+  noise_sd_grid:
+    - 0.5
+    - 1
+    - 2
+  family: gaussian
+simulate_grid:
+  - scenario: localized_dense
+    confounding_strength: 0.6
+    active_region_scale: 0.8
+    local_correlation: 0
+  - scenario: confounded_blocks
+    confounding_strength: 0.6
+    active_region_scale: 0.8
+    local_correlation: 0
+  - scenario: localized_dense
+    confounding_strength: 1.0
+    active_region_scale: 0.8
+    local_correlation: 0
+  - scenario: confounded_blocks
+    confounding_strength: 1.0
+    active_region_scale: 0.8
+    local_correlation: 0
+  - scenario: localized_dense
+    confounding_strength: 0.6
+    active_region_scale: 0.5
+    local_correlation: 0
+  - scenario: confounded_blocks
+    confounding_strength: 0.6
+    active_region_scale: 0.5
+    local_correlation: 0
+  - scenario: localized_dense
+    confounding_strength: 1.0
+    active_region_scale: 0.5
+    local_correlation: 0
+  - scenario: confounded_blocks
+    confounding_strength: 1.0
+    active_region_scale: 0.5
+    local_correlation: 0
+  - scenario: localized_dense
+    confounding_strength: 0.6
+    active_region_scale: 0.8
+    local_correlation: 2
+  - scenario: confounded_blocks
+    confounding_strength: 0.6
+    active_region_scale: 0.8
+    local_correlation: 2
+  - scenario: localized_dense
+    confounding_strength: 1.0
+    active_region_scale: 0.8
+    local_correlation: 2
+  - scenario: confounded_blocks
+    confounding_strength: 1.0
+    active_region_scale: 0.8
+    local_correlation: 2
+  - scenario: localized_dense
+    confounding_strength: 0.6
+    active_region_scale: 0.5
+    local_correlation: 2
+  - scenario: confounded_blocks
+    confounding_strength: 0.6
+    active_region_scale: 0.5
+    local_correlation: 2
+  - scenario: localized_dense
+    confounding_strength: 1.0
+    active_region_scale: 0.5
+    local_correlation: 2
+  - scenario: confounded_blocks
+    confounding_strength: 1.0
+    active_region_scale: 0.5
+    local_correlation: 2
+  - scenario: smooth_sparse
+    confounding_strength: 0.4
+    active_region_scale: 0.6
+    local_correlation: 2
+  - scenario: basis_block_signal
+    confounding_strength: 0.3
+    active_region_scale: 1.0
+    local_correlation: 1.5
+  - scenario: fpca_low_rank_signal
+    confounding_strength: 0.2
+    active_region_scale: 1.0
+    local_correlation: 1
+  - scenario: null_signal
+    confounding_strength: 0.0
+    active_region_scale: 1.0
+    local_correlation: 2
+  - scenario: mislocalized_signal
+    confounding_strength: 0.6
+    active_region_scale: 0.5
+    local_correlation: 2
+selectboost_grid:
+  - association_method: correlation
+    bandwidth: null
+  - association_method: neighborhood
+    bandwidth: 4
+  - association_method: hybrid
+    bandwidth: 4
+  - association_method: interval
+    bandwidth: 4
+  - association_method: interval
+    bandwidth: 8
+selectboost_args:
+  selector: msgps
+  B: 4
+  steps.seq:
+    - 0.9
+    - 0.7
+    - 0.5
+    - 0.3
+  c0lim: false
+plain_selectboost_args:
+  selector: msgps
+  B: 4
+  steps.seq:
+    - 0.9
+    - 0.7
+    - 0.5
+    - 0.3
+  c0lim: false
+stability_args:
+  selector: lasso
+  B: 8
+  cutoff: 0.5
+paired_gain_args:
+  bootstrap_replicates: 2000
+  bootstrap_confidence: 0.95
+  bootstrap_method: deterministic_percentile
+association_diagnostic_args:
+  within_blocks: true
+  c0_grid:
+    - 0.9
+    - 0.7
+    - 0.5
+    - 0.3
+method_comparison_args:
+  n_replicates: 3
+  selectboost_B: 2
+  stability_B: 4
+  optional_backends:
+    glmnet: selectboost_fda_lasso,stability_lasso
+    grpreg: selectboost_fda_group_lasso,stability_group_lasso
+    SGL: selectboost_fda_sparse_group_lasso,stability_sparse_group_lasso
+assessment_surface_args:
+  q_grid:
+    - 0.5
+    - 0.632
+    - 0.8
+  c0_grid:
+    - 0.9
+    - 0.7
+    - 0.5
+    - 0.3
+  B: 3
+  selectboost_B: 1
+  selector: msgps
+  representative_scenarios:
+    - localized_dense
+    - confounded_blocks
+    - smooth_sparse
+    - basis_block_signal
+    - fpca_low_rank_signal
+    - null_signal
+    - mislocalized_signal
+output_files:
+  - benchmark_config_baseline.yml
+  - progress.tsv
+  - benchmark_raw_metrics_checkpoint.csv
+  - checkpoints/benchmark_raw_metrics_repNNN.csv
+  - benchmark_raw_metrics.csv
+  - benchmark_summary_by_setting.csv
+  - benchmark_summary_n50.csv
+  - benchmark_summary_n50_or_n100.csv
+  - benchmark_best_settings.csv
+  - paired_gain_summary.csv
+  - paired_gain_bootstrap_ci.csv
+  - assessment_top_positive_settings.csv
+  - assessment_negative_gain_settings.csv
+  - assessment_all_setting_summary.csv
+  - assessment_failure_modes.csv
+  - assessment_surface_summary.csv
+  - assessment_monotonicity_summary.csv
+  - assessment_precision_recall_paths.csv
+  - assessment_best_thresholds.csv
+  - association_diagnostics.csv
+  - association_group_size_summary.csv
+  - assessment_association_comparison_table.csv
+  - method_comparison_summary.csv
+  - method_comparison_runtime.csv
+  - assessment_method_comparison_table.csv
+  - runtime_by_setting.csv
+  - runtime_by_method.csv
+  - benchmark_precision_recall_paths.csv
+  - benchmark_monotonicity_summary.csv
+  - benchmark_scenario_summary.csv
+  - benchmark_size_resolution_summary.csv
+  - benchmark_noise_summary.csv
+  - benchmark_noise_f1_gain_panel.csv
+  - benchmark_representation_summary.csv
+  - benchmark_runtime_summary.csv
+  - benchmark_runtime_by_size_resolution.csv
+  - benchmark_feature_advantage.csv
+  - assessment_representation_table.csv
+  - session_info.txt

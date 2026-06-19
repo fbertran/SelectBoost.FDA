@@ -8,6 +8,7 @@ starts from raw curves and optional scalar covariates.
 ## Construct a spectral design object
 
 ``` r
+
 library(SelectBoost.FDA)
 data("spectra_example", package = "SelectBoost.FDA")
 
@@ -75,6 +76,7 @@ head(selection_map(design))
 The fitting chunk below is evaluated only when `glmnet` is installed.
 
 ``` r
+
 sb_fit <- fit_selectboost(
   design,
   selector = "glmnet",

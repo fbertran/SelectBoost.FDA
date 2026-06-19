@@ -6,9 +6,146 @@ predictors: localized dense signals, confounded blocks, high local
 correlation, and narrow active regions.
 
 The driver script writes only to an explicit `--output-dir` or, when
-omitted, to [`tempdir()`](https://rdrr.io/r/base/tempfile.html).
+omitted, to [`tempdir()`](https://rdrr.io/r/base/tempfile.html). The
+current named baseline is `baseline_focused_benchmark_2026`. Its grid
+definition is stored in
+`inst/extdata/benchmarks/config_focused_baseline.yml`, and each run
+writes a copy named `benchmark_config_baseline.yml` beside the CSV
+outputs.
+
+Three run profiles are available:
+
+- `--quick --n-replicates=1` keeps the smoke-test benchmark small.
+- `--medium` runs the n = 30 benchmark and writes
+  `benchmark_summary_n30.csv`.
+- `--final` runs the n = 50 benchmark and also writes
+  `benchmark_summary_n50_or_n100.csv`.
+
+All raw metrics include the replicate index, simulation seed, benchmark
+seed, and method metadata. Summary tables include means, standard
+deviations, standard errors, and `paired_gain_summary.csv` reports
+paired `F1` gains for FDA-aware SelectBoost over plain SelectBoost. The
+paired comparison is computed as a replicate-level difference,
+`F1_selectboost_fda - F1_plain_selectboost`, for each matched setting.
+The driver also writes `paired_gain_bootstrap_ci.csv` with deterministic
+percentile bootstrap confidence intervals, win rates, valid paired
+replicate counts, and method-failure flags. Long runs also update
+`progress.tsv` after study, replicate, simulation, and setting
+milestones; append `benchmark_raw_metrics_checkpoint.csv` after each
+completed replicate; and write per-replicate raw metrics to
+`checkpoints/benchmark_raw_metrics_repNNN.csv`. For reproducibility, the
+driver uses a recorded deterministic SelectBoost perturbation backend by
+default. Pass `--upstream-rfast-rvmf` only when comparing against the
+upstream `Rfast` perturbation generator directly.
+
+For assessment interpretation, use `benchmark_best_settings.csv` only
+together with `assessment_all_setting_summary.csv`. The driver also
+writes `assessment_top_positive_settings.csv`,
+`assessment_negative_gain_settings.csv`, and
+`assessment_failure_modes.csv`, so the report can state both where
+FDA-aware grouping helps and where it loses against plain SelectBoost. A
+short defensible interpretation is: FDA-aware grouping is most useful in
+settings with local correlation and localized signal, but its advantage
+is not uniform; negative gain rows and failure-mode labels should be
+shown alongside top positive gains.
+
+The driver also produces a compact two-parameter perturbation analysis
+for representative scenario types. It evaluates selection surfaces
+`(q, c0) -> Pi_hat_j(q, c0)` on a smoke-test grid in `--quick` runs and
+on the baseline grid `q = 0.5, 0.632, 0.8` crossed with
+`c0 = 0.9, 0.7, 0.5, 0.3` in larger runs. The outputs are
+`assessment_surface_summary.csv`, `assessment_monotonicity_summary.csv`,
+`assessment_precision_recall_paths.csv`, and
+`assessment_best_thresholds.csv`. Together they support heatmap-like
+summaries, monotonicity checks across the two axes, precision-recall
+paths, the best threshold by `F1`, and fixed-threshold summaries at
+`0.5`, `0.75`, and `0.9`.
+
+Association geometry is measured separately from selection performance.
+The driver writes `association_diagnostics.csv` with sparsity, mean and
+median association, within-block and cross-block mass, local and
+nonlocal mass, and effective degree. It also writes
+`association_group_size_summary.csv` with the number of induced groups
+and group-size summaries at each `c0`, plus
+`assessment_association_comparison_table.csv` for compact method
+comparisons. The diagnostic tables retain the same scenario,
+representation, size, noise, and association-setting keys used by the
+benchmark metrics.
+
+Method comparison is measured separately from the main FDA-versus-plain
+SelectBoost contrast. The driver writes `method_comparison_summary.csv`,
+`method_comparison_runtime.csv`, and
+`assessment_method_comparison_table.csv` for seven labeled methods:
+`plain_selectboost`, `selectboost_fda_lasso`,
+`selectboost_fda_group_lasso`, `selectboost_fda_sparse_group_lasso`,
+`stability_lasso`, `stability_group_lasso`, and
+`stability_sparse_group_lasso`. These labels keep perturbation type
+separate from base selector choice. Optional backends are guarded with
+package checks: `glmnet` for lasso, `grpreg` for group lasso, and `SGL`
+for sparse-group lasso. Missing packages produce skipped rows in the
+runtime and assessment tables rather than aborting the benchmark.
+
+Runtime reporting is available at two granularities.
+`runtime_by_setting.csv` keeps one row per main benchmark method and
+setting, including elapsed time, user time, system time, warning and
+failure counts, selected-feature summaries, and fitted-object memory
+size where available. `runtime_by_method.csv` summarizes the same
+diagnostics by method and runtime source, combining the main benchmark
+and method-comparison runs. Failed settings are represented as failed
+runtime rows, so they can be counted in assessment tables instead of
+being silently dropped.
+
+Size-resolution sensitivity is controlled with comma-separated grids:
+`--n-grid=50,100,200` and `--grid-length-grid=30,75,150`. These values
+are crossed with the scenario, representation, and SelectBoost setting
+grids. The driver writes `benchmark_size_resolution_summary.csv` for
+recovery metrics by `n` and `grid_length`, plus
+`benchmark_runtime_by_size_resolution.csv` for runtime summaries at the
+corresponding setting level.
+
+Noise and signal-strength sensitivity are controlled with
+`--snr-grid=0.5,1,2,4` and `--noise-sd-grid=0.5,1,2`. The fixed-SNR grid
+is the recommended axis for the main method comparison because it keeps
+relative difficulty comparable across scenarios, representations, and
+signal structures. The fixed-noise grid is useful as a stress test for
+absolute observation noise. Both axes are recorded in the raw metrics
+and summaries through `noise_axis`, `snr`, and `noise_sd`. The driver
+writes `benchmark_noise_summary.csv` for performance by noise condition
+and `benchmark_noise_f1_gain_panel.csv` for a plot-ready `F1` gain
+panel.
+
+## Campaign interface
+
+The driver accepts comma-separated grids for assessment and extended
+benchmark campaigns:
+
+- `--representation-grid=grid,bspline,fpca` chooses the functional
+  encoding.
+- `--scenario-grid=localized_dense,confounded_blocks,smooth_sparse`
+  chooses the simulation scenarios.
+- `--n-grid=50,100,200` and `--grid-length-grid=30,75,150` choose sample
+  size and functional resolution.
+- `--snr-grid=0.5,1,2,4` and `--noise-sd-grid=0.5,1,2` choose fixed-SNR
+  and fixed-noise sensitivity axes.
+- `--q-grid=0.5,0.632,0.8` and `--c0-grid=0.9,0.7,0.5,0.3` choose the
+  subsampling and SelectBoost perturbation surface.
+- `--association-grid=correlation,neighborhood,hybrid,interval` and
+  `--bandwidth-grid=4,8` choose the FDA-aware grouping geometry.
+- `--bootstrap-reps=2000` controls the deterministic bootstrap used for
+  paired `F1` gain confidence intervals.
+
+Assessment-oriented summaries, perturbation surfaces, and association
+diagnostics are written by default for compatibility with the saved
+baseline outputs. Use `--assessment-summary`, `--save-surfaces`, and
+`--save-association-diagnostics` to make that choice explicit in command
+logs. For lighter local runs, use `--no-save-surfaces` or
+`--no-save-association-diagnostics` to skip the heavier optional
+diagnostics. The broader `--no-assessment-summary` shortcut disables
+both of those optional diagnostic families while keeping the core
+benchmark and paired-gain tables.
 
 ``` r
+
 system2(
   file.path(R.home("bin"), "Rscript"),
   c(
@@ -16,7 +153,49 @@ system2(
     "--quick",
     "--n-replicates=1",
     "--seed=20260616",
+    "--n-grid=50,100",
+    "--grid-length-grid=30,75",
+    "--snr-grid=0.5,1,2,4",
     paste0("--output-dir=", file.path(tempdir(), "selectboost_fda_focused_benchmark"))
+  )
+)
+```
+
+``` r
+
+system2(
+  file.path(R.home("bin"), "Rscript"),
+  c(
+    "tools/run_focused_benchmark.R",
+    "--medium",
+    "--seed=20260616",
+    "--representation-grid=grid,bspline",
+    "--scenario-grid=localized_dense,confounded_blocks,smooth_sparse",
+    "--n-grid=50,100",
+    "--grid-length-grid=30,75",
+    "--snr-grid=0.5,1,2,4",
+    "--q-grid=0.5,0.632,0.8",
+    "--c0-grid=0.9,0.7,0.5,0.3",
+    "--association-grid=correlation,neighborhood,hybrid,interval",
+    "--bandwidth-grid=4,8",
+    "--assessment-summary",
+    "--save-surfaces",
+    "--save-association-diagnostics",
+    "--bootstrap-reps=2000",
+    paste0("--output-dir=", file.path(tempdir(), "selectboost_fda_focused_campaign"))
+  )
+)
+```
+
+``` r
+
+system2(
+  file.path(R.home("bin"), "Rscript"),
+  c(
+    "tools/run_focused_benchmark.R",
+    "--medium",
+    "--seed=20260616",
+    paste0("--output-dir=", file.path(tempdir(), "selectboost_fda_focused_n30"))
   )
 )
 ```
@@ -24,6 +203,7 @@ system2(
 The package also exposes table extractors for report material.
 
 ``` r
+
 library(SelectBoost.FDA)
 
 report_summary_table()
@@ -91,6 +271,7 @@ Saved sensitivity-study artifacts shipped with the package can be turned
 into a compact benchmark table:
 
 ``` r
+
 report_benchmark_table(top_n = 5)
 #>            Scenario  Association Bandwidth F1 FDA-aware  F1 plain      Delta
 #> 1 confounded_blocks     interval         8    0.5362319 0.4087266 0.12750533
@@ -109,6 +290,7 @@ report_benchmark_table(top_n = 5)
 For new benchmark objects, use the renderer-neutral summary extractor:
 
 ``` r
+
 metrics <- data.frame(
   scenario = "localized_dense",
   representation = "grid",

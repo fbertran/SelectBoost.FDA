@@ -8,6 +8,7 @@ selector, and the reversible map back to the original curve domain.
 ## Build a functional design
 
 ``` r
+
 library(SelectBoost.FDA)
 data("spectra_example", package = "SelectBoost.FDA")
 
@@ -96,6 +97,7 @@ workflow the functional predictors stay on their original grid, while
 the scalar covariates are standardized.
 
 ``` r
+
 design$preprocessor
 #> FDA preprocessor
 #>   functional predictors: 2 
@@ -116,6 +118,7 @@ summary(design$preprocessor)
 The following chunk is evaluated only when `grpreg` is installed.
 
 ``` r
+
 fit <- fit_stability(
   design,
   selector = "grpreg",
@@ -192,6 +195,7 @@ plot(fit, type = "group")
 ![](discretized-curves_files/figure-html/unnamed-chunk-4-1.png)
 
 ``` r
+
 selected(fit, level = "group")
 #>  [1] predictor              group_id               group                 
 #>  [4] representation         basis_type             source_representation 
@@ -208,6 +212,7 @@ You can also move from predictor-level groups to non-overlapping
 intervals.
 
 ``` r
+
 interval_fit <- interval_stability_selection(
   design,
   width = 5,
@@ -238,6 +243,7 @@ plot(
 ![](discretized-curves_files/figure-html/unnamed-chunk-5-1.png)
 
 ``` r
+
 selected(interval_fit, level = "group")
 #>    predictor group_id          group representation basis_type
 #> 3     signal        3  signal[11:15]           grid           
