@@ -117,16 +117,22 @@ bootstrap confidence intervals, win rates, valid paired replicate
 counts, and method-failure flags. Long runs also update
 <code>progress.tsv</code> after study, replicate, simulation, and
 setting milestones; append
-<code>benchmark_raw_metrics_checkpoint.csv</code> at the cadence set by <code>--checkpoint-every=N</code> and at each completed replicate; write setting-level checkpoint files to <code>checkpoints/benchmark_raw_metrics_settingNNNNNN.csv</code>; overwrite <code>checkpoints/benchmark_raw_metrics_latest.csv</code> with the latest checkpointed setting; and write per-replicate raw metrics to <code>checkpoints/benchmark_raw_metrics_repNNN.csv</code>. For
-reproducibility, the driver uses a recorded deterministic SelectBoost
-perturbation backend by default. Pass <code>--upstream-rfast-rvmf</code>
-only when comparing against the upstream <code>Rfast</code> perturbation
-generator directly.</p>
-<p>Each run writes <code>run_metadata.yml</code>, creates <code>RUNNING</code> while active,
-writes <code>COMPLETED</code> on successful completion, and removes <code>RUNNING</code>
-only after success. Use distinct <code>--output-dir</code> values for parallel runs.
-<code>--resume</code> preserves previous checkpoint files but does not yet skip
-completed settings.</p>
+<code>benchmark_raw_metrics_checkpoint.csv</code> at the cadence set by
+<code>--checkpoint-every=N</code> and at each completed replicate; write
+setting-level checkpoint files to
+<code>checkpoints/benchmark_raw_metrics_settingNNNNNN.csv</code>;
+overwrite <code>checkpoints/benchmark_raw_metrics_latest.csv</code> with
+the latest checkpointed setting; and write per-replicate raw metrics to
+<code>checkpoints/benchmark_raw_metrics_repNNN.csv</code>. Each run
+writes <code>run_metadata.yml</code>, creates <code>RUNNING</code> while
+active, writes <code>COMPLETED</code> on successful completion, and
+removes <code>RUNNING</code> only after success. Use distinct
+<code>--output-dir</code> values for parallel runs.
+<code>--resume</code> preserves previous checkpoint files but does not
+yet skip completed settings. For reproducibility, the driver uses a
+recorded deterministic SelectBoost perturbation backend by default. Pass
+<code>--upstream-rfast-rvmf</code> only when comparing against the
+upstream <code>Rfast</code> perturbation generator directly.</p>
 <p>For assessment interpretation, use
 <code>benchmark_best_settings.csv</code> only together with
 <code>assessment_all_setting_summary.csv</code>. The driver also writes
@@ -203,9 +209,10 @@ recommended axis for the main method comparison because it keeps
 relative difficulty comparable across scenarios, representations, and
 signal structures. The fixed-noise grid is useful as a stress test for
 absolute observation noise. Both axes are recorded in the raw metrics
-and summaries through <code>noise_axis</code>, <code>snr</code>, <code>noise_sd</code>,
-<code>effective_snr</code>, and <code>effective_variance_snr</code>. Here
-<code>snr</code> is a signal-to-noise standard-deviation ratio, and
+and summaries through <code>noise_axis</code>, <code>snr</code>,
+<code>noise_sd</code>, <code>effective_snr</code>, and
+<code>effective_variance_snr</code>. Here <code>snr</code> is a
+signal-to-noise standard-deviation ratio;
 <code>effective_variance_snr</code> is <code>effective_snr^2</code> for
 variance-ratio reporting. The driver writes
 <code>benchmark_noise_summary.csv</code> for performance by noise
@@ -243,6 +250,18 @@ geometry.</li>
 <code>--bootstrap-reps=2000</code> controls the deterministic
 bootstrap used for paired <code>F1</code> gain confidence
 intervals.</li>
+<li>
+<code>--checkpoint-every=100</code> controls setting-level
+raw-metric checkpoint frequency; use <code>--checkpoint-every=1</code>
+when every completed setting should be materialized immediately.</li>
+<li>
+<code>--resume</code> preserves existing checkpoint files in an
+output directory but does not yet skip previously completed
+settings.</li>
+<li>
+<code>--surface-use-main-settings</code> makes surface diagnostics
+inherit a representative main-grid <code>n</code>,
+<code>grid_length</code>, and noise/SNR setting.</li>
 </ul>
 <p>Assessment-oriented summaries, perturbation surfaces, and association
 diagnostics are written by default for compatibility with the saved
@@ -266,6 +285,7 @@ keeping the core benchmark and paired-gain tables.</p>
 <span>    <span class="st">"--n-grid=50,100"</span>,</span>
 <span>    <span class="st">"--grid-length-grid=30,75"</span>,</span>
 <span>    <span class="st">"--snr-grid=0.5,1,2,4"</span>,</span>
+<span>    <span class="st">"--checkpoint-every=1"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"--output-dir="</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"selectboost_fda_focused_benchmark"</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -285,8 +305,10 @@ keeping the core benchmark and paired-gain tables.</p>
 <span>    <span class="st">"--c0-grid=0.9,0.7,0.5,0.3"</span>,</span>
 <span>    <span class="st">"--association-grid=correlation,neighborhood,hybrid,interval"</span>,</span>
 <span>    <span class="st">"--bandwidth-grid=4,8"</span>,</span>
+<span>    <span class="st">"--checkpoint-every=100"</span>,</span>
 <span>    <span class="st">"--assessment-summary"</span>,</span>
 <span>    <span class="st">"--save-surfaces"</span>,</span>
+<span>    <span class="st">"--surface-use-main-settings"</span>,</span>
 <span>    <span class="st">"--save-association-diagnostics"</span>,</span>
 <span>    <span class="st">"--bootstrap-reps=2000"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"--output-dir="</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"selectboost_fda_focused_campaign"</span><span class="op">)</span><span class="op">)</span></span>
@@ -440,7 +462,19 @@ extractor:</p>
 <span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                       0.2</span></span>
 <span><span class="co">#&gt;                                                         selection_rate_sd</span></span>
 <span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature                 0</span></span>
-<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                       0</span></span></code></pre></div>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                       0</span></span>
+<span><span class="co">#&gt;                                                         effective_snr_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature                 NA</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                       NA</span></span>
+<span><span class="co">#&gt;                                                         effective_snr_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature               NA</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                     NA</span></span>
+<span><span class="co">#&gt;                                                         effective_variance_snr_mean</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature                          NA</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                                NA</span></span>
+<span><span class="co">#&gt;                                                         effective_variance_snr_sd</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.plain_selectboost.feature                        NA</span></span>
+<span><span class="co">#&gt; localized_dense.grid.gaussian.selectboost.feature                              NA</span></span></code></pre></div>
 </div>
   </main>
 </div>

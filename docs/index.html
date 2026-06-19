@@ -217,7 +217,7 @@
 <span><span class="co">#&gt; 4    treatment  treatment    treatment  treatment c0 = 0.6</span></span>
 <span><span class="co">#&gt;   mean_selection max_selection selected_features</span></span>
 <span><span class="co">#&gt; 1      0.6666667          1.00                 2</span></span>
-<span><span class="co">#&gt; 2      0.4000000          1.00                 4</span></span>
+<span><span class="co">#&gt; 2      0.2000000          0.75                 2</span></span>
 <span><span class="co">#&gt; 3      0.2500000          0.25                 1</span></span>
 <span><span class="co">#&gt; 4      1.0000000          1.00                 1</span></span></code></pre></div>
 </div>
@@ -341,18 +341,18 @@
 <span><span class="co">#&gt; age.group.0.6.0.4.selectboost       age       age   age   group 0.6</span></span>
 <span><span class="co">#&gt; age.group.0.6.0.7.selectboost       age       age   age   group 0.6</span></span>
 <span><span class="co">#&gt;                                  c0 selection mean_selection</span></span>
-<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost 0.4         1              1</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost 0.4         0              0</span></span>
 <span><span class="co">#&gt; age.feature.0.6.0.7.selectboost 0.7         1              1</span></span>
 <span><span class="co">#&gt; age.feature.0.8.0.4.selectboost 0.4         0              0</span></span>
 <span><span class="co">#&gt; age.feature.0.8.0.7.selectboost 0.7         0              0</span></span>
-<span><span class="co">#&gt; age.group.0.6.0.4.selectboost   0.4         1              1</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost   0.4         0              0</span></span>
 <span><span class="co">#&gt; age.group.0.6.0.7.selectboost   0.7         1              1</span></span>
 <span><span class="co">#&gt;                                 max_selection selected</span></span>
-<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost             1     TRUE</span></span>
+<span><span class="co">#&gt; age.feature.0.6.0.4.selectboost             0    FALSE</span></span>
 <span><span class="co">#&gt; age.feature.0.6.0.7.selectboost             1     TRUE</span></span>
 <span><span class="co">#&gt; age.feature.0.8.0.4.selectboost             0    FALSE</span></span>
 <span><span class="co">#&gt; age.feature.0.8.0.7.selectboost             0    FALSE</span></span>
-<span><span class="co">#&gt; age.group.0.6.0.4.selectboost               1     TRUE</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost               0    FALSE</span></span>
 <span><span class="co">#&gt; age.group.0.6.0.7.selectboost               1     TRUE</span></span>
 <span><span class="co">#&gt;                                 representation basis_type</span></span>
 <span><span class="co">#&gt; age.feature.0.6.0.4.selectboost         scalar       &lt;NA&gt;</span></span>
@@ -450,7 +450,7 @@
 <span><span class="co">#&gt; age.feature.0.6.0.7.selectboost                NA        NA</span></span>
 <span><span class="co">#&gt; age.feature.0.8.0.4.selectboost                NA        NA</span></span>
 <span><span class="co">#&gt; age.feature.0.8.0.7.selectboost                NA        NA</span></span>
-<span><span class="co">#&gt; age.group.0.6.0.4.selectboost                   1        NA</span></span>
+<span><span class="co">#&gt; age.group.0.6.0.4.selectboost                   0        NA</span></span>
 <span><span class="co">#&gt; age.group.0.6.0.7.selectboost                   1        NA</span></span>
 <span><span class="co">#&gt;                                 association_method group_method</span></span>
 <span><span class="co">#&gt; age.feature.0.6.0.4.selectboost             hybrid    threshold</span></span>
@@ -477,11 +477,11 @@
 <span><span class="co">#&gt;                   level   q  c0 n_items n_selected mean_selection</span></span>
 <span><span class="co">#&gt; feature.0.6.0.4 feature 0.6 0.4      10          5      0.5000000</span></span>
 <span><span class="co">#&gt; feature.0.6.0.7 feature 0.6 0.7      10          4      0.4000000</span></span>
-<span><span class="co">#&gt; feature.0.8.0.4 feature 0.8 0.4      10          7      0.7000000</span></span>
+<span><span class="co">#&gt; feature.0.8.0.4 feature 0.8 0.4      10          4      0.4000000</span></span>
 <span><span class="co">#&gt; feature.0.8.0.7 feature 0.8 0.7      10          4      0.4000000</span></span>
-<span><span class="co">#&gt; group.0.6.0.4     group 0.6 0.4       4          4      0.7166667</span></span>
+<span><span class="co">#&gt; group.0.6.0.4     group 0.6 0.4       4          3      0.5166667</span></span>
 <span><span class="co">#&gt; group.0.6.0.7     group 0.6 0.7       4          3      0.6666667</span></span>
-<span><span class="co">#&gt; group.0.8.0.4     group 0.8 0.4       4          3      0.6166667</span></span>
+<span><span class="co">#&gt; group.0.8.0.4     group 0.8 0.4       4          3      0.4666667</span></span>
 <span><span class="co">#&gt; group.0.8.0.7     group 0.8 0.7       4          3      0.4666667</span></span>
 <span><span class="co">#&gt;                 max_selection</span></span>
 <span><span class="co">#&gt; feature.0.6.0.4             1</span></span>
@@ -524,29 +524,29 @@
 <span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost        0.4</span></span>
 <span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost        0.7</span></span>
 <span><span class="co">#&gt;                                                                                    value</span></span>
-<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     1</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     0</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     1</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     0</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     0</span></span>
-<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     0</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     1</span></span>
 <span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     0</span></span>
 <span><span class="co">#&gt;                                                                                    delta</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                    NA</span></span>
-<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     0</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     1</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                    NA</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     0</span></span>
 <span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost    NA</span></span>
-<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     0</span></span>
+<span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost    -1</span></span>
 <span><span class="co">#&gt;                                                                                    violation</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     FALSE</span></span>
-<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     FALSE</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                      TRUE</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     FALSE</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     FALSE</span></span>
 <span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     FALSE</span></span>
 <span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     FALSE</span></span>
 <span><span class="co">#&gt;                                                                                    violation_size</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                              0</span></span>
-<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                              0</span></span>
+<span><span class="co">#&gt; age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                              1</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                              0</span></span>
 <span><span class="co">#&gt; age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                              0</span></span>
 <span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost              0</span></span>
@@ -581,9 +581,9 @@
 <span><span class="co">#&gt; nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost 0.7</span></span>
 <span><span class="fu"><a href="reference/summarise_monotonicity.html">summarise_monotonicity</a></span><span class="op">(</span><span class="va">grid_fit</span>, axis <span class="op">=</span> <span class="st">"c0"</span>, level <span class="op">=</span> <span class="st">"feature"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;              level axis n_paths n_monotone fraction_monotone</span></span>
-<span><span class="co">#&gt; feature.c0 feature   c0      20         20                 1</span></span>
+<span><span class="co">#&gt; feature.c0 feature   c0      20         18               0.9</span></span>
 <span><span class="co">#&gt;            mean_total_violation max_violation</span></span>
-<span><span class="co">#&gt; feature.c0                    0             0</span></span>
+<span><span class="co">#&gt; feature.c0                  0.1             1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="reference/as_association_heatmap_data.html">as_association_heatmap_data</a></span><span class="op">(</span><span class="va">design</span>, method <span class="op">=</span> <span class="st">"hybrid"</span>, bandwidth <span class="op">=</span> <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     feature_i  feature_j predictor_i predictor_j position_i</span></span>
 <span><span class="co">#&gt; 1  signal_PC1 signal_PC1      signal      signal          1</span></span>
@@ -647,7 +647,12 @@
 <span><span class="co">#&gt; 1   noise_sd  NA      0.4                0.4      2.213897</span></span>
 <span><span class="co">#&gt; 2   noise_sd  NA      0.4                0.4      2.213897</span></span>
 <span><span class="co">#&gt; 3   noise_sd  NA      0.4                0.4      2.213897</span></span>
-<span><span class="co">#&gt; 4   noise_sd  NA      0.4                0.4      2.213897</span></span></code></pre></div>
+<span><span class="co">#&gt; 4   noise_sd  NA      0.4                0.4      2.213897</span></span>
+<span><span class="co">#&gt;   effective_variance_snr</span></span>
+<span><span class="co">#&gt; 1               4.901339</span></span>
+<span><span class="co">#&gt; 2               4.901339</span></span>
+<span><span class="co">#&gt; 3               4.901339</span></span>
+<span><span class="co">#&gt; 4               4.901339</span></span></code></pre></div>
 <p>The simulator exposes a scenario catalog for different FDA signal structures: <code>localized_dense</code>, <code>confounded_blocks</code>, <code>smooth_sparse</code>, <code>basis_block_signal</code>, <code>fpca_low_rank_signal</code>, <code>null_signal</code>, and <code>mislocalized_signal</code>. The null scenario has no active functional or scalar truth and is intended to summarize false-positive behavior through <code>fp</code>, <code>n_selected</code>, specificity, and selection rate. The mislocalized scenario uses fragmented active regions to document failure modes for locality-driven grouping rules.</p>
 <p>The package also ships a larger saved sensitivity study under <code>inst/extdata/benchmarks/</code>, generated by <code>tools/run_selectboost_sensitivity_study.R</code>. That script writes to an explicit <code>--output-dir=...</code> path when supplied, and otherwise defaults to a subdirectory of <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>, so it does not write into the package directory by default. The committed files under <code>inst/extdata/benchmarks/</code> are a saved copy of one benchmark run. The top-setting table keeps the FDA benchmark settings together with the mean <code>F1</code> score of both algorithms.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -700,15 +705,7 @@
 <span><span class="co">#&gt; 4 0.6666667</span></span>
 <span><span class="co">#&gt; 5 0.6666667</span></span></code></pre></div>
 <p>In the shipped benchmark, the strongest gains appear in the high-correlation, narrow-region settings. For example, in the <code>confounded_blocks</code> scenario with <code>active_region_scale = 0.5</code>, <code>local_correlation = 2</code>, and interval grouping at <code>bandwidth = 8</code>, the saved mean <code>F1</code> values are approximately <code>0.536</code> for FDA-aware <code>SelectBoost</code> versus <code>0.409</code> for plain <code>SelectBoost</code>.</p>
-<p>The focused benchmark driver is available at <code>tools/run_focused_benchmark.R</code>. It writes to <code>--output-dir=...</code> when provided and otherwise uses <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>. The current named baseline is <code>baseline_focused_benchmark_2026</code>; its grid is stored in <code>inst/extdata/benchmarks/config_focused_baseline.yml</code>, and each run writes <code>benchmark_config_baseline.yml</code> beside the benchmark CSV outputs. Use <code>--quick --n-replicates=1</code> for smoke tests, <code>--medium</code> for the n = 30 benchmark, and <code>--final</code> for the n = 50 benchmark. The driver writes <code>benchmark_summary_n30.csv</code>, <code>benchmark_summary_n50_or_n100.csv</code> for final runs, <code>paired_gain_summary.csv</code> with paired FDA-aware versus plain SelectBoost <code>F1</code> gains, and <code>paired_gain_bootstrap_ci.csv</code> with deterministic percentile bootstrap confidence intervals from the replicate-level paired differences. The paired-gain tables also report win rate, valid paired replicate count, and method-failure flags. Assessment-oriented summaries are written as <code>assessment_top_positive_settings.csv</code>, <code>assessment_negative_gain_settings.csv</code>, <code>assessment_all_setting_summary.csv</code>, and <code>assessment_failure_modes.csv</code>; the best-settings table should be interpreted only together with the all-setting summary so negative-gain settings remain visible. The same driver now also writes two-parameter perturbation-surface artifacts for representative scenario types: <code>assessment_surface_summary.csv</code> for <code>(q, c0)</code> selection surfaces, <code>assessment_monotonicity_summary.csv</code> for monotonicity across <code>q</code> and <code>c0</code>, <code>assessment_precision_recall_paths.csv</code> for thresholded precision-recall paths, and <code>assessment_best_thresholds.csv</code> for best-<code>F1</code> and fixed-threshold summaries at <code>0.5</code>, <code>0.75</code>, and <code>0.9</code>. Association-geometry diagnostics are written as <code>association_diagnostics.csv</code>, <code>association_group_size_summary.csv</code>, and <code>assessment_association_comparison_table.csv</code>; these report association sparsity, association mass, effective degree, induced group counts, and group-size summaries at each <code>c0</code>, with setting keys retained for joins to benchmark metrics. Method-comparison outputs are written as <code>method_comparison_summary.csv</code>, <code>method_comparison_runtime.csv</code>, and <code>assessment_method_comparison_table.csv</code>. These compare plain SelectBoost, FDA-aware SelectBoost, and stability selection while separating perturbation type from the base selector (<code>lasso</code>, <code>group_lasso</code>, or <code>sparse_group_lasso</code>). Optional backends from <code>glmnet</code>, <code>grpreg</code>, and <code>SGL</code> are skipped and labeled in the runtime table when unavailable, instead of failing the benchmark. Runtime and computational reporting is written as <code>runtime_by_setting.csv</code> and <code>runtime_by_method.csv</code>; these tables include elapsed, user, and system time, warning and failure counts, selected-feature summaries, and fitted-object memory size where available. Failed settings are kept as failed runtime rows rather than being silently dropped. The driver also writes <code>benchmark_scenario_summary.csv</code>, which aggregates mean, standard deviation, and standard error by scenario, method, and evaluation level. During long runs, <code>progress.tsv</code> is updated as settings complete, <code>benchmark_raw_metrics_checkpoint.csv</code> is appended at the setting cadence requested by <code>--checkpoint-every=N</code> and at replicate completion, and <code>checkpoints/benchmark_raw_metrics_settingNNNNNN.csv</code>, <code>checkpoints/benchmark_raw_metrics_latest.csv</code>, and <code>checkpoints/benchmark_raw_metrics_repNNN.csv</code> store setting-level, latest, and replicate-level checkpoint files. To check stability across sample size and functional resolution, pass for example <code>--n-grid=50,100,200 --grid-length-grid=30,75,150</code>; the driver then writes <code>benchmark_size_resolution_summary.csv</code> and <code>benchmark_runtime_by_size_resolution.csv</code>. To check robustness to signal strength and noise, use <code>--snr-grid=0.5,1,2,4</code> for fixed-SNR comparisons or <code>--noise-sd-grid=0.5,1,2</code> for fixed-noise stress tests; runs with these options write <code>benchmark_noise_summary.csv</code> and <code>benchmark_noise_f1_gain_panel.csv</code>. For the main scientific comparison, the fixed-SNR grid is usually the fairer axis because it keeps relative difficulty comparable across scenarios and representations. To make reruns reproducible, the benchmark driver uses a recorded deterministic SelectBoost perturbation backend by default; pass <code>--upstream-rfast-rvmf</code> only when you specifically want the upstream <code>Rfast</code> perturbation generator.</p>
-<p>Each run also writes <code>run_metadata.yml</code>, creates <code>RUNNING</code> while active,
-writes <code>COMPLETED</code> on successful completion, and removes <code>RUNNING</code>
-only after success. Use distinct <code>--output-dir</code> values for parallel runs.
-<code>--resume</code> preserves previous checkpoint files but does not yet skip
-completed settings.</p>
-<p>Here <code>snr</code> is a signal-to-noise standard-deviation ratio; outputs retain
-<code>effective_snr</code> and add <code>effective_variance_snr = effective_snr^2</code>
-for variance-ratio reporting.</p>
+<p>The focused benchmark driver is available at <code>tools/run_focused_benchmark.R</code>. It writes to <code>--output-dir=...</code> when provided and otherwise uses <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>. The current named baseline is <code>baseline_focused_benchmark_2026</code>; its grid is stored in <code>inst/extdata/benchmarks/config_focused_baseline.yml</code>, and each run writes <code>benchmark_config_baseline.yml</code> beside the benchmark CSV outputs. CSV outputs use <code>benchmark_name</code> as the primary identifier and retain <code>baseline_name</code> as a compatibility alias. Use <code>--quick --n-replicates=1</code> for smoke tests, <code>--medium</code> for the n = 30 benchmark, and <code>--final</code> for the n = 50 benchmark. The driver writes <code>benchmark_summary_n30.csv</code>, <code>benchmark_summary_n50_or_n100.csv</code> for final runs, <code>paired_gain_summary.csv</code> with paired FDA-aware versus plain SelectBoost <code>F1</code> gains, and <code>paired_gain_bootstrap_ci.csv</code> with deterministic percentile bootstrap confidence intervals from the replicate-level paired differences. The paired-gain tables also report win rate, valid paired replicate count, and method-failure flags. Assessment-oriented summaries are written as <code>assessment_top_positive_settings.csv</code>, <code>assessment_negative_gain_settings.csv</code>, <code>assessment_all_setting_summary.csv</code>, and <code>assessment_failure_modes.csv</code>; the best-settings table should be interpreted only together with the all-setting summary so negative-gain settings remain visible. The same driver now also writes two-parameter perturbation-surface artifacts for representative scenario types: <code>assessment_surface_summary.csv</code> for <code>(q, c0)</code> selection surfaces, <code>assessment_monotonicity_summary.csv</code> for monotonicity across <code>q</code> and <code>c0</code>, <code>assessment_precision_recall_paths.csv</code> for thresholded precision-recall paths, and <code>assessment_best_thresholds.csv</code> for best-<code>F1</code> and fixed-threshold summaries at <code>0.5</code>, <code>0.75</code>, and <code>0.9</code>. Association-geometry diagnostics are written as <code>association_diagnostics.csv</code>, <code>association_group_size_summary.csv</code>, and <code>assessment_association_comparison_table.csv</code>; these report association sparsity, association mass, effective degree, induced group counts, and group-size summaries at each <code>c0</code>, with setting keys retained for joins to benchmark metrics. Method-comparison outputs are written as <code>method_comparison_summary.csv</code>, <code>method_comparison_runtime.csv</code>, and <code>assessment_method_comparison_table.csv</code>. These compare plain SelectBoost, FDA-aware SelectBoost, and stability selection while separating perturbation type from the base selector (<code>lasso</code>, <code>group_lasso</code>, or <code>sparse_group_lasso</code>). Optional backends from <code>glmnet</code>, <code>grpreg</code>, and <code>SGL</code> are skipped and labeled in the runtime table when unavailable, instead of failing the benchmark. Runtime and computational reporting is written as <code>runtime_by_setting.csv</code> and <code>runtime_by_method.csv</code>; these tables include elapsed, user, and system time, warning and failure counts, selected-feature summaries, and fitted-object memory size where available. Failed settings are kept as failed runtime rows rather than being silently dropped. The driver also writes <code>benchmark_scenario_summary.csv</code>, which aggregates mean, standard deviation, and standard error by scenario, method, and evaluation level. During long runs, <code>progress.tsv</code> is updated as settings complete, <code>benchmark_raw_metrics_checkpoint.csv</code> is appended at the setting cadence requested by <code>--checkpoint-every=N</code> and at replicate completion, and <code>checkpoints/benchmark_raw_metrics_settingNNNNNN.csv</code>, <code>checkpoints/benchmark_raw_metrics_latest.csv</code>, and <code>checkpoints/benchmark_raw_metrics_repNNN.csv</code> store setting-level, latest, and replicate-level checkpoint files. A run also writes <code>run_metadata.yml</code>, <code>RUNNING</code>, and <code>COMPLETED</code>; <code>RUNNING</code> is removed only after successful completion. Use distinct <code>--output-dir</code> values for parallel runs. <code>--resume</code> preserves previous checkpoint files but does not yet skip completed settings. To check stability across sample size and functional resolution, pass for example <code>--n-grid=50,100,200 --grid-length-grid=30,75,150</code>; the driver then writes <code>benchmark_size_resolution_summary.csv</code> and <code>benchmark_runtime_by_size_resolution.csv</code>. To check robustness to signal strength and noise, use <code>--snr-grid=0.5,1,2,4</code> for fixed-SNR comparisons or <code>--noise-sd-grid=0.5,1,2</code> for fixed-noise stress tests; runs with these options write <code>benchmark_noise_summary.csv</code> and <code>benchmark_noise_f1_gain_panel.csv</code>. Here <code>snr</code> is a signal-to-noise standard-deviation ratio; outputs retain <code>effective_snr</code> and add <code>effective_variance_snr = effective_snr^2</code> for variance-ratio reporting. For the main scientific comparison, the fixed-SNR grid is usually the fairer axis because it keeps relative difficulty comparable across scenarios and representations. To make reruns reproducible, the benchmark driver uses a recorded deterministic SelectBoost perturbation backend by default; pass <code>--upstream-rfast-rvmf</code> only when you specifically want the upstream <code>Rfast</code> perturbation generator.</p>
 <p>The driver interface is campaign-configurable. Use comma-separated values to restrict or expand scenarios, representations, sample sizes, grid resolutions, SNR/noise axes, perturbation grids, and association structures. For example, this command targets the high-correlation settings most relevant to the FDA-aware grouping comparison while keeping all outputs under <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/system2.html" class="external-link">system2</a></span><span class="op">(</span></span>
@@ -726,8 +723,10 @@ for variance-ratio reporting.</p>
 <span>    <span class="st">"--c0-grid=0.9,0.7,0.5,0.3"</span>,</span>
 <span>    <span class="st">"--association-grid=correlation,neighborhood,hybrid,interval"</span>,</span>
 <span>    <span class="st">"--bandwidth-grid=4,8"</span>,</span>
+<span>    <span class="st">"--checkpoint-every=100"</span>,</span>
 <span>    <span class="st">"--assessment-summary"</span>,</span>
 <span>    <span class="st">"--save-surfaces"</span>,</span>
+<span>    <span class="st">"--surface-use-main-settings"</span>,</span>
 <span>    <span class="st">"--save-association-diagnostics"</span>,</span>
 <span>    <span class="st">"--bootstrap-reps=2000"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"--output-dir="</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"selectboost_fda_focused_n30"</span><span class="op">)</span><span class="op">)</span></span>

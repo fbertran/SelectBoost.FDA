@@ -65,11 +65,11 @@ head(selection_map(fit, c0 = colnames(fit$feature_selection)[1]))
 #> signal.6  0.333333333333333  0.333333333333333  0.333333333333333      <NA>
 #>          unit feature_index basis_component       domain_label selection
 #> signal.1 <NA>             1            <NA>                  0 0.0000000
-#> signal.2 <NA>             2            <NA> 0.0666666666666667 1.0000000
+#> signal.2 <NA>             2            <NA> 0.0666666666666667 0.6666667
 #> signal.3 <NA>             3            <NA>  0.133333333333333 1.0000000
 #> signal.4 <NA>             4            <NA>                0.2 0.6666667
-#> signal.5 <NA>             5            <NA>  0.266666666666667 1.0000000
-#> signal.6 <NA>             6            <NA>  0.333333333333333 1.0000000
+#> signal.5 <NA>             5            <NA>  0.266666666666667 0.3333333
+#> signal.6 <NA>             6            <NA>  0.333333333333333 0.3333333
 #>                c0 group_id  group
 #> signal.1 c0 = 0.5        1 signal
 #> signal.2 c0 = 0.5        1 signal

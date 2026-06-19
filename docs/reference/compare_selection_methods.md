@@ -63,11 +63,11 @@ summary(comparison)
 #> FDA method comparison summary
 #>   methods: selectboost, plain_selectboost 
 #>        c0 n_selected_features n_selected_groups mean_feature_selection
-#>  c0 = 0.5                  27                 4              0.5392157
-#>  c0 = 0.5                  24                 4              0.4607843
+#>  c0 = 0.5                  29                 4              0.5098039
+#>  c0 = 0.5                  29                 4              0.5392157
 #>  max_feature_selection mean_group_selection max_group_selection
+#>                      1            0.7395833                   1
 #>                      1            0.7552083                   1
-#>                      1            0.7135417                   1
 #>             method
 #>        selectboost
 #>  plain_selectboost

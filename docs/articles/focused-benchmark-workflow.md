@@ -38,8 +38,8 @@ setting-level checkpoint files to
 `checkpoints/benchmark_raw_metrics_latest.csv` with the latest
 checkpointed setting; and write per-replicate raw metrics to
 `checkpoints/benchmark_raw_metrics_repNNN.csv`. Each run writes
-`run_metadata.yml`, creates `RUNNING` while active, writes `COMPLETED` on
-successful completion, and removes `RUNNING` only after success. Use
+`run_metadata.yml`, creates `RUNNING` while active, writes `COMPLETED`
+on successful completion, and removes `RUNNING` only after success. Use
 distinct `--output-dir` values for parallel runs. `--resume` preserves
 previous checkpoint files but does not yet skip completed settings. For
 reproducibility, the driver uses a recorded deterministic SelectBoost
@@ -119,8 +119,8 @@ signal structures. The fixed-noise grid is useful as a stress test for
 absolute observation noise. Both axes are recorded in the raw metrics
 and summaries through `noise_axis`, `snr`, `noise_sd`, `effective_snr`,
 and `effective_variance_snr`. Here `snr` is a signal-to-noise
-standard-deviation ratio; `effective_variance_snr` is
-`effective_snr^2` for variance-ratio reporting. The driver writes
+standard-deviation ratio; `effective_variance_snr` is `effective_snr^2`
+for variance-ratio reporting. The driver writes
 `benchmark_noise_summary.csv` for performance by noise condition and
 `benchmark_noise_f1_gain_panel.csv` for a plot-ready `F1` gain panel.
 
@@ -368,4 +368,16 @@ as_benchmark_summary_data(metrics)
 #>                                                         selection_rate_sd
 #> localized_dense.grid.gaussian.plain_selectboost.feature                 0
 #> localized_dense.grid.gaussian.selectboost.feature                       0
+#>                                                         effective_snr_mean
+#> localized_dense.grid.gaussian.plain_selectboost.feature                 NA
+#> localized_dense.grid.gaussian.selectboost.feature                       NA
+#>                                                         effective_snr_sd
+#> localized_dense.grid.gaussian.plain_selectboost.feature               NA
+#> localized_dense.grid.gaussian.selectboost.feature                     NA
+#>                                                         effective_variance_snr_mean
+#> localized_dense.grid.gaussian.plain_selectboost.feature                          NA
+#> localized_dense.grid.gaussian.selectboost.feature                                NA
+#>                                                         effective_variance_snr_sd
+#> localized_dense.grid.gaussian.plain_selectboost.feature                        NA
+#> localized_dense.grid.gaussian.selectboost.feature                              NA
 ```

@@ -109,9 +109,9 @@ simulate_fda_scenario(
 
 - snr:
 
-  Optional target signal-to-noise standard-deviation ratio for Gaussian responses. When
-  supplied, the observation noise standard deviation is set to
-  `sd(linear_predictor) / snr`.
+  Optional target signal-to-noise standard-deviation ratio for Gaussian
+  responses. When supplied, the observation noise standard deviation is
+  set to `sd(linear_predictor) / snr`.
 
 - seed:
 
@@ -136,6 +136,7 @@ sim
 #>   local correlation: 0 
 #>   noise axis: noise_sd 
 #>   noise sd: 0.4 
+#>   effective signal-to-noise SD ratio: 1.509747 
 #>   active predictors: signal, age, treatment 
 head(sim$truth$active_features)
 #> [1] "signal_2"  "signal_3"  "signal_4"  "signal_8"  "signal_9"  "signal_10"

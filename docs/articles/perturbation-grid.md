@@ -44,19 +44,19 @@ head(selection_surface(grid_fit))
 #> nuisance_1.feature.0.6.0.4.selectboost nuisance_1  nuisance nuisance feature
 #> nuisance_1.feature.0.6.0.7.selectboost nuisance_1  nuisance nuisance feature
 #>                                          q  c0 selection mean_selection
-#> nuisance.group.0.6.0.4.selectboost     0.6 0.4       0.3            0.3
-#> nuisance.group.0.6.0.7.selectboost     0.6 0.7       0.5            0.5
-#> nuisance.group.0.8.0.4.selectboost     0.8 0.4       0.1            0.1
-#> nuisance.group.0.8.0.7.selectboost     0.8 0.7       0.1            0.1
+#> nuisance.group.0.6.0.4.selectboost     0.6 0.4       0.0            0.0
+#> nuisance.group.0.6.0.7.selectboost     0.6 0.7       0.3            0.3
+#> nuisance.group.0.8.0.4.selectboost     0.8 0.4       0.2            0.2
+#> nuisance.group.0.8.0.7.selectboost     0.8 0.7       0.2            0.2
 #> nuisance_1.feature.0.6.0.4.selectboost 0.6 0.4       0.0            0.0
-#> nuisance_1.feature.0.6.0.7.selectboost 0.6 0.7       1.0            1.0
+#> nuisance_1.feature.0.6.0.7.selectboost 0.6 0.7       0.0            0.0
 #>                                        max_selection selected representation
-#> nuisance.group.0.6.0.4.selectboost                 1     TRUE           grid
+#> nuisance.group.0.6.0.4.selectboost                 0    FALSE           grid
 #> nuisance.group.0.6.0.7.selectboost                 1     TRUE           grid
 #> nuisance.group.0.8.0.4.selectboost                 1     TRUE           grid
 #> nuisance.group.0.8.0.7.selectboost                 1     TRUE           grid
 #> nuisance_1.feature.0.6.0.4.selectboost             0    FALSE           grid
-#> nuisance_1.feature.0.6.0.7.selectboost             1     TRUE           grid
+#> nuisance_1.feature.0.6.0.7.selectboost             0    FALSE           grid
 #>                                        basis_type source_representation
 #> nuisance.group.0.6.0.4.selectboost                                 grid
 #> nuisance.group.0.6.0.7.selectboost                                 grid
@@ -128,10 +128,10 @@ head(selection_surface(grid_fit))
 #> nuisance_1.feature.0.6.0.4.selectboost            0        2         NA
 #> nuisance_1.feature.0.6.0.7.selectboost            0        2         NA
 #>                                        selected_features replicate
-#> nuisance.group.0.6.0.4.selectboost                     3        NA
-#> nuisance.group.0.6.0.7.selectboost                     5        NA
-#> nuisance.group.0.8.0.4.selectboost                     1        NA
-#> nuisance.group.0.8.0.7.selectboost                     1        NA
+#> nuisance.group.0.6.0.4.selectboost                     0        NA
+#> nuisance.group.0.6.0.7.selectboost                     3        NA
+#> nuisance.group.0.8.0.4.selectboost                     2        NA
+#> nuisance.group.0.8.0.7.selectboost                     2        NA
 #> nuisance_1.feature.0.6.0.4.selectboost                NA        NA
 #> nuisance_1.feature.0.6.0.7.selectboost                NA        NA
 #>                                        association_method group_method
@@ -157,13 +157,13 @@ head(selection_surface(grid_fit))
 #> nuisance_1.feature.0.6.0.7.selectboost            1
 summarise_perturbation_grid(grid_fit)
 #>                   level   q  c0 n_items n_selected mean_selection max_selection
-#> feature.0.6.0.4 feature 0.6 0.4      20         11           0.55             1
-#> feature.0.6.0.7 feature 0.6 0.7      20         13           0.65             1
-#> feature.0.8.0.4 feature 0.8 0.4      20          7           0.35             1
+#> feature.0.6.0.4 feature 0.6 0.4      20          4           0.20             1
+#> feature.0.6.0.7 feature 0.6 0.7      20          8           0.40             1
+#> feature.0.8.0.4 feature 0.8 0.4      20          8           0.40             1
 #> feature.0.8.0.7 feature 0.8 0.7      20          7           0.35             1
-#> group.0.6.0.4     group 0.6 0.4       2          2           0.55             1
-#> group.0.6.0.7     group 0.6 0.7       2          2           0.65             1
-#> group.0.8.0.4     group 0.8 0.4       2          2           0.35             1
+#> group.0.6.0.4     group 0.6 0.4       2          1           0.20             1
+#> group.0.6.0.7     group 0.6 0.7       2          2           0.40             1
+#> group.0.8.0.4     group 0.8 0.4       2          2           0.40             1
 #> group.0.8.0.7     group 0.8 0.7       2          2           0.35             1
 ```
 
@@ -178,21 +178,21 @@ group_surface <- selection_map(grid_fit, level = "group")
 head(feature_surface[, c("feature", "q", "c0", "selection", "selected")])
 #>                                             feature   q  c0 selection selected
 #> nuisance_1.feature.0.6.0.4.selectboost   nuisance_1 0.6 0.4         0    FALSE
-#> nuisance_1.feature.0.6.0.7.selectboost   nuisance_1 0.6 0.7         1     TRUE
+#> nuisance_1.feature.0.6.0.7.selectboost   nuisance_1 0.6 0.7         0    FALSE
 #> nuisance_1.feature.0.8.0.4.selectboost   nuisance_1 0.8 0.4         0    FALSE
 #> nuisance_1.feature.0.8.0.7.selectboost   nuisance_1 0.8 0.7         0    FALSE
 #> nuisance_10.feature.0.6.0.4.selectboost nuisance_10 0.6 0.4         0    FALSE
 #> nuisance_10.feature.0.6.0.7.selectboost nuisance_10 0.6 0.7         0    FALSE
 head(group_surface[, c("group", "q", "c0", "mean_selection", "max_selection")])
 #>                                       group   q  c0 mean_selection
-#> nuisance.group.0.6.0.4.selectboost nuisance 0.6 0.4            0.3
-#> nuisance.group.0.6.0.7.selectboost nuisance 0.6 0.7            0.5
-#> nuisance.group.0.8.0.4.selectboost nuisance 0.8 0.4            0.1
-#> nuisance.group.0.8.0.7.selectboost nuisance 0.8 0.7            0.1
-#> signal.group.0.6.0.4.selectboost     signal 0.6 0.4            0.8
-#> signal.group.0.6.0.7.selectboost     signal 0.6 0.7            0.8
+#> nuisance.group.0.6.0.4.selectboost nuisance 0.6 0.4            0.0
+#> nuisance.group.0.6.0.7.selectboost nuisance 0.6 0.7            0.3
+#> nuisance.group.0.8.0.4.selectboost nuisance 0.8 0.4            0.2
+#> nuisance.group.0.8.0.7.selectboost nuisance 0.8 0.7            0.2
+#> signal.group.0.6.0.4.selectboost     signal 0.6 0.4            0.4
+#> signal.group.0.6.0.7.selectboost     signal 0.6 0.7            0.5
 #>                                    max_selection
-#> nuisance.group.0.6.0.4.selectboost             1
+#> nuisance.group.0.6.0.4.selectboost             0
 #> nuisance.group.0.6.0.7.selectboost             1
 #> nuisance.group.0.8.0.4.selectboost             1
 #> nuisance.group.0.8.0.7.selectboost             1
@@ -205,130 +205,130 @@ The same data can be filtered before plotting or reporting:
 ``` r
 
 head(selected_surface(grid_fit, threshold = 0.5, level = "feature"))
-#>                                             feature predictor    group   level
-#> nuisance_1.feature.0.6.0.7.selectboost   nuisance_1  nuisance nuisance feature
-#> nuisance_10.feature.0.8.0.4.selectboost nuisance_10  nuisance nuisance feature
-#> nuisance_2.feature.0.6.0.4.selectboost   nuisance_2  nuisance nuisance feature
-#> nuisance_3.feature.0.6.0.4.selectboost   nuisance_3  nuisance nuisance feature
-#> nuisance_3.feature.0.6.0.7.selectboost   nuisance_3  nuisance nuisance feature
-#> nuisance_5.feature.0.6.0.7.selectboost   nuisance_5  nuisance nuisance feature
-#>                                           q  c0 selection mean_selection
-#> nuisance_1.feature.0.6.0.7.selectboost  0.6 0.7         1              1
-#> nuisance_10.feature.0.8.0.4.selectboost 0.8 0.4         1              1
-#> nuisance_2.feature.0.6.0.4.selectboost  0.6 0.4         1              1
-#> nuisance_3.feature.0.6.0.4.selectboost  0.6 0.4         1              1
-#> nuisance_3.feature.0.6.0.7.selectboost  0.6 0.7         1              1
-#> nuisance_5.feature.0.6.0.7.selectboost  0.6 0.7         1              1
-#>                                         max_selection selected representation
-#> nuisance_1.feature.0.6.0.7.selectboost              1     TRUE           grid
-#> nuisance_10.feature.0.8.0.4.selectboost             1     TRUE           grid
-#> nuisance_2.feature.0.6.0.4.selectboost              1     TRUE           grid
-#> nuisance_3.feature.0.6.0.4.selectboost              1     TRUE           grid
-#> nuisance_3.feature.0.6.0.7.selectboost              1     TRUE           grid
-#> nuisance_5.feature.0.6.0.7.selectboost              1     TRUE           grid
-#>                                         basis_type source_representation
-#> nuisance_1.feature.0.6.0.7.selectboost        <NA>                  grid
-#> nuisance_10.feature.0.8.0.4.selectboost       <NA>                  grid
-#> nuisance_2.feature.0.6.0.4.selectboost        <NA>                  grid
-#> nuisance_3.feature.0.6.0.4.selectboost        <NA>                  grid
-#> nuisance_3.feature.0.6.0.7.selectboost        <NA>                  grid
-#> nuisance_5.feature.0.6.0.7.selectboost        <NA>                  grid
-#>                                         start_position end_position
-#> nuisance_1.feature.0.6.0.7.selectboost               1            1
-#> nuisance_10.feature.0.8.0.4.selectboost             10           10
-#> nuisance_2.feature.0.6.0.4.selectboost               2            2
-#> nuisance_3.feature.0.6.0.4.selectboost               3            3
-#> nuisance_3.feature.0.6.0.7.selectboost               3            3
-#> nuisance_5.feature.0.6.0.7.selectboost               5            5
-#>                                              start_argval        end_argval
-#> nuisance_1.feature.0.6.0.7.selectboost                  0                 0
-#> nuisance_10.feature.0.8.0.4.selectboost                 1                 1
-#> nuisance_2.feature.0.6.0.4.selectboost  0.111111111111111 0.111111111111111
-#> nuisance_3.feature.0.6.0.4.selectboost  0.222222222222222 0.222222222222222
-#> nuisance_3.feature.0.6.0.7.selectboost  0.222222222222222 0.222222222222222
-#> nuisance_5.feature.0.6.0.7.selectboost  0.444444444444444 0.444444444444444
-#>                                              domain_start        domain_end
-#> nuisance_1.feature.0.6.0.7.selectboost                  0                 0
-#> nuisance_10.feature.0.8.0.4.selectboost                 1                 1
-#> nuisance_2.feature.0.6.0.4.selectboost  0.111111111111111 0.111111111111111
-#> nuisance_3.feature.0.6.0.4.selectboost  0.222222222222222 0.222222222222222
-#> nuisance_3.feature.0.6.0.7.selectboost  0.222222222222222 0.222222222222222
-#> nuisance_5.feature.0.6.0.7.selectboost  0.444444444444444 0.444444444444444
-#>                                              method    block position
-#> nuisance_1.feature.0.6.0.7.selectboost  selectboost nuisance        1
-#> nuisance_10.feature.0.8.0.4.selectboost selectboost nuisance       10
-#> nuisance_2.feature.0.6.0.4.selectboost  selectboost nuisance        2
-#> nuisance_3.feature.0.6.0.4.selectboost  selectboost nuisance        3
-#> nuisance_3.feature.0.6.0.7.selectboost  selectboost nuisance        3
-#> nuisance_5.feature.0.6.0.7.selectboost  selectboost nuisance        5
-#>                                                    argval transform
-#> nuisance_1.feature.0.6.0.7.selectboost                  0  identity
-#> nuisance_10.feature.0.8.0.4.selectboost                 1  identity
-#> nuisance_2.feature.0.6.0.4.selectboost  0.111111111111111  identity
-#> nuisance_3.feature.0.6.0.4.selectboost  0.222222222222222  identity
-#> nuisance_3.feature.0.6.0.7.selectboost  0.222222222222222  identity
-#> nuisance_5.feature.0.6.0.7.selectboost  0.444444444444444  identity
-#>                                         source_predictor source_position_start
-#> nuisance_1.feature.0.6.0.7.selectboost          nuisance                     1
-#> nuisance_10.feature.0.8.0.4.selectboost         nuisance                    10
-#> nuisance_2.feature.0.6.0.4.selectboost          nuisance                     2
-#> nuisance_3.feature.0.6.0.4.selectboost          nuisance                     3
-#> nuisance_3.feature.0.6.0.7.selectboost          nuisance                     3
-#> nuisance_5.feature.0.6.0.7.selectboost          nuisance                     5
-#>                                         source_position_end source_argval_start
-#> nuisance_1.feature.0.6.0.7.selectboost                    1                   0
-#> nuisance_10.feature.0.8.0.4.selectboost                  10                   1
-#> nuisance_2.feature.0.6.0.4.selectboost                    2   0.111111111111111
-#> nuisance_3.feature.0.6.0.4.selectboost                    3   0.222222222222222
-#> nuisance_3.feature.0.6.0.7.selectboost                    3   0.222222222222222
-#> nuisance_5.feature.0.6.0.7.selectboost                    5   0.444444444444444
-#>                                         source_argval_end component unit
-#> nuisance_1.feature.0.6.0.7.selectboost                  0      <NA> <NA>
-#> nuisance_10.feature.0.8.0.4.selectboost                 1      <NA> <NA>
-#> nuisance_2.feature.0.6.0.4.selectboost  0.111111111111111      <NA> <NA>
-#> nuisance_3.feature.0.6.0.4.selectboost  0.222222222222222      <NA> <NA>
-#> nuisance_3.feature.0.6.0.7.selectboost  0.222222222222222      <NA> <NA>
-#> nuisance_5.feature.0.6.0.7.selectboost  0.444444444444444      <NA> <NA>
-#>                                         feature_index basis_component
-#> nuisance_1.feature.0.6.0.7.selectboost             11            <NA>
-#> nuisance_10.feature.0.8.0.4.selectboost            20            <NA>
-#> nuisance_2.feature.0.6.0.4.selectboost             12            <NA>
-#> nuisance_3.feature.0.6.0.4.selectboost             13            <NA>
-#> nuisance_3.feature.0.6.0.7.selectboost             13            <NA>
-#> nuisance_5.feature.0.6.0.7.selectboost             15            <NA>
-#>                                              domain_label group_id n_features
-#> nuisance_1.feature.0.6.0.7.selectboost                  0        2         NA
-#> nuisance_10.feature.0.8.0.4.selectboost                 1        2         NA
-#> nuisance_2.feature.0.6.0.4.selectboost  0.111111111111111        2         NA
-#> nuisance_3.feature.0.6.0.4.selectboost  0.222222222222222        2         NA
-#> nuisance_3.feature.0.6.0.7.selectboost  0.222222222222222        2         NA
-#> nuisance_5.feature.0.6.0.7.selectboost  0.444444444444444        2         NA
-#>                                         selected_features replicate
-#> nuisance_1.feature.0.6.0.7.selectboost                 NA        NA
-#> nuisance_10.feature.0.8.0.4.selectboost                NA        NA
-#> nuisance_2.feature.0.6.0.4.selectboost                 NA        NA
-#> nuisance_3.feature.0.6.0.4.selectboost                 NA        NA
-#> nuisance_3.feature.0.6.0.7.selectboost                 NA        NA
-#> nuisance_5.feature.0.6.0.7.selectboost                 NA        NA
-#>                                         association_method group_method
-#> nuisance_1.feature.0.6.0.7.selectboost              hybrid    threshold
-#> nuisance_10.feature.0.8.0.4.selectboost             hybrid    threshold
-#> nuisance_2.feature.0.6.0.4.selectboost              hybrid    threshold
-#> nuisance_3.feature.0.6.0.4.selectboost              hybrid    threshold
-#> nuisance_3.feature.0.6.0.7.selectboost              hybrid    threshold
-#> nuisance_5.feature.0.6.0.7.selectboost              hybrid    threshold
-#>                                         within_blocks bandwidth width
-#> nuisance_1.feature.0.6.0.7.selectboost           TRUE         3    NA
-#> nuisance_10.feature.0.8.0.4.selectboost          TRUE         3    NA
-#> nuisance_2.feature.0.6.0.4.selectboost           TRUE         3    NA
-#> nuisance_3.feature.0.6.0.4.selectboost           TRUE         3    NA
-#> nuisance_3.feature.0.6.0.7.selectboost           TRUE         3    NA
-#> nuisance_5.feature.0.6.0.7.selectboost           TRUE         3    NA
-#>                                         n_replicates
-#> nuisance_1.feature.0.6.0.7.selectboost             1
-#> nuisance_10.feature.0.8.0.4.selectboost            1
-#> nuisance_2.feature.0.6.0.4.selectboost             1
-#> nuisance_3.feature.0.6.0.4.selectboost             1
-#> nuisance_3.feature.0.6.0.7.selectboost             1
-#> nuisance_5.feature.0.6.0.7.selectboost             1
+#>                                           feature predictor    group   level
+#> nuisance_2.feature.0.8.0.7.selectboost nuisance_2  nuisance nuisance feature
+#> nuisance_3.feature.0.6.0.7.selectboost nuisance_3  nuisance nuisance feature
+#> nuisance_3.feature.0.8.0.7.selectboost nuisance_3  nuisance nuisance feature
+#> nuisance_4.feature.0.6.0.7.selectboost nuisance_4  nuisance nuisance feature
+#> nuisance_5.feature.0.8.0.4.selectboost nuisance_5  nuisance nuisance feature
+#> nuisance_8.feature.0.6.0.7.selectboost nuisance_8  nuisance nuisance feature
+#>                                          q  c0 selection mean_selection
+#> nuisance_2.feature.0.8.0.7.selectboost 0.8 0.7         1              1
+#> nuisance_3.feature.0.6.0.7.selectboost 0.6 0.7         1              1
+#> nuisance_3.feature.0.8.0.7.selectboost 0.8 0.7         1              1
+#> nuisance_4.feature.0.6.0.7.selectboost 0.6 0.7         1              1
+#> nuisance_5.feature.0.8.0.4.selectboost 0.8 0.4         1              1
+#> nuisance_8.feature.0.6.0.7.selectboost 0.6 0.7         1              1
+#>                                        max_selection selected representation
+#> nuisance_2.feature.0.8.0.7.selectboost             1     TRUE           grid
+#> nuisance_3.feature.0.6.0.7.selectboost             1     TRUE           grid
+#> nuisance_3.feature.0.8.0.7.selectboost             1     TRUE           grid
+#> nuisance_4.feature.0.6.0.7.selectboost             1     TRUE           grid
+#> nuisance_5.feature.0.8.0.4.selectboost             1     TRUE           grid
+#> nuisance_8.feature.0.6.0.7.selectboost             1     TRUE           grid
+#>                                        basis_type source_representation
+#> nuisance_2.feature.0.8.0.7.selectboost       <NA>                  grid
+#> nuisance_3.feature.0.6.0.7.selectboost       <NA>                  grid
+#> nuisance_3.feature.0.8.0.7.selectboost       <NA>                  grid
+#> nuisance_4.feature.0.6.0.7.selectboost       <NA>                  grid
+#> nuisance_5.feature.0.8.0.4.selectboost       <NA>                  grid
+#> nuisance_8.feature.0.6.0.7.selectboost       <NA>                  grid
+#>                                        start_position end_position
+#> nuisance_2.feature.0.8.0.7.selectboost              2            2
+#> nuisance_3.feature.0.6.0.7.selectboost              3            3
+#> nuisance_3.feature.0.8.0.7.selectboost              3            3
+#> nuisance_4.feature.0.6.0.7.selectboost              4            4
+#> nuisance_5.feature.0.8.0.4.selectboost              5            5
+#> nuisance_8.feature.0.6.0.7.selectboost              8            8
+#>                                             start_argval        end_argval
+#> nuisance_2.feature.0.8.0.7.selectboost 0.111111111111111 0.111111111111111
+#> nuisance_3.feature.0.6.0.7.selectboost 0.222222222222222 0.222222222222222
+#> nuisance_3.feature.0.8.0.7.selectboost 0.222222222222222 0.222222222222222
+#> nuisance_4.feature.0.6.0.7.selectboost 0.333333333333333 0.333333333333333
+#> nuisance_5.feature.0.8.0.4.selectboost 0.444444444444444 0.444444444444444
+#> nuisance_8.feature.0.6.0.7.selectboost 0.777777777777778 0.777777777777778
+#>                                             domain_start        domain_end
+#> nuisance_2.feature.0.8.0.7.selectboost 0.111111111111111 0.111111111111111
+#> nuisance_3.feature.0.6.0.7.selectboost 0.222222222222222 0.222222222222222
+#> nuisance_3.feature.0.8.0.7.selectboost 0.222222222222222 0.222222222222222
+#> nuisance_4.feature.0.6.0.7.selectboost 0.333333333333333 0.333333333333333
+#> nuisance_5.feature.0.8.0.4.selectboost 0.444444444444444 0.444444444444444
+#> nuisance_8.feature.0.6.0.7.selectboost 0.777777777777778 0.777777777777778
+#>                                             method    block position
+#> nuisance_2.feature.0.8.0.7.selectboost selectboost nuisance        2
+#> nuisance_3.feature.0.6.0.7.selectboost selectboost nuisance        3
+#> nuisance_3.feature.0.8.0.7.selectboost selectboost nuisance        3
+#> nuisance_4.feature.0.6.0.7.selectboost selectboost nuisance        4
+#> nuisance_5.feature.0.8.0.4.selectboost selectboost nuisance        5
+#> nuisance_8.feature.0.6.0.7.selectboost selectboost nuisance        8
+#>                                                   argval transform
+#> nuisance_2.feature.0.8.0.7.selectboost 0.111111111111111  identity
+#> nuisance_3.feature.0.6.0.7.selectboost 0.222222222222222  identity
+#> nuisance_3.feature.0.8.0.7.selectboost 0.222222222222222  identity
+#> nuisance_4.feature.0.6.0.7.selectboost 0.333333333333333  identity
+#> nuisance_5.feature.0.8.0.4.selectboost 0.444444444444444  identity
+#> nuisance_8.feature.0.6.0.7.selectboost 0.777777777777778  identity
+#>                                        source_predictor source_position_start
+#> nuisance_2.feature.0.8.0.7.selectboost         nuisance                     2
+#> nuisance_3.feature.0.6.0.7.selectboost         nuisance                     3
+#> nuisance_3.feature.0.8.0.7.selectboost         nuisance                     3
+#> nuisance_4.feature.0.6.0.7.selectboost         nuisance                     4
+#> nuisance_5.feature.0.8.0.4.selectboost         nuisance                     5
+#> nuisance_8.feature.0.6.0.7.selectboost         nuisance                     8
+#>                                        source_position_end source_argval_start
+#> nuisance_2.feature.0.8.0.7.selectboost                   2   0.111111111111111
+#> nuisance_3.feature.0.6.0.7.selectboost                   3   0.222222222222222
+#> nuisance_3.feature.0.8.0.7.selectboost                   3   0.222222222222222
+#> nuisance_4.feature.0.6.0.7.selectboost                   4   0.333333333333333
+#> nuisance_5.feature.0.8.0.4.selectboost                   5   0.444444444444444
+#> nuisance_8.feature.0.6.0.7.selectboost                   8   0.777777777777778
+#>                                        source_argval_end component unit
+#> nuisance_2.feature.0.8.0.7.selectboost 0.111111111111111      <NA> <NA>
+#> nuisance_3.feature.0.6.0.7.selectboost 0.222222222222222      <NA> <NA>
+#> nuisance_3.feature.0.8.0.7.selectboost 0.222222222222222      <NA> <NA>
+#> nuisance_4.feature.0.6.0.7.selectboost 0.333333333333333      <NA> <NA>
+#> nuisance_5.feature.0.8.0.4.selectboost 0.444444444444444      <NA> <NA>
+#> nuisance_8.feature.0.6.0.7.selectboost 0.777777777777778      <NA> <NA>
+#>                                        feature_index basis_component
+#> nuisance_2.feature.0.8.0.7.selectboost            12            <NA>
+#> nuisance_3.feature.0.6.0.7.selectboost            13            <NA>
+#> nuisance_3.feature.0.8.0.7.selectboost            13            <NA>
+#> nuisance_4.feature.0.6.0.7.selectboost            14            <NA>
+#> nuisance_5.feature.0.8.0.4.selectboost            15            <NA>
+#> nuisance_8.feature.0.6.0.7.selectboost            18            <NA>
+#>                                             domain_label group_id n_features
+#> nuisance_2.feature.0.8.0.7.selectboost 0.111111111111111        2         NA
+#> nuisance_3.feature.0.6.0.7.selectboost 0.222222222222222        2         NA
+#> nuisance_3.feature.0.8.0.7.selectboost 0.222222222222222        2         NA
+#> nuisance_4.feature.0.6.0.7.selectboost 0.333333333333333        2         NA
+#> nuisance_5.feature.0.8.0.4.selectboost 0.444444444444444        2         NA
+#> nuisance_8.feature.0.6.0.7.selectboost 0.777777777777778        2         NA
+#>                                        selected_features replicate
+#> nuisance_2.feature.0.8.0.7.selectboost                NA        NA
+#> nuisance_3.feature.0.6.0.7.selectboost                NA        NA
+#> nuisance_3.feature.0.8.0.7.selectboost                NA        NA
+#> nuisance_4.feature.0.6.0.7.selectboost                NA        NA
+#> nuisance_5.feature.0.8.0.4.selectboost                NA        NA
+#> nuisance_8.feature.0.6.0.7.selectboost                NA        NA
+#>                                        association_method group_method
+#> nuisance_2.feature.0.8.0.7.selectboost             hybrid    threshold
+#> nuisance_3.feature.0.6.0.7.selectboost             hybrid    threshold
+#> nuisance_3.feature.0.8.0.7.selectboost             hybrid    threshold
+#> nuisance_4.feature.0.6.0.7.selectboost             hybrid    threshold
+#> nuisance_5.feature.0.8.0.4.selectboost             hybrid    threshold
+#> nuisance_8.feature.0.6.0.7.selectboost             hybrid    threshold
+#>                                        within_blocks bandwidth width
+#> nuisance_2.feature.0.8.0.7.selectboost          TRUE         3    NA
+#> nuisance_3.feature.0.6.0.7.selectboost          TRUE         3    NA
+#> nuisance_3.feature.0.8.0.7.selectboost          TRUE         3    NA
+#> nuisance_4.feature.0.6.0.7.selectboost          TRUE         3    NA
+#> nuisance_5.feature.0.8.0.4.selectboost          TRUE         3    NA
+#> nuisance_8.feature.0.6.0.7.selectboost          TRUE         3    NA
+#>                                        n_replicates
+#> nuisance_2.feature.0.8.0.7.selectboost            1
+#> nuisance_3.feature.0.6.0.7.selectboost            1
+#> nuisance_3.feature.0.8.0.7.selectboost            1
+#> nuisance_4.feature.0.6.0.7.selectboost            1
+#> nuisance_5.feature.0.8.0.4.selectboost            1
+#> nuisance_8.feature.0.6.0.7.selectboost            1
 ```

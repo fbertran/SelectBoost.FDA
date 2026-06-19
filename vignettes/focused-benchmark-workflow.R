@@ -80,3 +80,4 @@ metrics <- data.frame(
 )
 
 as_benchmark_summary_data(metrics)
+

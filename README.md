@@ -173,7 +173,7 @@ head(selection_map(fit_sb, level = "group", c0 = colnames(fit_sb$feature_selecti
 #> 4    treatment  treatment    treatment  treatment c0 = 0.6
 #>   mean_selection max_selection selected_features
 #> 1      0.6666667          1.00                 2
-#> 2      0.4000000          1.00                 4
+#> 2      0.2000000          0.75                 2
 #> 3      0.2500000          0.25                 1
 #> 4      1.0000000          1.00                 1
 ```
@@ -308,18 +308,18 @@ head(selection_surface(grid_fit))
 #> age.group.0.6.0.4.selectboost       age       age   age   group 0.6
 #> age.group.0.6.0.7.selectboost       age       age   age   group 0.6
 #>                                  c0 selection mean_selection
-#> age.feature.0.6.0.4.selectboost 0.4         1              1
+#> age.feature.0.6.0.4.selectboost 0.4         0              0
 #> age.feature.0.6.0.7.selectboost 0.7         1              1
 #> age.feature.0.8.0.4.selectboost 0.4         0              0
 #> age.feature.0.8.0.7.selectboost 0.7         0              0
-#> age.group.0.6.0.4.selectboost   0.4         1              1
+#> age.group.0.6.0.4.selectboost   0.4         0              0
 #> age.group.0.6.0.7.selectboost   0.7         1              1
 #>                                 max_selection selected
-#> age.feature.0.6.0.4.selectboost             1     TRUE
+#> age.feature.0.6.0.4.selectboost             0    FALSE
 #> age.feature.0.6.0.7.selectboost             1     TRUE
 #> age.feature.0.8.0.4.selectboost             0    FALSE
 #> age.feature.0.8.0.7.selectboost             0    FALSE
-#> age.group.0.6.0.4.selectboost               1     TRUE
+#> age.group.0.6.0.4.selectboost               0    FALSE
 #> age.group.0.6.0.7.selectboost               1     TRUE
 #>                                 representation basis_type
 #> age.feature.0.6.0.4.selectboost         scalar       <NA>
@@ -417,7 +417,7 @@ head(selection_surface(grid_fit))
 #> age.feature.0.6.0.7.selectboost                NA        NA
 #> age.feature.0.8.0.4.selectboost                NA        NA
 #> age.feature.0.8.0.7.selectboost                NA        NA
-#> age.group.0.6.0.4.selectboost                   1        NA
+#> age.group.0.6.0.4.selectboost                   0        NA
 #> age.group.0.6.0.7.selectboost                   1        NA
 #>                                 association_method group_method
 #> age.feature.0.6.0.4.selectboost             hybrid    threshold
@@ -444,11 +444,11 @@ summarise_perturbation_grid(grid_fit)
 #>                   level   q  c0 n_items n_selected mean_selection
 #> feature.0.6.0.4 feature 0.6 0.4      10          5      0.5000000
 #> feature.0.6.0.7 feature 0.6 0.7      10          4      0.4000000
-#> feature.0.8.0.4 feature 0.8 0.4      10          7      0.7000000
+#> feature.0.8.0.4 feature 0.8 0.4      10          4      0.4000000
 #> feature.0.8.0.7 feature 0.8 0.7      10          4      0.4000000
-#> group.0.6.0.4     group 0.6 0.4       4          4      0.7166667
+#> group.0.6.0.4     group 0.6 0.4       4          3      0.5166667
 #> group.0.6.0.7     group 0.6 0.7       4          3      0.6666667
-#> group.0.8.0.4     group 0.8 0.4       4          3      0.6166667
+#> group.0.8.0.4     group 0.8 0.4       4          3      0.4666667
 #> group.0.8.0.7     group 0.8 0.7       4          3      0.4666667
 #>                 max_selection
 #> feature.0.6.0.4             1
@@ -495,29 +495,29 @@ head(as_monotonicity_path_data(grid_fit, axis = "c0", level = "feature"))
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost        0.4
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost        0.7
 #>                                                                                    value
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     1
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     0
 #> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     1
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     0
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     0
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     0
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     1
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     0
 #>                                                                                    delta
 #> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                    NA
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     0
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     1
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                    NA
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     0
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost    NA
-#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     0
+#> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost    -1
 #>                                                                                    violation
 #> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                     FALSE
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                     FALSE
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                      TRUE
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                     FALSE
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                     FALSE
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost     FALSE
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost     FALSE
 #>                                                                                    violation_size
 #> age.selectboost...NA...feature.0.6.age.feature.0.6.0.4.selectboost                              0
-#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                              0
+#> age.selectboost...NA...feature.0.6.age.feature.0.6.0.7.selectboost                              1
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.4.selectboost                              0
 #> age.selectboost...NA...feature.0.8.age.feature.0.8.0.7.selectboost                              0
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.4.selectboost              0
@@ -552,9 +552,9 @@ head(as_monotonicity_path_data(grid_fit, axis = "c0", level = "feature"))
 #> nuisance_B1.selectboost...NA...feature.0.6.nuisance_B1.feature.0.6.0.7.selectboost 0.7
 summarise_monotonicity(grid_fit, axis = "c0", level = "feature")
 #>              level axis n_paths n_monotone fraction_monotone
-#> feature.c0 feature   c0      20         20                 1
+#> feature.c0 feature   c0      20         18               0.9
 #>            mean_total_violation max_violation
-#> feature.c0                    0             0
+#> feature.c0                  0.1             1
 head(as_association_heatmap_data(design, method = "hybrid", bandwidth = 4))
 #>     feature_i  feature_j predictor_i predictor_j position_i
 #> 1  signal_PC1 signal_PC1      signal      signal          1
@@ -624,6 +624,11 @@ head(bench$metrics)
 #> 2   noise_sd  NA      0.4                0.4      2.213897
 #> 3   noise_sd  NA      0.4                0.4      2.213897
 #> 4   noise_sd  NA      0.4                0.4      2.213897
+#>   effective_variance_snr
+#> 1               4.901339
+#> 2               4.901339
+#> 3               4.901339
+#> 4               4.901339
 ```
 
 The simulator exposes a scenario catalog for different FDA signal structures:
