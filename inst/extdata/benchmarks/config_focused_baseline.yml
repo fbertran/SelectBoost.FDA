@@ -1,3 +1,4 @@
+benchmark_name: baseline_focused_benchmark_2026
 baseline_name: baseline_focused_benchmark_2026
 package_version: 0.6.1
 git_commit: null
@@ -37,6 +38,9 @@ interface_args:
   save_surfaces: true
   save_association_diagnostics: true
   bootstrap_reps: 2000
+  checkpoint_every: 100
+  resume: false
+  surface_use_main_settings: false
 run_profiles:
   - profile: quick
     quick: true
@@ -230,6 +234,7 @@ assessment_surface_args:
     - 0.3
   B: 3
   selectboost_B: 1
+  surface_use_main_settings: false
   selector: msgps
   representative_scenarios:
     - localized_dense
@@ -244,6 +249,11 @@ output_files:
   - progress.tsv
   - benchmark_raw_metrics_checkpoint.csv
   - checkpoints/benchmark_raw_metrics_repNNN.csv
+  - checkpoints/benchmark_raw_metrics_settingNNNNNN.csv
+  - checkpoints/benchmark_raw_metrics_latest.csv
+  - run_metadata.yml
+  - RUNNING
+  - COMPLETED
   - benchmark_raw_metrics.csv
   - benchmark_summary_by_setting.csv
   - benchmark_summary_n50.csv

@@ -284,6 +284,8 @@ It writes to `--output-dir=...` when provided and otherwise uses `tempdir()`.
 The current named baseline is `baseline_focused_benchmark_2026`; its grid is
 stored in `inst/extdata/benchmarks/config_focused_baseline.yml`, and each run
 writes `benchmark_config_baseline.yml` beside the benchmark CSV outputs.
+CSV outputs use `benchmark_name` as the primary identifier and retain
+`baseline_name` as a compatibility alias.
 Use `--quick --n-replicates=1` for smoke tests, `--medium` for the n = 30
 benchmark, and `--final` for the n = 50 benchmark. The driver writes
 `benchmark_summary_n30.csv`, `benchmark_summary_n50_or_n100.csv` for final
@@ -322,18 +324,28 @@ writes
 `benchmark_scenario_summary.csv`, which aggregates mean, standard deviation,
 and standard error by scenario, method, and evaluation level. During long runs,
 `progress.tsv` is updated as settings complete,
-`benchmark_raw_metrics_checkpoint.csv` is appended after each replicate, and
-`checkpoints/benchmark_raw_metrics_repNNN.csv` stores the replicate-level raw
-metrics. To check stability across sample size and functional resolution, pass for example
+`benchmark_raw_metrics_checkpoint.csv` is appended at the setting cadence
+requested by `--checkpoint-every=N` and at replicate completion, and
+`checkpoints/benchmark_raw_metrics_settingNNNNNN.csv`,
+`checkpoints/benchmark_raw_metrics_latest.csv`, and
+`checkpoints/benchmark_raw_metrics_repNNN.csv` store setting-level, latest, and
+replicate-level checkpoint files. A run also writes `run_metadata.yml`,
+`RUNNING`, and `COMPLETED`; `RUNNING` is removed only after successful
+completion. Use distinct `--output-dir` values for parallel runs. `--resume`
+preserves previous checkpoint files but does not yet skip completed settings.
+To check stability across sample size and functional resolution, pass for example
 `--n-grid=50,100,200 --grid-length-grid=30,75,150`; the driver then writes
 `benchmark_size_resolution_summary.csv` and
 `benchmark_runtime_by_size_resolution.csv`. To check robustness to signal
 strength and noise, use `--snr-grid=0.5,1,2,4` for fixed-SNR comparisons or
 `--noise-sd-grid=0.5,1,2` for fixed-noise stress tests; runs with these options
 write `benchmark_noise_summary.csv` and `benchmark_noise_f1_gain_panel.csv`.
-For the main scientific comparison, the fixed-SNR grid is usually the fairer
-axis because it keeps relative difficulty comparable across scenarios and
-representations. To make reruns reproducible, the benchmark driver uses a
+Here `snr` is a signal-to-noise standard-deviation ratio; outputs retain
+`effective_snr` and add `effective_variance_snr = effective_snr^2` for
+variance-ratio reporting. For the main scientific comparison, the fixed-SNR
+grid is usually the fairer axis because it keeps relative difficulty comparable
+across scenarios and representations. To make reruns reproducible, the
+benchmark driver uses a
 recorded deterministic SelectBoost perturbation backend by default; pass
 `--upstream-rfast-rvmf` only when you specifically want the upstream `Rfast`
 perturbation generator.
@@ -360,8 +372,10 @@ system2(
     "--c0-grid=0.9,0.7,0.5,0.3",
     "--association-grid=correlation,neighborhood,hybrid,interval",
     "--bandwidth-grid=4,8",
+    "--checkpoint-every=100",
     "--assessment-summary",
     "--save-surfaces",
+    "--surface-use-main-settings",
     "--save-association-diagnostics",
     "--bootstrap-reps=2000",
     paste0("--output-dir=", file.path(tempdir(), "selectboost_fda_focused_n30"))

@@ -31,12 +31,20 @@ The driver also writes `paired_gain_bootstrap_ci.csv` with deterministic
 percentile bootstrap confidence intervals, win rates, valid paired
 replicate counts, and method-failure flags. Long runs also update
 `progress.tsv` after study, replicate, simulation, and setting
-milestones; append `benchmark_raw_metrics_checkpoint.csv` after each
-completed replicate; and write per-replicate raw metrics to
-`checkpoints/benchmark_raw_metrics_repNNN.csv`. For reproducibility, the
-driver uses a recorded deterministic SelectBoost perturbation backend by
-default. Pass `--upstream-rfast-rvmf` only when comparing against the
-upstream `Rfast` perturbation generator directly.
+milestones; append `benchmark_raw_metrics_checkpoint.csv` at the cadence
+set by `--checkpoint-every=N` and at each completed replicate; write
+setting-level checkpoint files to
+`checkpoints/benchmark_raw_metrics_settingNNNNNN.csv`; overwrite
+`checkpoints/benchmark_raw_metrics_latest.csv` with the latest
+checkpointed setting; and write per-replicate raw metrics to
+`checkpoints/benchmark_raw_metrics_repNNN.csv`. Each run writes
+`run_metadata.yml`, creates `RUNNING` while active, writes `COMPLETED` on
+successful completion, and removes `RUNNING` only after success. Use
+distinct `--output-dir` values for parallel runs. `--resume` preserves
+previous checkpoint files but does not yet skip completed settings. For
+reproducibility, the driver uses a recorded deterministic SelectBoost
+perturbation backend by default. Pass `--upstream-rfast-rvmf` only when
+comparing against the upstream `Rfast` perturbation generator directly.
 
 For assessment interpretation, use `benchmark_best_settings.csv` only
 together with `assessment_all_setting_summary.csv`. The driver also
@@ -109,10 +117,12 @@ is the recommended axis for the main method comparison because it keeps
 relative difficulty comparable across scenarios, representations, and
 signal structures. The fixed-noise grid is useful as a stress test for
 absolute observation noise. Both axes are recorded in the raw metrics
-and summaries through `noise_axis`, `snr`, and `noise_sd`. The driver
-writes `benchmark_noise_summary.csv` for performance by noise condition
-and `benchmark_noise_f1_gain_panel.csv` for a plot-ready `F1` gain
-panel.
+and summaries through `noise_axis`, `snr`, `noise_sd`, `effective_snr`,
+and `effective_variance_snr`. Here `snr` is a signal-to-noise
+standard-deviation ratio; `effective_variance_snr` is
+`effective_snr^2` for variance-ratio reporting. The driver writes
+`benchmark_noise_summary.csv` for performance by noise condition and
+`benchmark_noise_f1_gain_panel.csv` for a plot-ready `F1` gain panel.
 
 ## Campaign interface
 
@@ -133,6 +143,13 @@ benchmark campaigns:
   `--bandwidth-grid=4,8` choose the FDA-aware grouping geometry.
 - `--bootstrap-reps=2000` controls the deterministic bootstrap used for
   paired `F1` gain confidence intervals.
+- `--checkpoint-every=100` controls setting-level raw-metric checkpoint
+  frequency; use `--checkpoint-every=1` when every completed setting
+  should be materialized immediately.
+- `--resume` preserves existing checkpoint files in an output directory
+  but does not yet skip previously completed settings.
+- `--surface-use-main-settings` makes surface diagnostics inherit a
+  representative main-grid `n`, `grid_length`, and noise/SNR setting.
 
 Assessment-oriented summaries, perturbation surfaces, and association
 diagnostics are written by default for compatibility with the saved
@@ -156,6 +173,7 @@ system2(
     "--n-grid=50,100",
     "--grid-length-grid=30,75",
     "--snr-grid=0.5,1,2,4",
+    "--checkpoint-every=1",
     paste0("--output-dir=", file.path(tempdir(), "selectboost_fda_focused_benchmark"))
   )
 )
@@ -178,8 +196,10 @@ system2(
     "--c0-grid=0.9,0.7,0.5,0.3",
     "--association-grid=correlation,neighborhood,hybrid,interval",
     "--bandwidth-grid=4,8",
+    "--checkpoint-every=100",
     "--assessment-summary",
     "--save-surfaces",
+    "--surface-use-main-settings",
     "--save-association-diagnostics",
     "--bootstrap-reps=2000",
     paste0("--output-dir=", file.path(tempdir(), "selectboost_fda_focused_campaign"))

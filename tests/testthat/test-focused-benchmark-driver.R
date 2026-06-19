@@ -14,7 +14,7 @@ focused_benchmark_script <- function() {
 test_that("focused benchmark driver writes quick artifacts to tempdir", {
   skip_on_cran()
 
-  output_dir <- file.path(tempdir(), paste0("selectboost-benchmark-", Sys.getpid()))
+  output_dir <- tempfile("selectboost-benchmark-")
   script <- focused_benchmark_script()
   result <- system2(
     file.path(R.home("bin"), "Rscript"),
@@ -23,6 +23,7 @@ test_that("focused benchmark driver writes quick artifacts to tempdir", {
       "--quick",
       "--n-replicates=1",
       "--seed=101",
+      "--checkpoint-every=1",
       paste0("--output-dir=", output_dir)
     ),
     stdout = TRUE,
@@ -65,14 +66,18 @@ test_that("focused benchmark driver writes quick artifacts to tempdir", {
     "benchmark_noise_f1_gain_panel.csv",
     "benchmark_representation_summary.csv",
     "assessment_representation_table.csv",
+    "run_metadata.yml",
+    "COMPLETED",
     "session_info.txt",
     "config.yml"
   )
   expect_true(all(file.exists(file.path(output_dir, expected))))
   expect_true(file.exists(file.path(output_dir, "checkpoints", "benchmark_raw_metrics_rep001.csv")))
+  expect_true(file.exists(file.path(output_dir, "checkpoints", "benchmark_raw_metrics_latest.csv")))
+  expect_false(file.exists(file.path(output_dir, "RUNNING")))
 
   required_columns <- c(
-    "benchmark_name", "package_version", "git_commit", "seed", "rng_backend",
+    "benchmark_name", "baseline_name", "package_version", "git_commit", "seed", "rng_backend",
     "replicate", "method", "scenario", "representation", "n", "grid_length",
     "noise_axis", "snr", "noise_sd", "association_method", "bandwidth",
     "selector", "B", "steps.seq"
@@ -80,6 +85,8 @@ test_that("focused benchmark driver writes quick artifacts to tempdir", {
   metrics <- utils::read.csv(file.path(output_dir, "benchmark_raw_metrics.csv"))
   expect_true(all(c(required_columns, "level", "f1") %in% names(metrics)))
   expect_true(all(metrics$benchmark_name == "baseline_focused_benchmark_2026"))
+  expect_true(all(metrics$baseline_name == metrics$benchmark_name))
+  expect_true("effective_variance_snr" %in% names(metrics))
   expect_true(all(metrics$seed == 101))
   expect_true(all(metrics$rng_backend == "base_r_deterministic_vmf_shim"))
   expect_true(all(c("simulation_seed", "benchmark_seed") %in% names(metrics)))
@@ -94,6 +101,7 @@ test_that("focused benchmark driver writes quick artifacts to tempdir", {
 
   progress <- utils::read.delim(file.path(output_dir, "progress.tsv"), check.names = FALSE)
   expect_true(all(c("timestamp", "event", "completed_runs", "total_runs", "percent_complete") %in% names(progress)))
+  expect_true(all(c("checkpoint_file", "checkpoint_rows") %in% names(progress)))
   expect_true(all(c("noise_axis", "snr", "noise_sd") %in% names(progress)))
   expect_true(all(c(
     "runtime_status", "n_warnings", "n_failures",
@@ -110,10 +118,21 @@ test_that("focused benchmark driver writes quick artifacts to tempdir", {
     file.path(output_dir, "checkpoints", "benchmark_raw_metrics_rep001.csv"),
     check.names = FALSE
   )
+  latest_checkpoint <- utils::read.csv(
+    file.path(output_dir, "checkpoints", "benchmark_raw_metrics_latest.csv"),
+    check.names = FALSE
+  )
+  setting_checkpoints <- list.files(
+    file.path(output_dir, "checkpoints"),
+    pattern = "^benchmark_raw_metrics_setting[0-9]{6}[.]csv$",
+    full.names = TRUE
+  )
   expect_identical(names(checkpoint), names(metrics))
   expect_identical(names(replicate_checkpoint), names(metrics))
+  expect_identical(names(latest_checkpoint), names(metrics))
   expect_equal(nrow(checkpoint), nrow(metrics))
   expect_equal(nrow(replicate_checkpoint), nrow(metrics))
+  expect_equal(length(setting_checkpoints), length(unique(metrics$setting_index)))
 
   summary <- utils::read.csv(file.path(output_dir, "benchmark_summary_by_setting.csv"))
   best <- utils::read.csv(file.path(output_dir, "benchmark_best_settings.csv"))
@@ -193,6 +212,10 @@ test_that("focused benchmark driver writes quick artifacts to tempdir", {
   expect_true(all(c("summary_scope", "median_gain", "iqr_gain", "fraction_positive", "interpretation_rule") %in% names(assessment_all)))
   expect_true(all(c("failure_mode", "assessment_note", "paired_gain_mean") %in% names(assessment_failures)))
   expect_true(all(c("surface_scenario_type", "q", "c0", "mean_selection", "n_selected") %in% names(assessment_surface)))
+  expect_true(all(c(
+    "surface_design_source", "surface_inherits_main_n",
+    "surface_inherits_main_grid_length", "surface_inherits_main_noise"
+  ) %in% names(assessment_surface)))
   expect_true(all(c("surface_scenario_type", "axis", "fraction_monotone", "expected_direction") %in% names(assessment_monotonicity)))
   expect_true(all(c("surface_scenario_type", "q", "c0", "threshold", "precision", "recall", "f1") %in% names(assessment_pr)))
   expect_true(all(c("surface_scenario_type", "threshold_type", "threshold", "precision", "recall", "f1") %in% names(assessment_thresholds)))
@@ -322,8 +345,12 @@ test_that("focused benchmark driver writes quick artifacts to tempdir", {
 
   config <- readLines(file.path(output_dir, "benchmark_config_baseline.yml"), warn = FALSE)
   expect_true(any(grepl("^baseline_name: baseline_focused_benchmark_2026$", config)))
+  expect_true(any(grepl("^benchmark_name: baseline_focused_benchmark_2026$", config)))
   expect_true(any(grepl("^  - progress.tsv$", config)))
   expect_true(any(grepl("^  - benchmark_raw_metrics_checkpoint.csv$", config)))
+  expect_true(any(grepl("^  - checkpoints/benchmark_raw_metrics_latest.csv$", config)))
+  expect_true(any(grepl("^  - run_metadata.yml$", config)))
+  expect_true(any(grepl("^  - COMPLETED$", config)))
   expect_true(any(grepl("^  - benchmark_size_resolution_summary.csv$", config)))
   expect_true(any(grepl("^  - benchmark_runtime_by_size_resolution.csv$", config)))
   expect_true(any(grepl("^  - paired_gain_bootstrap_ci.csv$", config)))
@@ -357,6 +384,7 @@ test_that("focused benchmark driver writes quick artifacts to tempdir", {
   expect_true(any(grepl("^  save_surfaces: true$", config)))
   expect_true(any(grepl("^  save_association_diagnostics: true$", config)))
   expect_true(any(grepl("^  bootstrap_reps:", config)))
+  expect_true(any(grepl("^  checkpoint_every: 1$", config)))
   expect_true(any(grepl("^  representation_grid:$", config)))
   expect_true(any(grepl("^  snr_grid:", config)))
   expect_true(any(grepl("^  noise_sd_grid:", config)))
@@ -366,12 +394,81 @@ test_that("focused benchmark driver writes quick artifacts to tempdir", {
   expect_true(any(grepl("^association_diagnostic_args:", config)))
   expect_true(any(grepl("^method_comparison_args:", config)))
   expect_true(any(grepl("^assessment_surface_args:", config)))
+
+  run_metadata <- readLines(file.path(output_dir, "run_metadata.yml"), warn = FALSE)
+  expect_true(any(grepl("^run_id:", run_metadata)))
+  expect_true(any(grepl("^checkpoint_every: 1$", run_metadata)))
+  expect_true(any(grepl("^resume: false$", run_metadata)))
+
+  rerun <- suppressWarnings(system2(
+    file.path(R.home("bin"), "Rscript"),
+    c(
+      script,
+      "--quick",
+      "--n-replicates=1",
+      "--seed=101",
+      paste0("--output-dir=", output_dir)
+    ),
+    stdout = TRUE,
+    stderr = TRUE
+  ))
+  expect_true((attr(rerun, "status") %||% 0) != 0)
+  expect_true(any(grepl("completed benchmark run", rerun)))
+})
+
+test_that("focused benchmark driver protects active runs and resume preserves checkpoint files", {
+  skip_on_cran()
+
+  output_dir <- tempfile("selectboost-benchmark-resume-")
+  dir.create(file.path(output_dir, "checkpoints"), recursive = TRUE, showWarnings = FALSE)
+  writeLines("run_id: previous\npid: 1\nstart_time: old", file.path(output_dir, "RUNNING"))
+  writeLines("sentinel\tvalue\nbefore\t1", file.path(output_dir, "progress.tsv"))
+  writeLines("sentinel", file.path(output_dir, "checkpoints", "manual_checkpoint.csv"))
+
+  script <- focused_benchmark_script()
+  blocked <- suppressWarnings(system2(
+    file.path(R.home("bin"), "Rscript"),
+    c(
+      script,
+      "--quick",
+      "--n-replicates=1",
+      "--seed=101",
+      paste0("--output-dir=", output_dir)
+    ),
+    stdout = TRUE,
+    stderr = TRUE
+  ))
+  expect_true((attr(blocked, "status") %||% 0) != 0)
+  expect_true(any(grepl("active or interrupted benchmark run", blocked)))
+  expect_true(file.exists(file.path(output_dir, "progress.tsv")))
+  expect_true(file.exists(file.path(output_dir, "checkpoints", "manual_checkpoint.csv")))
+
+  resumed <- system2(
+    file.path(R.home("bin"), "Rscript"),
+    c(
+      script,
+      "--quick",
+      "--n-replicates=1",
+      "--seed=101",
+      "--representation-grid=grid",
+      "--checkpoint-every=1",
+      "--resume",
+      paste0("--output-dir=", output_dir)
+    ),
+    stdout = TRUE,
+    stderr = TRUE
+  )
+  expect_equal(attr(resumed, "status") %||% 0, 0)
+  expect_true(any(grepl("does not skip previously completed settings yet", resumed)))
+  expect_true(file.exists(file.path(output_dir, "checkpoints", "manual_checkpoint.csv")))
+  expect_true(file.exists(file.path(output_dir, "COMPLETED")))
+  expect_false(file.exists(file.path(output_dir, "RUNNING")))
 })
 
 test_that("focused benchmark driver accepts phase 13 campaign grids", {
   skip_on_cran()
 
-  output_dir <- file.path(tempdir(), paste0("selectboost-benchmark-interface-", Sys.getpid()))
+  output_dir <- tempfile("selectboost-benchmark-interface-")
   script <- focused_benchmark_script()
   result <- system2(
     file.path(R.home("bin"), "Rscript"),
@@ -388,8 +485,11 @@ test_that("focused benchmark driver accepts phase 13 campaign grids", {
       "--bandwidth-grid=3",
       "--q-grid=0.4,0.7",
       "--c0-grid=0.8,0.6",
+      "--checkpoint-every",
+      "2",
       "--assessment-summary",
       "--save-surfaces",
+      "--surface-use-main-settings",
       "--save-association-diagnostics",
       "--bootstrap-reps=50",
       paste0("--output-dir=", output_dir)
@@ -410,6 +510,10 @@ test_that("focused benchmark driver accepts phase 13 campaign grids", {
   expect_setequal(unique(surface$surface_scenario_type), "smooth_sparse")
   expect_setequal(unique(surface$q), c(0.4, 0.7))
   expect_setequal(unique(surface$c0), c(0.8, 0.6))
+  expect_true(all(surface$surface_design_source == "main_grid_representative"))
+  expect_true(all(surface$surface_inherits_main_n))
+  expect_true(all(surface$surface_inherits_main_grid_length))
+  expect_true(all(surface$surface_inherits_main_noise))
 
   association <- utils::read.csv(file.path(output_dir, "association_diagnostics.csv"))
   expect_setequal(unique(association$scenario), "smooth_sparse")
@@ -418,6 +522,8 @@ test_that("focused benchmark driver accepts phase 13 campaign grids", {
 
   config <- readLines(file.path(output_dir, "benchmark_config_baseline.yml"), warn = FALSE)
   expect_true(any(grepl("^  bootstrap_reps: 50$", config)))
+  expect_true(any(grepl("^  checkpoint_every: 2$", config)))
+  expect_true(any(grepl("^  surface_use_main_settings: true$", config)))
   expect_true(any(grepl("^    - smooth_sparse$", config)))
   expect_true(any(grepl("^    - 0.4$", config)))
   expect_true(any(grepl("^    - 0.8$", config)))
@@ -428,7 +534,7 @@ test_that("focused benchmark driver accepts phase 13 campaign grids", {
 test_that("focused benchmark driver accepts SNR and fixed-noise grids", {
   skip_on_cran()
 
-  output_dir <- file.path(tempdir(), paste0("selectboost-benchmark-noise-", Sys.getpid()))
+  output_dir <- tempfile("selectboost-benchmark-noise-")
   script <- focused_benchmark_script()
   result <- system2(
     file.path(R.home("bin"), "Rscript"),
@@ -459,8 +565,8 @@ test_that("focused benchmark driver accepts SNR and fixed-noise grids", {
   noise_panel <- utils::read.csv(file.path(output_dir, "benchmark_noise_f1_gain_panel.csv"))
   paired_gain_ci <- utils::read.csv(file.path(output_dir, "paired_gain_bootstrap_ci.csv"))
   assessment_all <- utils::read.csv(file.path(output_dir, "assessment_all_setting_summary.csv"))
-  expect_true(all(c("noise_axis", "snr", "noise_sd", "f1_mean") %in% names(noise_summary)))
-  expect_true(all(c("noise_axis", "snr", "noise_sd", "f1_gain_mean") %in% names(noise_panel)))
+  expect_true(all(c("noise_axis", "snr", "noise_sd", "effective_snr", "effective_variance_snr", "f1_mean") %in% names(noise_summary)))
+  expect_true(all(c("noise_axis", "snr", "noise_sd", "effective_snr", "effective_variance_snr", "f1_gain_mean") %in% names(noise_panel)))
   expect_true(all(c("bootstrap_ci_lower", "bootstrap_ci_upper", "n_valid_pairs") %in% names(paired_gain_ci)))
   expect_true(all(c("summary_scope", "median_gain", "fraction_positive") %in% names(assessment_all)))
   expect_true(0.5 %in% unique(stats::na.omit(noise_summary$snr)))
@@ -475,7 +581,7 @@ test_that("focused benchmark driver accepts SNR and fixed-noise grids", {
 test_that("focused benchmark driver accepts explicit size-resolution grids", {
   skip_on_cran()
 
-  output_dir <- file.path(tempdir(), paste0("selectboost-benchmark-size-", Sys.getpid()))
+  output_dir <- tempfile("selectboost-benchmark-size-")
   script <- focused_benchmark_script()
   result <- system2(
     file.path(R.home("bin"), "Rscript"),
@@ -510,8 +616,8 @@ test_that("focused benchmark driver accepts explicit size-resolution grids", {
 test_that("focused benchmark driver is reproducible for the same quick seed", {
   skip_on_cran()
 
-  output_a <- file.path(tempdir(), paste0("selectboost-benchmark-repro-a-", Sys.getpid()))
-  output_b <- file.path(tempdir(), paste0("selectboost-benchmark-repro-b-", Sys.getpid()))
+  output_a <- tempfile("selectboost-benchmark-repro-a-")
+  output_b <- tempfile("selectboost-benchmark-repro-b-")
   script <- focused_benchmark_script()
 
   common_args <- c("--quick", "--n-replicates=1", "--seed=101", "--representation-grid=grid")

@@ -231,7 +231,8 @@ summarise_simulation_metrics <- function(metrics) {
   )
   numeric_cols <- intersect(c(
     "n_truth", "n_selected", "tp", "fp", "fn", "tn",
-    "precision", "recall", "specificity", "f1", "jaccard", "selection_rate"
+    "precision", "recall", "specificity", "f1", "jaccard", "selection_rate",
+    "effective_snr", "effective_variance_snr"
   ), names(metrics))
 
   if (length(by_cols) == 0L) {
@@ -317,7 +318,8 @@ aggregate_benchmark_rows <- function(metrics) {
   )
   numeric_cols <- intersect(c(
     "n_truth", "n_selected", "tp", "fp", "fn", "tn",
-    "precision", "recall", "specificity", "f1", "jaccard", "selection_rate"
+    "precision", "recall", "specificity", "f1", "jaccard", "selection_rate",
+    "effective_snr", "effective_variance_snr"
   ), names(metrics))
 
     split_keys <- interaction_key(metrics[by_cols])
@@ -560,6 +562,14 @@ failed_benchmark_metrics <- function(methods,
   out$noise_sd <- if (!is.null(data)) data$requested_noise_sd %||% data$noise_sd %||% NA_real_ else simulate_labels$noise_sd %||% NA_real_
   out$effective_noise_sd <- if (!is.null(data)) data$noise_sd %||% NA_real_ else NA_real_
   out$effective_snr <- if (!is.null(data)) data$effective_snr %||% NA_real_ else NA_real_
+  out$effective_variance_snr <- if (!is.null(data)) {
+    data$effective_variance_snr %||% {
+      value <- data$effective_snr %||% NA_real_
+      ifelse(is.na(value), NA_real_, value^2)
+    }
+  } else {
+    NA_real_
+  }
   out$runtime_status <- "failed"
   out$failure_stage <- stage
   out$n_failures <- 1L
@@ -804,9 +814,9 @@ print.summary.plain_selectboost_result <- function(x, ...) {
 #'   part of the default, fixed-SNR, or fixed-noise axis.
 #' @param noise_sd Observation noise level. Ignored for Gaussian responses when
 #'   `snr` is supplied.
-#' @param snr Optional target signal-to-noise ratio for Gaussian responses. When
-#'   supplied, the observation noise standard deviation is set to
-#'   `sd(linear_predictor) / snr`.
+#' @param snr Optional target signal-to-noise standard-deviation ratio for
+#'   Gaussian responses. When supplied, the observation noise standard deviation
+#'   is set to `sd(linear_predictor) / snr`.
 #' @param seed Optional random seed.
 #'
 #' @returns An object of class `fda_simulation_data`.
@@ -1149,7 +1159,8 @@ simulate_fda_scenario <- function(n = 80L,
       snr = snr %||% NA_real_,
       noise_sd = effective_noise_sd,
       requested_noise_sd = noise_sd,
-      effective_snr = effective_snr
+      effective_snr = effective_snr,
+      effective_variance_snr = if (is.na(effective_snr)) NA_real_ else effective_snr^2
     )
     class(output) <- "fda_simulation_data"
     output
@@ -1168,6 +1179,7 @@ print.fda_simulation_data <- function(x, ...) {
   cat("  local correlation:", x$local_correlation, "\n")
   cat("  noise axis:", x$noise_axis %||% NA_character_, "\n")
   cat("  noise sd:", x$noise_sd %||% NA_real_, "\n")
+  cat("  effective signal-to-noise SD ratio:", x$effective_snr %||% NA_real_, "\n")
   target_snr <- x$snr %||% NA_real_
   if (length(target_snr) == 1L && !is.na(target_snr)) {
     cat("  target snr:", target_snr, "\n")
@@ -1329,6 +1341,10 @@ benchmark_selection_methods <- function(data,
     out$noise_sd <- data$requested_noise_sd %||% data$noise_sd %||% NA_real_
     out$effective_noise_sd <- data$noise_sd %||% NA_real_
     out$effective_snr <- data$effective_snr %||% NA_real_
+    out$effective_variance_snr <- data$effective_variance_snr %||% {
+      value <- data$effective_snr %||% NA_real_
+      ifelse(is.na(value), NA_real_, value^2)
+    }
     out
   }))
 
@@ -1533,8 +1549,9 @@ run_simulation_study <- function(n_rep = 10L,
 #' @param keep_results Should the individual benchmark objects be returned?
 #' @param progress Optional callback function used for long-running studies.
 #'   When supplied, it is called with named arguments including `event`,
-#'   `replicate`, `completed_runs`, `total_runs`, and, at replicate completion,
-#'   the completed replicate `metrics`. No files are written by default.
+#'   `replicate`, `completed_runs`, `total_runs`, and `metrics` at
+#'   `setting_complete` and `replicate_complete`. No files are written by
+#'   default.
 #'
 #' The returned raw metrics include runtime diagnostics for each setting:
 #' elapsed, user, and system time; warning and failure counts; runtime status;
@@ -1689,6 +1706,7 @@ run_selectboost_sensitivity_study <- function(n_rep = 10L,
             error_message = conditionMessage(simulation_capture$error)
           )
           metrics$replicate <- replicate
+          metrics$setting_index <- counter
           metrics$simulation_seed <- simulate_args_current$seed
           metrics$benchmark_seed <- benchmark_seed
           metrics$simulation_user <- timing_value(simulation_timing, "user.self")
@@ -1731,6 +1749,7 @@ run_selectboost_sensitivity_study <- function(n_rep = 10L,
             n_failures = 1L,
             runtime_status = "failed",
             error_message = conditionMessage(simulation_capture$error),
+            metrics = metrics,
             completed_runs = counter,
             total_runs = total_runs
           )
@@ -1791,6 +1810,7 @@ run_selectboost_sensitivity_study <- function(n_rep = 10L,
           )
         }
         metrics$replicate <- replicate
+        metrics$setting_index <- counter
         metrics$simulation_seed <- simulate_args_current$seed
         metrics$benchmark_seed <- benchmark_seed
         metrics$simulation_user <- timing_value(simulation_timing, "user.self")
@@ -1848,6 +1868,7 @@ run_selectboost_sensitivity_study <- function(n_rep = 10L,
           runtime_status = if (is.null(benchmark_capture$error)) "completed" else "failed",
           error_message = if (is.null(benchmark_capture$error)) NA_character_ else conditionMessage(benchmark_capture$error),
           result_size_mb = if (is.null(benchmark_capture$error)) object_size_mb(bench) else NA_real_,
+          metrics = metrics,
           completed_runs = counter,
           total_runs = total_runs
         )

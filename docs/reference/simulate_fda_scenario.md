@@ -109,7 +109,7 @@ simulate_fda_scenario(
 
 - snr:
 
-  Optional target signal-to-noise ratio for Gaussian responses. When
+  Optional target signal-to-noise standard-deviation ratio for Gaussian responses. When
   supplied, the observation noise standard deviation is set to
   `sd(linear_predictor) / snr`.
 

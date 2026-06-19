@@ -123,8 +123,7 @@ per-setting seeds.</p></dd>
 <dt id="arg-progress">progress<a class="anchor" aria-label="anchor" href="#arg-progress"></a></dt>
 <dd><p>Optional callback function used for long-running studies.
 When supplied, it is called with named arguments including <code>event</code>,
-<code>replicate</code>, <code>completed_runs</code>, <code>total_runs</code>, and, at replicate completion,
-the completed replicate <code>metrics</code>. No files are written by default.</p>
+<code>replicate</code>, <code>completed_runs</code>, <code>total_runs</code>, and <code>metrics</code> at <code>setting_complete</code> and <code>replicate_complete</code>. No files are written by default.</p>
 <p>The returned raw metrics include runtime diagnostics for each setting:
 elapsed, user, and system time; warning and failure counts; runtime status;
 error messages for failed settings; and fitted benchmark object size in MB

@@ -74,9 +74,9 @@ part of the default, fixed-SNR, or fixed-noise axis.}
 \item{noise_sd}{Observation noise level. Ignored for Gaussian responses when
 \code{snr} is supplied.}
 
-\item{snr}{Optional target signal-to-noise ratio for Gaussian responses. When
-supplied, the observation noise standard deviation is set to
-\code{sd(linear_predictor) / snr}.}
+\item{snr}{Optional target signal-to-noise standard-deviation ratio for
+Gaussian responses. When supplied, the observation noise standard deviation is
+set to \code{sd(linear_predictor) / snr}.}
 
 \item{seed}{Optional random seed.}
 }

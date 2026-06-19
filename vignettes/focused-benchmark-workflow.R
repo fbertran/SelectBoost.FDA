@@ -12,6 +12,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 #     "--n-grid=50,100",
 #     "--grid-length-grid=30,75",
 #     "--snr-grid=0.5,1,2,4",
+#     "--checkpoint-every=1",
 #     paste0("--output-dir=", file.path(tempdir(), "selectboost_fda_focused_benchmark"))
 #   )
 # )
@@ -32,8 +33,10 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 #     "--c0-grid=0.9,0.7,0.5,0.3",
 #     "--association-grid=correlation,neighborhood,hybrid,interval",
 #     "--bandwidth-grid=4,8",
+#     "--checkpoint-every=100",
 #     "--assessment-summary",
 #     "--save-surfaces",
+#     "--surface-use-main-settings",
 #     "--save-association-diagnostics",
 #     "--bootstrap-reps=2000",
 #     paste0("--output-dir=", file.path(tempdir(), "selectboost_fda_focused_campaign"))
@@ -77,4 +80,3 @@ metrics <- data.frame(
 )
 
 as_benchmark_summary_data(metrics)
-

@@ -688,7 +688,9 @@ normalize_benchmark_summary <- function(data) {
     "association_method", "bandwidth", "group_method", "within_blocks",
     "n_rep", "precision_mean", "precision_sd", "recall_mean", "recall_sd",
     "f1_mean", "f1_sd", "jaccard_mean", "jaccard_sd",
-    "selection_rate_mean", "selection_rate_sd"
+    "selection_rate_mean", "selection_rate_sd",
+    "effective_snr_mean", "effective_snr_sd",
+    "effective_variance_snr_mean", "effective_variance_snr_sd"
   )
   data <- add_missing_columns(as.data.frame(data, stringsAsFactors = FALSE), expected)
   data[, unique(c(expected, setdiff(names(data), expected))), drop = FALSE]

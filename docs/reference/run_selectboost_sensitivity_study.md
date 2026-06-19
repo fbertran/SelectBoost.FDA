@@ -70,8 +70,8 @@ run_selectboost_sensitivity_study(
 
   Optional callback function used for long-running studies. When
   supplied, it is called with named arguments including `event`,
-  `replicate`, `completed_runs`, `total_runs`, and, at replicate
-  completion, the completed replicate `metrics`. No files are written by
+  `replicate`, `completed_runs`, `total_runs`, and `metrics` at
+  `setting_complete` and `replicate_complete`. No files are written by
   default.
 
   The returned raw metrics include runtime diagnostics for each setting:

@@ -58,6 +58,15 @@
   `benchmark_raw_metrics_checkpoint.csv`, and per-replicate raw-metric
   checkpoint files under `checkpoints/`, so long runs can be inspected before
   final summary files are written.
+- Added setting-level focused-benchmark checkpointing with
+  `--checkpoint-every=N` and `--checkpoint-every N`. Checkpoints now include
+  numbered setting files, `checkpoints/benchmark_raw_metrics_latest.csv`, and
+  append-only raw-metric checkpoint rows, while preserving the existing
+  per-replicate checkpoint files.
+- Added `--resume` preservation mode plus `RUNNING`, `COMPLETED`, and
+  `run_metadata.yml` run markers. A completed or active output directory is
+  protected from accidental reuse unless `--resume` is supplied; `--resume`
+  preserves previous checkpoint files but does not yet skip completed settings.
 - Added Phase 5 size-resolution controls to the focused benchmark driver:
   `--n-grid=50,100,200` and `--grid-length-grid=30,75,150`. Runs now keep
   `n`, `grid_length`, and per-setting elapsed-time columns in raw metrics, and
@@ -66,14 +75,17 @@
 - Added Phase 6 noise and signal-strength controls:
   `--snr-grid=0.5,1,2,4` for fixed-SNR comparisons and
   `--noise-sd-grid=0.5,1,2` for fixed-noise stress tests. Benchmark outputs
-  now carry `noise_axis`, `snr`, and `noise_sd`, and the driver writes
-  `benchmark_noise_summary.csv` plus `benchmark_noise_f1_gain_panel.csv`.
+  now carry `noise_axis`, `snr`, `noise_sd`, `effective_snr`, and
+  `effective_variance_snr`, and the driver writes `benchmark_noise_summary.csv`
+  plus `benchmark_noise_f1_gain_panel.csv`. The `snr` argument is documented as
+  a signal-to-noise standard-deviation ratio.
 - Added Phase 13 campaign-level controls to `tools/run_focused_benchmark.R`:
   `--representation-grid`, `--scenario-grid`, `--n-grid`,
   `--grid-length-grid`, `--snr-grid`, `--noise-sd-grid`, `--q-grid`,
   `--c0-grid`, `--association-grid`, `--bandwidth-grid`,
   `--assessment-summary`, `--save-surfaces`,
-  `--save-association-diagnostics`, and `--bootstrap-reps`. Generated
+  `--save-association-diagnostics`, `--bootstrap-reps`,
+  `--checkpoint-every`, and `--surface-use-main-settings`. Generated
   benchmark configuration files now record these interface arguments so
   assessment and extended benchmark campaigns can be audited and reproduced.
 

@@ -20,6 +20,9 @@ parse_cli_args <- function(args) {
     save_surfaces = TRUE,
     save_association_diagnostics = TRUE,
     bootstrap_replicates = 2000L,
+    checkpoint_every = 100L,
+    resume = FALSE,
+    surface_use_main_settings = FALSE,
     n_cores = 1L,
     deterministic_rng = TRUE,
     n_replicates_explicit = FALSE
@@ -122,6 +125,11 @@ parse_cli_args <- function(args) {
     } else if ((identical(arg, "--bootstrap-replicates") || identical(arg, "--bootstrap-reps")) && i < length(args)) {
       i <- i + 1L
       out$bootstrap_replicates <- as.integer(args[[i]])
+    } else if (grepl("^--checkpoint-every=", arg)) {
+      out$checkpoint_every <- as.integer(sub("^--checkpoint-every=", "", arg))
+    } else if (identical(arg, "--checkpoint-every") && i < length(args)) {
+      i <- i + 1L
+      out$checkpoint_every <- as.integer(args[[i]])
     } else if (grepl("^--n-cores=", arg)) {
       out$n_cores <- as.integer(sub("^--n-cores=", "", arg))
     } else if (identical(arg, "--n-cores") && i < length(args)) {
@@ -141,6 +149,10 @@ parse_cli_args <- function(args) {
       out$save_association_diagnostics <- TRUE
     } else if (identical(arg, "--no-save-association-diagnostics")) {
       out$save_association_diagnostics <- FALSE
+    } else if (identical(arg, "--resume")) {
+      out$resume <- TRUE
+    } else if (identical(arg, "--surface-use-main-settings")) {
+      out$surface_use_main_settings <- TRUE
     }
     i <- i + 1L
   }
@@ -159,6 +171,10 @@ parse_cli_args <- function(args) {
   if (length(out$bootstrap_replicates) != 1L || is.na(out$bootstrap_replicates) ||
       out$bootstrap_replicates < 1L) {
     stop("`--bootstrap-replicates` must be a positive integer.", call. = FALSE)
+  }
+  if (length(out$checkpoint_every) != 1L || is.na(out$checkpoint_every) ||
+      out$checkpoint_every < 1L) {
+    stop("`--checkpoint-every` must be a positive integer.", call. = FALSE)
   }
   out
 }
@@ -510,6 +526,7 @@ write_baseline_config <- function(file,
     representation_grid = representation_grid
   )$scenario
   lines <- c(
+    paste0("benchmark_name: ", yaml_scalar(baseline_name)),
     paste0("baseline_name: ", yaml_scalar(baseline_name)),
     paste0("package_version: ", yaml_scalar(package_version)),
     paste0("git_commit: ", yaml_scalar(git_commit)),
@@ -529,6 +546,9 @@ write_baseline_config <- function(file,
     paste0("  save_surfaces: ", yaml_scalar(args$save_surfaces)),
     paste0("  save_association_diagnostics: ", yaml_scalar(args$save_association_diagnostics)),
     paste0("  bootstrap_reps: ", yaml_scalar(args$bootstrap_replicates)),
+    paste0("  checkpoint_every: ", yaml_scalar(args$checkpoint_every)),
+    paste0("  resume: ", yaml_scalar(args$resume)),
+    paste0("  surface_use_main_settings: ", yaml_scalar(args$surface_use_main_settings)),
     yaml_vector_lines("requested_methods", args$methods),
     yaml_vector_lines("benchmark_methods", methods),
     "simulate_args:",
@@ -576,6 +596,7 @@ write_baseline_config <- function(file,
     yaml_nested_vector_lines("c0_grid", surface_c0_grid),
     paste0("  B: ", yaml_scalar(surface_reps)),
     paste0("  selectboost_B: ", yaml_scalar(surface_selectboost_reps)),
+    paste0("  surface_use_main_settings: ", yaml_scalar(args$surface_use_main_settings)),
     "  selector: msgps",
     yaml_nested_vector_lines("representative_scenarios", surface_scenarios),
     "output_files:",
@@ -583,6 +604,11 @@ write_baseline_config <- function(file,
     "  - progress.tsv",
     "  - benchmark_raw_metrics_checkpoint.csv",
     "  - checkpoints/benchmark_raw_metrics_repNNN.csv",
+    "  - checkpoints/benchmark_raw_metrics_settingNNNNNN.csv",
+    "  - checkpoints/benchmark_raw_metrics_latest.csv",
+    "  - run_metadata.yml",
+    "  - RUNNING",
+    "  - COMPLETED",
     "  - benchmark_raw_metrics.csv",
     "  - benchmark_summary_by_setting.csv",
     paste0("  - benchmark_summary_n", args$n_replicates, ".csv"),
@@ -619,6 +645,91 @@ write_baseline_config <- function(file,
     "  - session_info.txt"
   )
   writeLines(lines, con = file, useBytes = TRUE)
+}
+
+make_run_id <- function() {
+  paste0(
+    "focused-benchmark-",
+    format(Sys.time(), "%Y%m%dT%H%M%OS3"),
+    "-pid",
+    Sys.getpid()
+  )
+}
+
+write_key_value_yaml <- function(file, values) {
+  lines <- paste0(names(values), ": ", vapply(values, yaml_scalar, character(1)))
+  writeLines(lines, con = file, useBytes = TRUE)
+}
+
+write_running_marker <- function(output_dir, run_id, start_time) {
+  write_key_value_yaml(
+    file.path(output_dir, "RUNNING"),
+    list(
+      run_id = run_id,
+      pid = Sys.getpid(),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3%z")
+    )
+  )
+}
+
+write_completed_marker <- function(output_dir, run_id, start_time, end_time) {
+  write_key_value_yaml(
+    file.path(output_dir, "COMPLETED"),
+    list(
+      run_id = run_id,
+      pid = Sys.getpid(),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3%z"),
+      end_time = format(end_time, "%Y-%m-%dT%H:%M:%OS3%z")
+    )
+  )
+}
+
+write_run_metadata <- function(output_dir,
+                               run_id,
+                               start_time,
+                               package_version,
+                               git_commit,
+                               args) {
+  write_key_value_yaml(
+    file.path(output_dir, "run_metadata.yml"),
+    list(
+      run_id = run_id,
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3%z"),
+      pid = Sys.getpid(),
+      hostname = Sys.info()[["nodename"]] %||% NA_character_,
+      output_dir = normalizePath(output_dir, mustWork = FALSE),
+      package_version = package_version,
+      git_commit = git_commit,
+      seed = args$seed,
+      n_replicates = args$n_replicates,
+      profile = args$profile,
+      checkpoint_every = args$checkpoint_every,
+      resume = args$resume
+    )
+  )
+}
+
+guard_run_markers <- function(output_dir, resume = FALSE) {
+  running_file <- file.path(output_dir, "RUNNING")
+  completed_file <- file.path(output_dir, "COMPLETED")
+  if (file.exists(running_file) && !isTRUE(resume)) {
+    stop(
+      "Output directory appears to contain an active or interrupted benchmark run. ",
+      "Use a different --output-dir, remove RUNNING manually, or use --resume.",
+      call. = FALSE
+    )
+  }
+  if (file.exists(completed_file) && !isTRUE(resume)) {
+    stop(
+      "Output directory appears to contain a completed benchmark run. ",
+      "Use a different --output-dir, remove COMPLETED manually, or use --resume.",
+      call. = FALSE
+    )
+  }
+  if (isTRUE(resume)) {
+    message("--resume preserves existing checkpoint files but does not skip previously completed settings yet.")
+  }
+  invisible(TRUE)
 }
 
 bind_rows_fill <- function(dfs) {
@@ -843,6 +954,7 @@ add_benchmark_metadata <- function(data,
   }
 
   data$benchmark_name <- metadata_value(baseline_name, n)
+  data$baseline_name <- metadata_value(baseline_name, n)
   data$package_version <- metadata_value(package_version, n)
   data$git_commit <- metadata_value(git_commit, n)
   data$seed <- metadata_value(seed, n)
@@ -858,7 +970,7 @@ add_benchmark_metadata <- function(data,
   }
 
   first_cols <- c(
-    "benchmark_name", "package_version", "git_commit", "seed", "rng_backend",
+    "benchmark_name", "baseline_name", "package_version", "git_commit", "seed", "rng_backend",
     "replicate", "method", "scenario", "representation", "n", "grid_length",
     "noise_axis", "snr", "noise_sd", "association_method", "bandwidth",
     "selector", "B", "steps.seq"
@@ -923,12 +1035,15 @@ append_csv_rows <- function(file, data) {
   invisible(TRUE)
 }
 
-prepare_progress_outputs <- function(output_dir) {
+prepare_progress_outputs <- function(output_dir, resume = FALSE) {
   checkpoints_dir <- file.path(output_dir, "checkpoints")
   dir.create(checkpoints_dir, recursive = TRUE, showWarnings = FALSE)
-  unlink(file.path(output_dir, "progress.tsv"))
-  unlink(file.path(output_dir, "benchmark_raw_metrics_checkpoint.csv"))
-  unlink(Sys.glob(file.path(checkpoints_dir, "benchmark_raw_metrics_rep*.csv")))
+  if (!isTRUE(resume)) {
+    unlink(file.path(output_dir, "progress.tsv"))
+    unlink(file.path(output_dir, "benchmark_raw_metrics_checkpoint.csv"))
+    unlink(file.path(output_dir, "COMPLETED"))
+    unlink(Sys.glob(file.path(checkpoints_dir, "*.csv")))
+  }
 
   list(
     progress_file = file.path(output_dir, "progress.tsv"),
@@ -941,7 +1056,8 @@ make_progress_row <- function(event,
                               info,
                               start_time,
                               checkpoint_file = NA_character_,
-                              rows = NA_integer_) {
+                              rows = NA_integer_,
+                              checkpoint_rows = NA_integer_) {
   now <- Sys.time()
   total_runs <- suppressWarnings(as.numeric(progress_value(info$total_runs, NA_character_)))
   completed_runs <- suppressWarnings(as.numeric(progress_value(info$completed_runs, NA_character_)))
@@ -991,6 +1107,7 @@ make_progress_row <- function(event,
     setting_elapsed = progress_value(info$setting_elapsed),
     result_size_mb = progress_value(info$result_size_mb),
     rows = progress_value(rows),
+    checkpoint_rows = progress_value(checkpoint_rows),
     checkpoint_file = progress_value(checkpoint_file),
     stringsAsFactors = FALSE
   )
@@ -1004,36 +1121,93 @@ make_focused_progress_callback <- function(output_dir,
                                            rng_backend,
                                            selectboost_reps,
                                            stability_reps,
-                                           selectboost_steps) {
-  outputs <- prepare_progress_outputs(output_dir)
+                                           selectboost_steps,
+                                           checkpoint_every = 100L,
+                                           resume = FALSE) {
+  outputs <- prepare_progress_outputs(output_dir, resume = resume)
   start_time <- Sys.time()
+  appended_setting_indices <- integer()
+
+  add_checkpoint_metadata <- function(metrics) {
+    add_benchmark_metadata(
+      metrics,
+      baseline_name = baseline_name,
+      package_version = package_version,
+      git_commit = git_commit,
+      seed = seed,
+      selectboost_reps = selectboost_reps,
+      stability_reps = stability_reps,
+      selectboost_steps = selectboost_steps,
+      rng_backend = rng_backend
+    )
+  }
+
+  setting_index_from_info <- function(info, metrics = NULL) {
+    if (!is.null(metrics) && "setting_index" %in% names(metrics)) {
+      value <- suppressWarnings(as.integer(stats::na.omit(unique(metrics$setting_index))))
+      if (length(value) > 0L && !is.na(value[1L])) {
+        return(value[1L])
+      }
+    }
+    value <- suppressWarnings(as.integer(info$completed_runs))
+    if (length(value) == 0L || is.na(value)) NA_integer_ else value
+  }
+
+  write_latest_checkpoint <- function(metrics) {
+    latest_file <- file.path(outputs$checkpoints_dir, "benchmark_raw_metrics_latest.csv")
+    utils::write.csv(metrics, latest_file, row.names = FALSE)
+    latest_file
+  }
 
   function(event, ...) {
     info <- list(...)
     checkpoint_file <- NA_character_
     rows <- info$rows
+    checkpoint_rows <- NA_integer_
+
+    if (identical(event, "setting_complete")) {
+      metrics <- info$metrics
+      setting_index <- setting_index_from_info(info, metrics)
+      should_checkpoint <- !is.na(setting_index) && setting_index %% checkpoint_every == 0L
+      if (isTRUE(should_checkpoint) && !is.null(metrics) && nrow(metrics) > 0L) {
+        metrics <- add_checkpoint_metadata(metrics)
+        checkpoint_file <- file.path(
+          outputs$checkpoints_dir,
+          sprintf("benchmark_raw_metrics_setting%06d.csv", as.integer(setting_index))
+        )
+        utils::write.csv(metrics, checkpoint_file, row.names = FALSE)
+        write_latest_checkpoint(metrics)
+        append_csv_rows(outputs$checkpoint_file, metrics)
+        appended_setting_indices <<- union(appended_setting_indices, as.integer(setting_index))
+        checkpoint_rows <- nrow(metrics)
+      }
+    }
 
     if (identical(event, "replicate_complete")) {
       metrics <- info$metrics
       if (!is.null(metrics) && nrow(metrics) > 0L) {
-        metrics <- add_benchmark_metadata(
-          metrics,
-          baseline_name = baseline_name,
-          package_version = package_version,
-          git_commit = git_commit,
-          seed = seed,
-          selectboost_reps = selectboost_reps,
-          stability_reps = stability_reps,
-          selectboost_steps = selectboost_steps,
-          rng_backend = rng_backend
-        )
+        metrics <- add_checkpoint_metadata(metrics)
         checkpoint_file <- file.path(
           outputs$checkpoints_dir,
           sprintf("benchmark_raw_metrics_rep%03d.csv", as.integer(info$replicate))
         )
         utils::write.csv(metrics, checkpoint_file, row.names = FALSE)
-        append_csv_rows(outputs$checkpoint_file, metrics)
+        if ("setting_index" %in% names(metrics)) {
+          setting_indices <- suppressWarnings(as.integer(metrics$setting_index))
+          append_mask <- is.na(setting_indices) | !setting_indices %in% appended_setting_indices
+          metrics_to_append <- metrics[append_mask, , drop = FALSE]
+          appended_setting_indices <<- union(appended_setting_indices, stats::na.omit(unique(setting_indices)))
+          latest_index <- suppressWarnings(max(setting_indices, na.rm = TRUE))
+          if (is.finite(latest_index)) {
+            write_latest_checkpoint(metrics[setting_indices == latest_index, , drop = FALSE])
+          }
+        } else {
+          metrics_to_append <- metrics
+          write_latest_checkpoint(utils::tail(metrics, 1L))
+        }
+        append_csv_rows(outputs$checkpoint_file, metrics_to_append)
         rows <- nrow(metrics)
+        checkpoint_rows <- nrow(metrics)
       }
     }
 
@@ -1044,7 +1218,8 @@ make_focused_progress_callback <- function(output_dir,
         info = info,
         start_time = start_time,
         checkpoint_file = checkpoint_file,
-        rows = rows
+        rows = rows,
+        checkpoint_rows = checkpoint_rows
       )
     )
     invisible(NULL)
@@ -1177,6 +1352,12 @@ build_paired_gain_differences <- function(study,
       target_rows <- part[part$method == target, , drop = FALSE]
       reference_rows <- part[part$method == reference, , drop = FALSE]
       out <- part[1, pair_cols, drop = FALSE]
+      if ("effective_snr" %in% names(part)) {
+        out$effective_snr <- mean_or_na(part$effective_snr)
+      }
+      if ("effective_variance_snr" %in% names(part)) {
+        out$effective_variance_snr <- mean_or_na(part$effective_variance_snr)
+      }
       out$target <- target
       out$reference <- reference
       out$metric <- metric
@@ -1255,6 +1436,12 @@ build_paired_gain_summary <- function(study,
     out$has_method_failures <- out$n_missing_target > 0L ||
       out$n_missing_reference > 0L ||
       out$n_missing_pairs > 0L
+    if ("effective_snr" %in% names(part)) {
+      out$effective_snr <- mean_or_na(part$effective_snr)
+    }
+    if ("effective_variance_snr" %in% names(part)) {
+      out$effective_variance_snr <- mean_or_na(part$effective_variance_snr)
+    }
     out$target_value_mean <- mean_or_na(target_values)
     out$reference_value_mean <- mean_or_na(reference_values)
     out$delta_mean <- mean_or_na(deltas)
@@ -1281,6 +1468,7 @@ build_paired_gain_summary <- function(study,
     ,
     unique(c(
       setting_cols,
+      intersect(c("effective_snr", "effective_variance_snr"), names(summary)),
       "method", "n_expected_replicates", "n_complete_method_pairs", "n_valid_pairs",
       "n_missing_target", "n_missing_reference", "n_missing_pairs",
       "n_invalid_metric_pairs", "has_method_failures", "paired_gain_mean", "paired_gain_sd",
@@ -2372,6 +2560,13 @@ fixed_threshold_rows <- function(precision_recall_paths,
 build_assessment_surface_artifacts <- function(surface_grid,
                                            sim_n,
                                            grid_length,
+                                           noise_axis = "default",
+                                           snr = NA_real_,
+                                           noise_sd = NA_real_,
+                                           surface_design_source = "quick_diagnostic",
+                                           surface_inherits_main_n = FALSE,
+                                           surface_inherits_main_grid_length = FALSE,
+                                           surface_inherits_main_noise = FALSE,
                                            q_grid,
                                            c0_grid,
                                            B,
@@ -2399,6 +2594,13 @@ build_assessment_surface_artifacts <- function(surface_grid,
     labels$steps.seq <- paste(c0_grid, collapse = ";")
     labels$n <- sim_n
     labels$grid_length <- grid_length
+    labels$noise_axis <- noise_axis
+    labels$snr <- snr
+    labels$noise_sd <- noise_sd
+    labels$surface_design_source <- surface_design_source
+    labels$surface_inherits_main_n <- surface_inherits_main_n
+    labels$surface_inherits_main_grid_length <- surface_inherits_main_grid_length
+    labels$surface_inherits_main_noise <- surface_inherits_main_noise
     labels$q_grid <- paste(q_grid, collapse = ";")
     labels$c0_grid <- paste(c0_grid, collapse = ";")
 
@@ -2408,6 +2610,9 @@ build_assessment_surface_artifacts <- function(surface_grid,
         grid_length = grid_length,
         scenario = setting$scenario,
         representation = setting$representation,
+        noise_axis = noise_axis,
+        snr = if (is.na(snr)) NULL else snr,
+        noise_sd = if (is.na(noise_sd)) 0.4 else noise_sd,
         confounding_strength = setting$confounding_strength,
         active_region_scale = setting$active_region_scale,
         local_correlation = setting$local_correlation,
@@ -2555,6 +2760,12 @@ build_scenario_summary <- function(summary_by_setting) {
     part <- data[idx, , drop = FALSE]
     out <- part[1, by_cols, drop = FALSE]
     out$n_settings <- nrow(part)
+    if ("effective_snr_mean" %in% names(part)) {
+      out$effective_snr <- mean_or_na(part$effective_snr_mean)
+    }
+    if ("effective_variance_snr_mean" %in% names(part)) {
+      out$effective_variance_snr <- mean_or_na(part$effective_variance_snr_mean)
+    }
     for (metric in metric_bases) {
       values <- part[[paste0(metric, "_mean")]]
       out[[paste0(metric, "_mean")]] <- mean_or_na(values)
@@ -2583,6 +2794,12 @@ build_size_resolution_summary <- function(summary_by_setting) {
     part <- data[idx, , drop = FALSE]
     out <- part[1, by_cols, drop = FALSE]
     out$n_settings <- nrow(part)
+    if ("effective_snr_mean" %in% names(part)) {
+      out$effective_snr <- mean_or_na(part$effective_snr_mean)
+    }
+    if ("effective_variance_snr_mean" %in% names(part)) {
+      out$effective_variance_snr <- mean_or_na(part$effective_variance_snr_mean)
+    }
     for (metric in metric_bases) {
       values <- part[[paste0(metric, "_mean")]]
       out[[paste0(metric, "_mean")]] <- mean_or_na(values)
@@ -2614,6 +2831,12 @@ build_noise_summary <- function(summary_by_setting) {
     part <- data[idx, , drop = FALSE]
     out <- part[1, by_cols, drop = FALSE]
     out$n_settings <- nrow(part)
+    if ("effective_snr_mean" %in% names(part)) {
+      out$effective_snr <- mean_or_na(part$effective_snr_mean)
+    }
+    if ("effective_variance_snr_mean" %in% names(part)) {
+      out$effective_variance_snr <- mean_or_na(part$effective_variance_snr_mean)
+    }
     for (metric in metric_bases) {
       values <- part[[paste0(metric, "_mean")]]
       out[[paste0(metric, "_mean")]] <- mean_or_na(values)
@@ -2652,6 +2875,12 @@ build_noise_f1_gain_panel <- function(paired_gain_summary,
     part <- data[idx, , drop = FALSE]
     out <- part[1, by_cols, drop = FALSE]
     out$n_settings <- nrow(part)
+    if ("effective_snr" %in% names(part)) {
+      out$effective_snr <- mean_or_na(part$effective_snr)
+    }
+    if ("effective_variance_snr" %in% names(part)) {
+      out$effective_variance_snr <- mean_or_na(part$effective_variance_snr)
+    }
     out$f1_gain_mean <- mean_or_na(part$paired_gain_mean)
     out$f1_gain_sd <- sd_or_zero(part$paired_gain_mean)
     out$f1_gain_se <- out$f1_gain_sd / sqrt(pmax(out$n_settings, 1L))
@@ -2967,6 +3196,18 @@ if (!nzchar(args$output_dir)) {
   }
 }
 dir.create(args$output_dir, recursive = TRUE, showWarnings = FALSE)
+guard_run_markers(args$output_dir, resume = args$resume)
+run_start_time <- Sys.time()
+run_id <- make_run_id()
+write_run_metadata(
+  output_dir = args$output_dir,
+  run_id = run_id,
+  start_time = run_start_time,
+  package_version = package_version,
+  git_commit = git_commit,
+  args = args
+)
+write_running_marker(args$output_dir, run_id = run_id, start_time = run_start_time)
 
 methods <- method_names_for_existing_api(args$methods)
 if (length(methods) == 0L) {
@@ -3065,7 +3306,9 @@ progress_callback <- make_focused_progress_callback(
   rng_backend = rng_backend,
   selectboost_reps = selectboost_reps,
   stability_reps = stability_reps,
-  selectboost_steps = selectboost_steps
+  selectboost_steps = selectboost_steps,
+  checkpoint_every = args$checkpoint_every,
+  resume = args$resume
 )
 
 timing <- system.time({
@@ -3199,14 +3442,57 @@ surface_q_grid <- args$q_grid %||% if (quick) c(0.5, 0.8) else c(0.5, 0.632, 0.8
 surface_c0_grid <- args$c0_grid %||% if (quick) c(0.7, 0.4) else c(0.9, 0.7, 0.5, 0.3)
 surface_reps <- if (quick) 1L else 3L
 surface_selectboost_reps <- 1L
+main_surface_row <- simulate_grid[1L, , drop = FALSE]
+surface_sim_n <- if (isTRUE(args$surface_use_main_settings)) {
+  as.integer(main_surface_row$n)
+} else {
+  sim_n
+}
+surface_grid_length <- if (isTRUE(args$surface_use_main_settings)) {
+  as.integer(main_surface_row$grid_length)
+} else {
+  grid_length
+}
+surface_noise_axis <- if (isTRUE(args$surface_use_main_settings)) {
+  as.character(main_surface_row$noise_axis)
+} else {
+  "default"
+}
+surface_snr <- if (isTRUE(args$surface_use_main_settings)) {
+  suppressWarnings(as.numeric(main_surface_row$snr))
+} else {
+  NA_real_
+}
+surface_noise_sd <- if (isTRUE(args$surface_use_main_settings)) {
+  suppressWarnings(as.numeric(main_surface_row$noise_sd))
+} else {
+  NA_real_
+}
+surface_design_source <- if (isTRUE(args$surface_use_main_settings)) {
+  "main_grid_representative"
+} else {
+  "quick_diagnostic"
+}
+surface_inherits_main_n <- identical(as.integer(surface_sim_n), as.integer(main_surface_row$n))
+surface_inherits_main_grid_length <- identical(as.integer(surface_grid_length), as.integer(main_surface_row$grid_length))
+surface_inherits_main_noise <- identical(as.character(surface_noise_axis), as.character(main_surface_row$noise_axis)) &&
+  identical(as.numeric(surface_snr), as.numeric(main_surface_row$snr)) &&
+  identical(as.numeric(surface_noise_sd), as.numeric(main_surface_row$noise_sd))
 surface_artifacts <- if (isTRUE(args$save_surfaces)) {
   build_assessment_surface_artifacts(
     surface_grid = filtered_surface_scenario_grid(
       scenario_grid = args$scenario_grid,
       representation_grid = args$representation_grid
     ),
-    sim_n = sim_n,
-    grid_length = grid_length,
+    sim_n = surface_sim_n,
+    grid_length = surface_grid_length,
+    noise_axis = surface_noise_axis,
+    snr = surface_snr,
+    noise_sd = surface_noise_sd,
+    surface_design_source = surface_design_source,
+    surface_inherits_main_n = surface_inherits_main_n,
+    surface_inherits_main_grid_length = surface_inherits_main_grid_length,
+    surface_inherits_main_noise = surface_inherits_main_noise,
     q_grid = surface_q_grid,
     c0_grid = surface_c0_grid,
     B = surface_reps,
@@ -3621,7 +3907,35 @@ saveRDS(
 
 writeLines(capture.output(utils::sessionInfo()), file.path(args$output_dir, "session_info.txt"), useBytes = TRUE)
 
+write_completed_marker(args$output_dir, run_id = run_id, start_time = run_start_time, end_time = Sys.time())
+unlink(file.path(args$output_dir, "RUNNING"))
+
 cat("Saved benchmark artifacts to:\n")
 cat("  ", args$output_dir, "\n", sep = "")
 cat("Best settings:\n")
 print(utils::head(best_settings, 10L), row.names = FALSE)
+
+runtime_status_counts <- if ("runtime_status" %in% names(study$metrics)) {
+  table(study$metrics$runtime_status, useNA = "ifany")
+} else {
+  integer()
+}
+checkpoint_files <- list.files(file.path(args$output_dir, "checkpoints"), pattern = "[.]csv$", full.names = TRUE)
+cat("Run audit:\n")
+cat("  raw rows: ", nrow(study$metrics), "\n", sep = "")
+cat(
+  "  runtime statuses: ",
+  if (length(runtime_status_counts) == 0L) {
+    "none"
+  } else {
+    paste(paste0(names(runtime_status_counts), "=", as.integer(runtime_status_counts)), collapse = ", ")
+  },
+  "\n",
+  sep = ""
+)
+cat("  scenarios: ", paste(unique(study$metrics$scenario), collapse = ", "), "\n", sep = "")
+cat("  representations: ", paste(unique(study$metrics$representation), collapse = ", "), "\n", sep = "")
+cat("  methods: ", paste(unique(study$metrics$method), collapse = ", "), "\n", sep = "")
+cat("  levels: ", paste(unique(study$metrics$level), collapse = ", "), "\n", sep = "")
+cat("  checkpoint files: ", length(checkpoint_files), "\n", sep = "")
+cat("  output dir: ", args$output_dir, "\n", sep = "")

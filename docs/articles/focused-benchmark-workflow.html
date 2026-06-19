@@ -117,13 +117,16 @@ bootstrap confidence intervals, win rates, valid paired replicate
 counts, and method-failure flags. Long runs also update
 <code>progress.tsv</code> after study, replicate, simulation, and
 setting milestones; append
-<code>benchmark_raw_metrics_checkpoint.csv</code> after each completed
-replicate; and write per-replicate raw metrics to
-<code>checkpoints/benchmark_raw_metrics_repNNN.csv</code>. For
+<code>benchmark_raw_metrics_checkpoint.csv</code> at the cadence set by <code>--checkpoint-every=N</code> and at each completed replicate; write setting-level checkpoint files to <code>checkpoints/benchmark_raw_metrics_settingNNNNNN.csv</code>; overwrite <code>checkpoints/benchmark_raw_metrics_latest.csv</code> with the latest checkpointed setting; and write per-replicate raw metrics to <code>checkpoints/benchmark_raw_metrics_repNNN.csv</code>. For
 reproducibility, the driver uses a recorded deterministic SelectBoost
 perturbation backend by default. Pass <code>--upstream-rfast-rvmf</code>
 only when comparing against the upstream <code>Rfast</code> perturbation
 generator directly.</p>
+<p>Each run writes <code>run_metadata.yml</code>, creates <code>RUNNING</code> while active,
+writes <code>COMPLETED</code> on successful completion, and removes <code>RUNNING</code>
+only after success. Use distinct <code>--output-dir</code> values for parallel runs.
+<code>--resume</code> preserves previous checkpoint files but does not yet skip
+completed settings.</p>
 <p>For assessment interpretation, use
 <code>benchmark_best_settings.csv</code> only together with
 <code>assessment_all_setting_summary.csv</code>. The driver also writes
@@ -200,8 +203,11 @@ recommended axis for the main method comparison because it keeps
 relative difficulty comparable across scenarios, representations, and
 signal structures. The fixed-noise grid is useful as a stress test for
 absolute observation noise. Both axes are recorded in the raw metrics
-and summaries through <code>noise_axis</code>, <code>snr</code>, and
-<code>noise_sd</code>. The driver writes
+and summaries through <code>noise_axis</code>, <code>snr</code>, <code>noise_sd</code>,
+<code>effective_snr</code>, and <code>effective_variance_snr</code>. Here
+<code>snr</code> is a signal-to-noise standard-deviation ratio, and
+<code>effective_variance_snr</code> is <code>effective_snr^2</code> for
+variance-ratio reporting. The driver writes
 <code>benchmark_noise_summary.csv</code> for performance by noise
 condition and <code>benchmark_noise_f1_gain_panel.csv</code> for a
 plot-ready <code>F1</code> gain panel.</p>

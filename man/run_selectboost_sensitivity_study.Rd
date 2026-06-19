@@ -43,8 +43,9 @@ per-setting seeds.}
 
 \item{progress}{Optional callback function used for long-running studies.
 When supplied, it is called with named arguments including \code{event},
-\code{replicate}, \code{completed_runs}, \code{total_runs}, and, at replicate completion,
-the completed replicate \code{metrics}. No files are written by default.
+\code{replicate}, \code{completed_runs}, \code{total_runs}, and \code{metrics} at
+\code{setting_complete} and \code{replicate_complete}. No files are written by
+default.
 
 The returned raw metrics include runtime diagnostics for each setting:
 elapsed, user, and system time; warning and failure counts; runtime status;
