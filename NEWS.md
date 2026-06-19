@@ -36,7 +36,9 @@
   from the base selector choice. Runs now write
   `method_comparison_summary.csv`, `method_comparison_runtime.csv`, and
   `assessment_method_comparison_table.csv`, with optional `glmnet`, `grpreg`, and
-  `SGL` backends recorded as skipped when unavailable.
+  `SGL` backends recorded as skipped when unavailable. Method-comparison
+  metrics now retain `effective_variance_snr` when SNR-controlled simulations
+  are used.
 - Added Phase 12 runtime and computational reporting to the focused benchmark
   driver. Runs now write `runtime_by_setting.csv` and
   `runtime_by_method.csv`, with elapsed, user, and system time; warning and
@@ -88,6 +90,8 @@
   `--checkpoint-every`, and `--surface-use-main-settings`. Generated
   benchmark configuration files now record these interface arguments so
   assessment and extended benchmark campaigns can be audited and reproduced.
+  `--surface-use-main-settings` is documented as inheriting from the first
+  representative row of the main simulation grid, not every main-grid setting.
 
 
 # SelectBoost.FDA 0.6.0

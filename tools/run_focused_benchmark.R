@@ -2203,6 +2203,10 @@ evaluate_method_fit <- function(fit,
   metrics$noise_sd <- sim$requested_noise_sd %||% sim$noise_sd %||% NA_real_
   metrics$effective_noise_sd <- sim$noise_sd %||% NA_real_
   metrics$effective_snr <- sim$effective_snr %||% NA_real_
+  metrics$effective_variance_snr <- sim$effective_variance_snr %||% {
+    value <- sim$effective_snr %||% NA_real_
+    ifelse(is.na(value), NA_real_, value^2)
+  }
   metrics <- focused_append_parameter_columns(metrics, simulate_labels)
   metrics <- focused_append_parameter_columns(metrics, selectboost_labels)
   metrics
@@ -2405,6 +2409,15 @@ build_method_comparison_summary <- function(metrics, specs) {
     out <- part[1, by_cols, drop = FALSE]
     out$n_rep <- length(unique(part$replicate))
     out$n_method_rows <- nrow(part)
+    if ("effective_noise_sd" %in% names(part)) {
+      out$effective_noise_sd <- mean_or_na(part$effective_noise_sd)
+    }
+    if ("effective_snr" %in% names(part)) {
+      out$effective_snr <- mean_or_na(part$effective_snr)
+    }
+    if ("effective_variance_snr" %in% names(part)) {
+      out$effective_variance_snr <- mean_or_na(part$effective_variance_snr)
+    }
     for (metric in metric_cols) {
       values <- as.numeric(part[[metric]])
       out[[paste0(metric, "_mean")]] <- mean_or_na(values)

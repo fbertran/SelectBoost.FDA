@@ -148,8 +148,10 @@ benchmark campaigns:
   should be materialized immediately.
 - `--resume` preserves existing checkpoint files in an output directory
   but does not yet skip previously completed settings.
-- `--surface-use-main-settings` makes surface diagnostics inherit a
-  representative main-grid `n`, `grid_length`, and noise/SNR setting.
+- `--surface-use-main-settings` makes surface diagnostics inherit `n`,
+  `grid_length`, and noise/SNR from the first representative row of the
+  main simulation grid. It does not run surface diagnostics for every
+  main-grid setting.
 
 Assessment-oriented summaries, perturbation surfaces, and association
 diagnostics are written by default for compatibility with the saved

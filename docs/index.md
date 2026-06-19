@@ -818,6 +818,10 @@ system2(
 )
 ```
 
+With `--surface-use-main-settings`, surface diagnostics inherit `n`,
+`grid_length`, and noise/SNR from the first representative row of the main
+simulation grid. They are not recomputed for every main-grid setting.
+
 For a lighter local run, use `--no-save-surfaces` or
 `--no-save-association-diagnostics` to skip the heavier optional
 diagnostics. The broader `--no-assessment-summary` shortcut disables

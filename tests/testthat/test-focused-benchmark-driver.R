@@ -180,6 +180,7 @@ test_that("focused benchmark driver writes quick artifacts to tempdir", {
   expect_true(all(required_columns %in% names(association_groups)))
   expect_true(all(required_columns %in% names(assessment_association)))
   expect_true(all(required_columns %in% names(method_comparison)))
+  expect_true("effective_variance_snr" %in% names(method_comparison))
   expect_true(all(required_columns %in% names(method_runtime)))
   expect_true(all(required_columns %in% names(assessment_method)))
   expect_true(all(required_columns %in% names(runtime_by_setting)))
@@ -481,6 +482,7 @@ test_that("focused benchmark driver accepts phase 13 campaign grids", {
       "--scenario-grid=smooth_sparse",
       "--n-grid=24",
       "--grid-length-grid=12",
+      "--snr-grid=1",
       "--association-grid=correlation,hybrid",
       "--bandwidth-grid=3",
       "--q-grid=0.4,0.7",
@@ -511,6 +513,7 @@ test_that("focused benchmark driver accepts phase 13 campaign grids", {
   expect_setequal(unique(surface$q), c(0.4, 0.7))
   expect_setequal(unique(surface$c0), c(0.8, 0.6))
   expect_true(all(surface$surface_design_source == "main_grid_representative"))
+  expect_setequal(unique(surface$snr), 1)
   expect_true(all(surface$surface_inherits_main_n))
   expect_true(all(surface$surface_inherits_main_grid_length))
   expect_true(all(surface$surface_inherits_main_noise))

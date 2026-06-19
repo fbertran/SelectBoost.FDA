@@ -732,6 +732,10 @@
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"--output-dir="</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"selectboost_fda_focused_n30"</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>With <code>--surface-use-main-settings</code>, surface diagnostics inherit
+<code>n</code>, <code>grid_length</code>, and noise/SNR from the first representative row
+of the main simulation grid. They are not recomputed for every main-grid
+setting.</p>
 <p>For a lighter local run, use <code>--no-save-surfaces</code> or <code>--no-save-association-diagnostics</code> to skip the heavier optional diagnostics. The broader <code>--no-assessment-summary</code> shortcut disables both of those optional diagnostic families while keeping the core benchmark and paired-gain tables.</p>
 </div>
 <div class="section level2">
